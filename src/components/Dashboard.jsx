@@ -44,6 +44,15 @@ const detailedPath = interpolatePoints(FLIGHT_PATH, 50);
 
 function Dashboard({ onLogout }) {
   const { state: appState, actions } = useAppState();
+  
+  // Helper to dynamically get API base URL to connect to the local server from Vercel/production
+  const getApiUrl = (path) => {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    // If not local, use absolute URL pointing to http://127.0.0.1:5000 (local Flask backend)
+    const base = isLocal ? '' : 'http://127.0.0.1:5000';
+    return base + path;
+  };
+
   const [activeTab, setActiveTab] = useState('overview'); // Mapped to Zeex AI sections
   const [activeDroneSimId, setActiveDroneSimId] = useState('ZD-109');
   const [selectedMaintenanceDroneId, setSelectedMaintenanceDroneId] = useState(null);
@@ -121,7 +130,7 @@ function Dashboard({ onLogout }) {
   useEffect(() => {
     if (activeTab === 'cctv' || activeTab === 'live_mon') {
       // Fetch available video sources from backend
-      fetch('/api/videos')
+      fetch(getApiUrl('/api/videos'))
         .then(r => r.json())
         .then(data => {
           if (Array.isArray(data) && data.length > 0) setVideoSources(data);
@@ -129,7 +138,7 @@ function Dashboard({ onLogout }) {
         .catch(() => {}); // silent fallback to default list
 
       // Push current video selection to backend immediately
-      fetch('/api/settings', {
+      fetch(getApiUrl('/api/settings'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ video_path: videoPath })
@@ -151,7 +160,7 @@ function Dashboard({ onLogout }) {
     if (sseSourceRef.current) sseSourceRef.current.close();
     
     // Connect to proxy stats_feed
-    const sse = new EventSource('/stats_feed');
+    const sse = new EventSource(getApiUrl('/stats_feed'));
     sseSourceRef.current = sse;
 
     sse.onmessage = (e) => {
@@ -333,7 +342,7 @@ function Dashboard({ onLogout }) {
 
   // API Call helper
   const postApi = (path, body = {}) => {
-    fetch(path, {
+    fetch(getApiUrl(path), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -899,7 +908,7 @@ function Dashboard({ onLogout }) {
                     {/* Always render img tag, set src conditionally */}
                     <img
                       key={videoPath}
-                      src={`/video_feed?src=${encodeURIComponent(videoPath)}&t=${Date.now()}`}
+                      src={getApiUrl(`/video_feed?src=${encodeURIComponent(videoPath)}&t=${Date.now()}`)}
                       alt="AI Annotated Feed"
                       className="w-full h-full object-contain"
                       style={{ display: liveStatus === 'OFFLINE' ? 'none' : 'block' }}
