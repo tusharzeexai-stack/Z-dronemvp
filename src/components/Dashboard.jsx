@@ -79,11 +79,16 @@ function Dashboard({ onLogout }) {
   const [liveBackend, setLiveBackend] = useState('CPU');
   const [inferencePaused, setInferencePaused] = useState(false);
 
-  // CCTV Configuration settings state (corresponds to local variables)
+  // CCTV Configuration settings state
   const [frameSkip, setFrameSkip] = useState(1);
   const [confThreshold, setConfThreshold] = useState(0.4);
   const [inferenceMode, setInferenceMode] = useState(3);
-  const [videoPath, setVideoPath] = useState('test.mp4');
+  const [videoPath, setVideoPath] = useState('test3.mp4');
+  const [videoSources, setVideoSources] = useState([
+    { value: 'test.mp4', label: '📹 Sector Alpha — test.mp4 (Surveillance)' },
+    { value: 'test3.mp4', label: '📹 Sector Charlie — test3.mp4 (New Footage)' },
+    { value: 'Okutama-Action-Dataset-example.mp4', label: '📹 Okutama Action Dataset' }
+  ]);
 
   // Chart ref for AI Inference tab
   const aiChartCanvasRef = useRef(null);
@@ -111,8 +116,24 @@ function Dashboard({ onLogout }) {
   }, []);
 
   // Initialize AI Inference Chart when in live CCTV view
+  // Also dynamically fetch available video list from backend
   useEffect(() => {
     if (activeTab === 'cctv' || activeTab === 'live_mon') {
+      // Fetch available video sources from backend
+      fetch('/api/videos')
+        .then(r => r.json())
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) setVideoSources(data);
+        })
+        .catch(() => {}); // silent fallback to default list
+
+      // Push current video selection to backend immediately
+      fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ video_path: videoPath })
+      }).catch(() => {});
+
       setTimeout(() => {
         initAiInferenceChart();
       }, 200);
@@ -906,17 +927,19 @@ function Dashboard({ onLogout }) {
                         </button>
                       </div>
 
-                      {/* Video Path Select */}
+                      {/* Video Source Dropdown */}
                       <div className="space-y-1">
-                        <label className="text-[10px] text-slate-500 font-semibold block">Select Video File Source</label>
+                        <label className="text-[10px] text-slate-500 font-semibold block uppercase tracking-wider">📂 Video Source</label>
                         <select 
                           value={videoPath} 
                           onChange={(e) => handleSetVideo(e.target.value)}
-                          className="w-full text-xs rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 py-2 focus:ring-sky-500"
+                          className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 py-2 px-2 focus:ring-2 focus:ring-sky-500 focus:outline-none cursor-pointer"
                         >
-                          <option value="test.mp4">Downtown LA - test.mp4 (Surveillance)</option>
-                          <option value="Okutama-Action-Dataset-example.mp4">Sector Bravo - Okutama Action.mp4</option>
+                          {videoSources.map(vs => (
+                            <option key={vs.value} value={vs.value}>{vs.label}</option>
+                          ))}
                         </select>
+                        <p className="text-[9px] text-slate-400 mt-0.5">Currently: <span className="font-bold text-sky-500">{videoPath}</span></p>
                       </div>
 
                       {/* Mode Select */}

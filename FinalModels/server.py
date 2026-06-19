@@ -229,6 +229,26 @@ def reset_video():
     reset_requested = True
     return jsonify({"status": "success", "message": "Reset requested"})
 
+@app.route('/api/videos', methods=['GET'])
+def list_videos():
+    """Return list of available video sources."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    public_dir = os.path.join(os.path.dirname(base_dir), 'public')
+    
+    available = []
+    candidates = [
+        ('test.mp4', 'Sector Alpha — test.mp4 (Surveillance)'),
+        ('test2.mp4', 'Sector Bravo — test2.mp4'),
+        ('test3.mp4', 'Sector Charlie — test3.mp4 (New Footage)'),
+        ('Okutama-Action-Dataset-example.mp4', 'Okutama Action Dataset'),
+    ]
+    for filename, label in candidates:
+        local = os.path.join(base_dir, filename)
+        pub = os.path.join(public_dir, filename)
+        if os.path.isfile(local) or os.path.isfile(pub):
+            available.append({'value': filename, 'label': label})
+    return jsonify(available)
+
 if __name__ == '__main__':
     # Run server on port 5000
     app.run(host='0.0.0.0', port=5000, threaded=True)
