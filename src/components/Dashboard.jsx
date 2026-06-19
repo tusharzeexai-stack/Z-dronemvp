@@ -136,8 +136,9 @@ function Dashboard({ onLogout }) {
   const [frameSkip, setFrameSkip] = useState(1);
   const [confThreshold, setConfThreshold] = useState(0.4);
   const [inferenceMode, setInferenceMode] = useState(3);
-  const [videoPath, setVideoPath] = useState('test3.mp4');
+  const [videoPath, setVideoPath] = useState('cam1.mp4');
   const [videoSources, setVideoSources] = useState([
+    { value: 'cam1.mp4', label: '📹 Sector Delta — cam1.mp4 (Recorded/Annotated)' },
     { value: 'test.mp4', label: '📹 Sector Alpha — test.mp4 (Surveillance)' },
     { value: 'test3.mp4', label: '📹 Sector Charlie — test3.mp4 (New Footage)' },
     { value: 'Okutama-Action-Dataset-example.mp4', label: '📹 Okutama Action Dataset' }

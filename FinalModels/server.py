@@ -16,7 +16,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Global state
-video_path = "test.mp4"
+video_path = "cam1.mp4"
 conf_threshold = 0.4
 mode = 3
 frame_skip = 3
@@ -240,6 +240,7 @@ def list_videos():
     
     available = []
     candidates = [
+        ('cam1.mp4', 'Sector Delta — cam1.mp4 (Recorded/Annotated)'),
         ('test.mp4', 'Sector Alpha — test.mp4 (Surveillance)'),
         ('test2.mp4', 'Sector Bravo — test2.mp4'),
         ('test3.mp4', 'Sector Charlie — test3.mp4 (New Footage)'),
