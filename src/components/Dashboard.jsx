@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppState } from '../hooks/useAppState';
+import { state } from '../js/state';
 import TrackingMap from './TrackingMap';
 import TelemetryChart from './TelemetryChart';
 import { UtilizationChart, BatteryHealthChart } from './AnalyticsCharts';
@@ -221,7 +222,7 @@ function Dashboard({ onLogout }) {
           };
           appState.alerts.unshift(newAlert);
           localStorage.setItem('z_drone_alerts', JSON.stringify(appState.alerts));
-          state.triggerUpdate(); // force broadcast
+          try { state.triggerUpdate(); } catch(_) {} // force broadcast
 
           if (appState.settings.soundsEnabled) {
             playWarningBeep();
