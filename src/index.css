@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0ea5e9; /* sky-500 */
+  --color-primary-hover: #0284c7; /* sky-600 */
+  --color-primary-container: #e0f2fe; /* sky-100 */
+  
+  --spacing-xs: 4px;
+  --spacing-base: 4px;
+  --spacing-md: 16px;
+  --spacing-sm: 8px;
+  --spacing-xl: 32px;
+  --spacing-lg: 24px;
+  --spacing-3xl: 64px;
+  --spacing-gutter: 24px;
+  --spacing-2xl: 48px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}

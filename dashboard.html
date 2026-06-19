@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Z-DRONE | Fleet Management Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass-panel {
+            background: rgba(23, 28, 32, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        /* Custom scrollbar adjustments */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #3e484f; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Transition animations */
+        .tab-view {
+            transition: opacity 0.2s ease-in-out;
+        }
+        .drone-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+    <!-- Tailwind Config Injection -->
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed-variant": "#004c69",
+                    "surface-container-high": "#e4e9ee",
+                    "secondary-fixed": "#e2e2e2",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed-variant": "#454747",
+                    "primary-fixed-dim": "#7bd0ff",
+                    "tertiary-container": "#f1a02b",
+                    "inverse-primary": "#7bd0ff",
+                    "on-tertiary-fixed": "#2a1700",
+                    "surface": "#f5faff",
+                    "on-secondary-container": "#616363",
+                    "on-primary": "#ffffff",
+                    "surface-dim": "#d6dbdf",
+                    "error-container": "#ffdad6",
+                    "on-secondary": "#ffffff",
+                    "surface-bright": "#f5faff",
+                    "primary-container": "#38bdf8",
+                    "outline": "#6e7980",
+                    "tertiary-fixed": "#ffddb8",
+                    "secondary-fixed-dim": "#c6c6c7",
+                    "on-surface": "#171c20",
+                    "secondary-container": "#dfe0e0",
+                    "primary": "#00668a",
+                    "background": "#f5faff",
+                    "on-primary-container": "#004965",
+                    "on-tertiary-container": "#613b00",
+                    "primary-fixed": "#c4e7ff",
+                    "on-primary-fixed": "#001e2c",
+                    "surface-tint": "#00668a",
+                    "on-surface-variant": "#3e484f",
+                    "secondary": "#5d5f5f",
+                    "outline-variant": "#bdc8d1",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "surface-container-highest": "#dee3e8",
+                    "on-tertiary": "#ffffff",
+                    "on-background": "#171c20",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#1a1c1c",
+                    "surface-variant": "#dee3e8",
+                    "tertiary": "#855300",
+                    "tertiary-fixed-dim": "#ffb960",
+                    "surface-container-low": "#eff4f9",
+                    "inverse-surface": "#2c3135",
+                    "inverse-on-surface": "#edf1f6",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container": "#eaeef3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sidebar-width": "260px",
+                    "xs": "4px",
+                    "base": "4px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "xl": "32px",
+                    "lg": "24px",
+                    "3xl": "64px",
+                    "gutter": "24px",
+                    "2xl": "48px",
+                    "container-max": "1440px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"]
+            },
+            "fontSize": {
+                    "label-sm": ["12px", {"lineHeight": "1", "fontWeight": "500"}],
+                    "display-lg": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background dark:bg-inverse-surface text-on-background dark:text-inverse-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen">
+
+<!-- SIDEBAR -->
+<aside class="w-sidebar-width h-screen fixed left-0 top-0 bg-surface-container-lowest dark:bg-inverse-surface shadow-md flex flex-col z-50 border-r border-outline-variant/30 dark:border-outline/20">
+    <div class="px-lg py-xl">
+        <h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-inverse-on-surface">Z-DRONE</h1>
+        <p class="font-label-sm text-label-sm text-on-surface-variant/70 dark:text-inverse-on-surface/55 tracking-widest uppercase mt-xs">Fleet Management</p>
+    </div>
+    <nav class="flex-1 px-md space-y-xs" id="sidebarNav">
+        <button data-tab="dashboard" class="sidebar-btn w-full flex items-center gap-md px-md py-sm rounded-lg text-primary dark:text-primary-fixed-dim font-bold border-l-4 border-primary bg-primary-container/5 dark:bg-primary-fixed-dim/5 hover:bg-primary/5 transition-colors duration-200">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="font-body-md">Dashboard</span>
+        </button>
+        <button data-tab="ai-inference" class="sidebar-btn w-full flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-inverse-on-surface/70 hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-primary/5 transition-colors duration-200">
+            <span class="material-symbols-outlined">smart_toy</span>
+            <span class="font-body-md">AI Inference</span>
+            <span class="ml-auto px-1.5 py-0.5 bg-primary/20 text-primary dark:text-primary-fixed-dim text-[9px] font-bold rounded-full">LIVE</span>
+        </button>
+        <button data-tab="drones" class="sidebar-btn w-full flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-inverse-on-surface/70 hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-primary/5 transition-colors duration-200">
+            <span class="material-symbols-outlined">flight_takeoff</span>
+            <span class="font-body-md">Drones</span>
+        </button>
+        <button data-tab="flights" class="sidebar-btn w-full flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-inverse-on-surface/70 hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-primary/5 transition-colors duration-200">
+            <span class="material-symbols-outlined">route</span>
+            <span class="font-body-md">Flights</span>
+        </button>
+        <button data-tab="live" class="sidebar-btn w-full flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-inverse-on-surface/70 hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-primary/5 transition-colors duration-200">
+            <span class="material-symbols-outlined">sensors</span>
+            <span class="font-body-md">Live Monitoring</span>
+        </button>
+        <button data-tab="analytics" class="sidebar-btn w-full flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-inverse-on-surface/70 hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-primary/5 transition-colors duration-200">
+            <span class="material-symbols-outlined">insights</span>
+            <span class="font-body-md">Analytics</span>
+        </button>
+        <button data-tab="alerts" class="sidebar-btn w-full flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-inverse-on-surface/70 hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-primary/5 transition-colors duration-200 relative">
+            <span class="material-symbols-outlined">notifications_active</span>
+            <span class="font-body-md">Alerts</span>
+            <span id="alerts-badge-count" class="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 bg-error text-white font-label-sm text-[10px] rounded-full hidden">0</span>
+        </button>
+        <button data-tab="maintenance" class="sidebar-btn w-full flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-inverse-on-surface/70 hover:text-primary dark:hover:text-primary-fixed-dim hover:bg-primary/5 transition-colors duration-200">
+            <span class="material-symbols-outlined">build</span>
+            <span class="font-body-md">Maintenance</span>
+        </button>
+    </nav>
+    <div class="p-lg mt-auto space-y-xs border-t border-outline-variant/20 dark:border-outline/10">
+        <button data-tab="users" class="sidebar-btn w-full flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-inverse-on-surface/70 hover:text-primary hover:bg-primary/5 transition-colors text-left">
+            <span class="material-symbols-outlined">group</span>
+            <span class="font-body-sm">Users</span>
+        </button>
+        <button data-tab="settings" class="sidebar-btn w-full flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-inverse-on-surface/70 hover:text-primary hover:bg-primary/5 transition-colors text-left">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="font-body-sm">Settings</span>
+        </button>
+    </div>
+</aside>
+
+<!-- TOP NAVIGATION -->
+<header class="fixed top-0 right-0 h-16 flex justify-between items-center px-lg backdrop-blur-xl bg-surface/70 dark:bg-inverse-surface/85 w-[calc(100%-260px)] ml-sidebar-width z-40 border-b border-outline-variant/10 dark:border-outline/10">
+    <div class="flex items-center bg-surface-container dark:bg-inverse-surface px-md py-xs rounded-full w-96 border border-outline-variant/20 dark:border-outline/20">
+        <span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+        <input id="globalSearchInput" class="bg-transparent border-none focus:ring-0 text-body-sm w-full placeholder:text-outline/60 text-on-surface dark:text-inverse-on-surface" placeholder="Search drones, flights, or alerts..." type="text"/>
+    </div>
+    
+    <div class="flex items-center gap-lg">
+        <div class="flex items-center gap-sm">
+            <!-- Notifications Dropdown Trigger -->
+            <div class="relative">
+                <button id="notificationBtn" class="relative p-sm rounded-full hover:bg-surface-variant dark:hover:bg-on-surface-variant/20 transition-all active:scale-95 text-on-surface-variant dark:text-inverse-on-surface">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span id="notification-dot" class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface dark:border-inverse-surface hidden"></span>
+                </button>
+                
+                <!-- Notification Tray Dropdown -->
+                <div id="notificationTray" class="absolute right-0 mt-2 w-80 bg-white dark:bg-inverse-surface border border-outline-variant/30 dark:border-outline/20 rounded-xl shadow-xl z-50 hidden">
+                    <div class="p-md border-b border-outline-variant/10 flex justify-between items-center">
+                        <span class="font-bold font-headline-md text-sm text-on-surface dark:text-inverse-on-surface">Active Warnings</span>
+                        <button id="clearAllNotificationsBtn" class="text-xs text-primary dark:text-primary-fixed-dim hover:underline">Clear all</button>
+                    </div>
+                    <div id="notificationList" class="max-h-64 overflow-y-auto divide-y divide-outline-variant/10">
+                        <!-- Filled in JS -->
+                        <div class="p-md text-center text-xs text-on-surface-variant dark:text-inverse-on-surface/60">No new alerts</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="p-sm rounded-full hover:bg-surface-variant dark:hover:bg-on-surface-variant/20 transition-all active:scale-95 text-on-surface-variant dark:text-inverse-on-surface">
+                <span class="material-symbols-outlined">mail</span>
+            </button>
+            
+            <!-- Quick Dark Mode Toggle -->
+            <button id="quickThemeToggleBtn" class="p-sm rounded-full hover:bg-surface-variant dark:hover:bg-on-surface-variant/20 transition-all active:scale-95 text-on-surface-variant dark:text-inverse-on-surface">
+                <span class="material-symbols-outlined" id="quickThemeToggleIcon">dark_mode</span>
+            </button>
+        </div>
+        
+        <div class="h-8 w-[1px] bg-outline-variant/30"></div>
+        
+        <!-- Profile Dropdown Trigger -->
+        <div class="relative">
+            <div id="profileDropdownTrigger" class="flex items-center gap-md cursor-pointer hover:bg-surface-variant dark:hover:bg-on-surface-variant/20 p-xs px-sm rounded-lg transition-all active:scale-95">
+                <div class="text-right hidden sm:block">
+                    <p class="font-label-md text-label-md text-on-surface dark:text-inverse-on-surface" id="profileName">Alex Rivera</p>
+                    <p class="font-label-sm text-label-sm text-outline dark:text-inverse-on-surface/60" id="profileRole">Fleet Manager</p>
+                </div>
+                <img class="w-10 h-10 rounded-full border-2 border-primary-container object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBijJZddpbaAwXrMcKxkk4y5a8XK3TNesNW3AycY6mN2XMSPWhi-KOtgNnDLiV7jx7kJRTX8NreKaVxQeo6CFq-GUV4ewnI2U6Vb1rZ90U3HS2UdQ6RwMHkl8qlfM-aPxnBmFCzL8Jb2Coc0PUZEMekUHPT5KHuRTpRndBVSNGdP9wR1kvr-E2RJst4YVbbbMsSyh05z_ZwxxiBlxAZOdc_RkAy5OP3aU9gZF1k_fjuiztN5z-x2YDpQGWd0_coz4R7mUbce-uDKmA" alt="Operator portrait"/>
+            </div>
+            
+            <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-white dark:bg-inverse-surface border border-outline-variant/30 dark:border-outline/20 rounded-xl shadow-xl z-50 hidden p-sm">
+                <button id="logoutBtn" class="w-full text-left px-md py-sm rounded-lg text-error hover:bg-error-container/20 flex items-center gap-sm">
+                    <span class="material-symbols-outlined text-[18px]">logout</span>
+                    <span class="font-body-sm">Sign Out</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- MAIN CONTENT WRAPPER -->
+<main class="ml-sidebar-width pt-20 p-lg max-w-[1600px] mx-auto min-h-screen">
+    
+    <!-- ================= VIEW: DASHBOARD (DEFAULT) ================= -->
+    <div id="view-dashboard" class="tab-view space-y-xl">
+        <!-- KPI SECTION -->
+        <section class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-md">
+            <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10 group hover:shadow-md transition-all">
+                <div class="flex justify-between items-start mb-sm">
+                    <p class="font-label-md text-label-md text-outline dark:text-inverse-on-surface/60">Total Flights</p>
+                    <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">flight_takeoff</span>
+                </div>
+                <h3 class="font-headline-lg text-headline-lg text-on-surface dark:text-inverse-on-surface" id="kpi-flights-count">128</h3>
+                <div class="h-8 mt-md">
+                    <svg class="w-full h-full text-primary dark:text-primary-fixed-dim fill-none stroke-current stroke-[1.5]" viewBox="0 0 100 20">
+                        <path d="M0,15 Q10,5 20,12 T40,8 T60,15 T80,5 T100,10"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10 group hover:shadow-md transition-all">
+                <div class="flex justify-between items-start mb-sm">
+                    <p class="font-label-md text-label-md text-outline dark:text-inverse-on-surface/60">Flight Time</p>
+                    <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">schedule</span>
+                </div>
+                <h3 class="font-headline-lg text-headline-lg text-on-surface dark:text-inverse-on-surface" id="kpi-flight-time">24h 35m</h3>
+                <div class="h-8 mt-md">
+                    <svg class="w-full h-full text-primary dark:text-primary-fixed-dim fill-none stroke-current stroke-[1.5]" viewBox="0 0 100 20">
+                        <path d="M0,10 L10,8 L20,14 L30,5 L40,12 L50,10 L60,18 L70,12 L80,15 L90,8 L100,10"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10 group hover:shadow-md transition-all">
+                <div class="flex justify-between items-start mb-sm">
+                    <p class="font-label-md text-label-md text-outline dark:text-inverse-on-surface/60">Distance Flown</p>
+                    <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">route</span>
+                </div>
+                <h3 class="font-headline-lg text-headline-lg text-on-surface dark:text-inverse-on-surface" id="kpi-distance-flown">382.6 km</h3>
+                <div class="h-8 mt-md">
+                    <svg class="w-full h-full text-primary dark:text-primary-fixed-dim fill-none stroke-current stroke-[1.5]" viewBox="0 0 100 20">
+                        <path d="M0,18 L20,15 L40,17 L60,8 L80,5 L100,2"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10 group hover:shadow-md transition-all">
+                <div class="flex justify-between items-start mb-sm">
+                    <p class="font-label-md text-label-md text-outline dark:text-inverse-on-surface/60">Images Captured</p>
+                    <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">photo_library</span>
+                </div>
+                <h3 class="font-headline-lg text-headline-lg text-on-surface dark:text-inverse-on-surface" id="kpi-images-captured">4,326</h3>
+                <div class="h-8 mt-md">
+                    <svg class="w-full h-full text-primary dark:text-primary-fixed-dim fill-none stroke-current stroke-[1.5]" viewBox="0 0 100 20">
+                        <path d="M0,10 Q25,10 50,5 T100,15"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10 group hover:shadow-md transition-all border-l-4 border-l-error">
+                <div class="flex justify-between items-start mb-sm">
+                    <p class="font-label-md text-label-md text-outline dark:text-inverse-on-surface/60">Active Alerts</p>
+                    <span class="material-symbols-outlined text-error animate-pulse">warning</span>
+                </div>
+                <h3 class="font-headline-lg text-headline-lg text-error" id="kpi-alerts-count">2</h3>
+                <div class="h-8 mt-md">
+                    <svg class="w-full h-full text-error fill-none stroke-current stroke-[1.5]" viewBox="0 0 100 20">
+                        <path d="M0,15 L10,5 L20,15 L30,5 L40,15 L50,5 L60,15 L70,5 L80,15 L90,5 L100,15"></path>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+
+
+        
+        <!-- LIVE TELEMETRY & MAP -->
+        <section class="grid grid-cols-12 gap-lg">
+            <!-- Left: Info Panel -->
+            <div class="col-span-12 lg:col-span-3 space-y-md">
+                <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10 h-full flex flex-col justify-between">
+                    <div>
+                        <h2 class="font-label-md text-label-md text-primary dark:text-primary-fixed-dim uppercase tracking-wider mb-lg">Active Unit: ZD-109</h2>
+                        <div class="relative group rounded-xl overflow-hidden mb-lg">
+                            <img id="activeDroneImg" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEtS7NrbcgfHg99hJ425acZI8rj7dosDJgoUynLj7qinbew2xRZmz7cKonHa-f8N9tg_4iyeOeBXWhUmyYhZZx4fOxlVuPePX9o7jXezHyqGk44ybU46cO7ypt_PN1rQGZuzZAcvZBhgdqhFz1amjREou-ZHhfk1eu5UUapiEGxMoqznDDRATtXQJZhOfjlI_ZXhM13t_3YFg2Ew45ezU4JT6qMHZ1VCtj-RZxwOiufSfecRxS6XGQClvLIKnjvPS5PyNZs3FFPRw" alt="Active drone"/>
+                            <div class="absolute top-2 right-2 px-sm py-1 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 text-label-sm rounded-full flex items-center gap-xs">
+                                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                <span id="activeDroneStatus">Online</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-md">
+                        <div class="flex justify-between items-center">
+                            <span class="text-on-surface-variant dark:text-inverse-on-surface/75 font-body-sm flex items-center gap-sm">
+                                <span class="material-symbols-outlined text-md">battery_full</span> Battery
+                            </span>
+                            <span id="activeDroneBattery" class="font-bold text-on-surface dark:text-inverse-on-surface">88%</span>
+                        </div>
+                        <div class="w-full bg-surface-container dark:bg-on-surface-variant/20 rounded-full h-1.5">
+                            <div id="activeDroneBatteryBar" class="bg-emerald-500 h-1.5 rounded-full" style="width: 88%"></div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-sm mt-lg pt-lg border-t border-outline-variant/10">
+                            <div>
+                                <p class="text-outline dark:text-inverse-on-surface/60 text-label-sm">Signal</p>
+                                <p id="activeDroneSignal" class="text-primary dark:text-primary-fixed-dim font-bold">Excellent</p>
+                            </div>
+                            <div>
+                                <p class="text-outline dark:text-inverse-on-surface/60 text-label-sm">Altitude</p>
+                                <p id="activeDroneAltitude" class="text-on-surface dark:text-inverse-on-surface font-bold">45m</p>
+                            </div>
+                            <div>
+                                <p class="text-outline dark:text-inverse-on-surface/60 text-label-sm">Speed</p>
+                                <p id="activeDroneSpeed" class="text-on-surface dark:text-inverse-on-surface font-bold">12m/s</p>
+                            </div>
+                            <div>
+                                <p class="text-outline dark:text-inverse-on-surface/60 text-label-sm">Coordinates</p>
+                                <p id="activeDroneCoords" class="text-on-surface dark:text-inverse-on-surface font-bold text-[10px]">34.05, -118.24</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Center: Interactive Map -->
+            <div class="col-span-12 lg:col-span-6">
+                <div class="bg-surface-container-lowest dark:bg-inverse-surface rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10 overflow-hidden h-[450px] relative group">
+                    <div id="trackingMap" class="absolute inset-0 z-0 bg-slate-200 dark:bg-slate-900">
+                        <!-- Loaded by Leaflet.js -->
+                    </div>
+                    
+                    <!-- Map Overlays -->
+                    <div class="absolute top-4 left-4 z-10 glass-panel p-md rounded-lg shadow-lg border border-white/30 dark:border-outline/10 pointer-events-none">
+                        <p class="font-label-sm text-label-sm text-primary dark:text-primary-fixed-dim mb-1">Current Mission</p>
+                        <h4 class="font-bold text-on-surface dark:text-inverse-on-surface" id="activeDroneMission">Alpha Sector Delivery</h4>
+                    </div>
+                    
+                    <div class="absolute bottom-4 right-4 z-10 flex gap-xs">
+                        <button id="mapZoomIn" class="w-10 h-10 bg-white dark:bg-inverse-surface dark:text-inverse-on-surface shadow-md rounded-lg flex items-center justify-center hover:bg-surface-variant transition-all">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                        <button id="mapZoomOut" class="w-10 h-10 bg-white dark:bg-inverse-surface dark:text-inverse-on-surface shadow-md rounded-lg flex items-center justify-center hover:bg-surface-variant transition-all">
+                            <span class="material-symbols-outlined">remove</span>
+                        </button>
+                        <button id="mapFocusBtn" class="w-10 h-10 bg-primary text-white shadow-md rounded-lg flex items-center justify-center hover:bg-primary/90 transition-all">
+                            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">my_location</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Real-time Telemetry Scrolling Chart -->
+            <div class="col-span-12 lg:col-span-3 space-y-md">
+                <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10 h-full flex flex-col">
+                    <h3 class="font-label-md text-label-md text-on-surface dark:text-inverse-on-surface mb-md">Live Telemetry Streams</h3>
+                    <div class="flex-1 relative min-h-[300px]">
+                        <canvas id="telemetryChart"></canvas>
+                    </div>
+                    <div class="mt-md pt-md border-t border-outline-variant/10 dark:border-outline/10 flex justify-between items-center text-xs text-on-surface-variant dark:text-inverse-on-surface/60">
+                        <span class="flex items-center gap-xs">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#00668a]"></span> Altitude
+                        </span>
+                        <span class="flex items-center gap-xs">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#f1a02b]"></span> Speed
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- DATA TABLES & ANALYTICS GRID -->
+        <section class="grid grid-cols-12 gap-lg">
+            <!-- Recent Flights Table -->
+            <div class="col-span-12 xl:col-span-8">
+                <div class="bg-surface-container-lowest dark:bg-inverse-surface rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10 overflow-hidden">
+                    <div class="px-lg py-md border-b border-outline-variant/10 dark:border-outline/10 flex justify-between items-center">
+                        <h2 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">Recent Flights</h2>
+                        <button data-tab="flights" class="route-tab-btn text-primary dark:text-primary-fixed-dim font-label-md text-label-md hover:underline">View All</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left" id="dashboardFlightsTable">
+                            <thead class="bg-surface-container-low dark:bg-on-surface-variant/10 text-label-sm text-outline dark:text-inverse-on-surface/65">
+                                <tr>
+                                    <th class="px-lg py-md">ID</th>
+                                    <th class="px-lg py-md">Drone</th>
+                                    <th class="px-lg py-md">Date</th>
+                                    <th class="px-lg py-md">Duration</th>
+                                    <th class="px-lg py-md">Distance</th>
+                                    <th class="px-lg py-md">Pilot</th>
+                                    <th class="px-lg py-md">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-outline-variant/10 dark:divide-outline/10 text-on-surface dark:text-inverse-on-surface" id="dashboardFlightsBody">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analytics Utilization Preview -->
+            <div class="col-span-12 xl:col-span-4 flex flex-col gap-lg">
+                <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-label-md text-label-md text-on-surface-variant dark:text-inverse-on-surface/75 mb-md">Drone Utilization</h3>
+                        <div class="relative h-44 flex items-center justify-center">
+                            <canvas id="dashboardUtilizationChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-xs mt-md pt-sm border-t border-outline-variant/10 dark:border-outline/10 text-center text-xs text-on-surface-variant dark:text-inverse-on-surface/65">
+                        <div>
+                            <p class="font-bold text-primary dark:text-primary-fixed-dim" id="utilizationActiveCount">2</p>
+                            <p class="text-[10px]">Active</p>
+                        </div>
+                        <div>
+                            <p class="font-bold text-secondary dark:text-inverse-on-surface/70" id="utilizationOfflineCount">1</p>
+                            <p class="text-[10px]">Offline</p>
+                        </div>
+                        <div>
+                            <p class="font-bold text-tertiary-container" id="utilizationMaintCount">1</p>
+                            <p class="text-[10px]">Maintenance</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-primary dark:bg-primary/90 p-lg rounded-xl shadow-lg flex flex-col text-white relative overflow-hidden group">
+                    <div class="relative z-10">
+                        <p class="font-label-sm opacity-80 mb-xs uppercase tracking-wider">Weekly Battery Health</p>
+                        <h4 class="text-headline-md font-bold mb-md">94.2% Avg</h4>
+                        <div class="h-16 flex items-end gap-2">
+                            <div class="flex-1 bg-white/20 hover:bg-white/40 transition-all rounded-t-sm h-[80%]"></div>
+                            <div class="flex-1 bg-white/20 hover:bg-white/40 transition-all rounded-t-sm h-[85%]"></div>
+                            <div class="flex-1 bg-white/20 hover:bg-white/40 transition-all rounded-t-sm h-[75%]"></div>
+                            <div class="flex-1 bg-white/20 hover:bg-white/40 transition-all rounded-t-sm h-[90%]"></div>
+                            <div class="flex-1 bg-white/20 hover:bg-white/40 transition-all rounded-t-sm h-[95%]"></div>
+                            <div class="flex-1 bg-white/20 hover:bg-white/40 transition-all rounded-t-sm h-[88%]"></div>
+                            <div class="flex-1 bg-white h-[92%] rounded-t-sm"></div>
+                        </div>
+                    </div>
+                    <!-- Decorative background element -->
+                    <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full group-hover:scale-125 transition-transform duration-700"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ALERTS & MAINTENANCE -->
+        <section class="grid grid-cols-12 gap-lg">
+            <!-- Timeline of Alerts -->
+            <div class="col-span-12 lg:col-span-7">
+                <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10">
+                    <h3 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface mb-lg">Security & System Alerts</h3>
+                    <div class="space-y-md" id="dashboardAlertsTimeline">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Health Scores & Upcoming Service -->
+            <div class="col-span-12 lg:col-span-5 flex flex-col gap-lg">
+                <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10">
+                    <h3 class="font-label-md text-label-md text-on-surface-variant dark:text-inverse-on-surface/75 mb-lg uppercase">Fleet Health Score</h3>
+                    <div class="space-y-lg">
+                        <div>
+                            <div class="flex justify-between text-body-sm mb-xs">
+                                <span>Propulsion Systems</span>
+                                <span class="font-bold text-emerald-600 dark:text-emerald-400">98%</span>
+                            </div>
+                            <div class="w-full bg-surface-container dark:bg-on-surface-variant/20 rounded-full h-1.5">
+                                <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 98%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-body-sm mb-xs">
+                                <span>Optical Sensors</span>
+                                <span class="font-bold text-sky-600 dark:text-sky-400">92%</span>
+                            </div>
+                            <div class="w-full bg-surface-container dark:bg-on-surface-variant/20 rounded-full h-1.5">
+                                <div class="bg-sky-500 h-1.5 rounded-full" style="width: 92%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-body-sm mb-xs">
+                                <span>Chassis Integrity</span>
+                                <span class="font-bold text-amber-600 dark:text-amber-400">84%</span>
+                            </div>
+                            <div class="w-full bg-surface-container dark:bg-on-surface-variant/20 rounded-full h-1.5">
+                                <div class="bg-amber-500 h-1.5 rounded-full" style="width: 84%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-surface-container dark:bg-on-surface-variant/10 p-lg rounded-xl border border-outline-variant/20 dark:border-outline/10 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h3 class="font-label-md text-label-md text-on-surface-variant dark:text-inverse-on-surface/75 mb-md">Upcoming Hangar Service</h3>
+                        <div class="flex items-center gap-md">
+                            <div class="bg-white dark:bg-inverse-surface p-sm rounded-lg shadow-sm text-center min-w-[60px]">
+                                <p class="text-label-sm text-error font-bold">OCT</p>
+                                <p class="text-headline-md font-extrabold text-on-surface dark:text-inverse-on-surface">28</p>
+                            </div>
+                            <div>
+                                <p class="font-bold text-on-surface dark:text-inverse-on-surface">Unit ZD-112</p>
+                                <p class="text-body-sm text-on-surface-variant dark:text-inverse-on-surface/60">Annual Certification & Firmware Update</p>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-8xl text-on-surface/5 dark:text-white/5" data-icon="build">build</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ================= VIEW: AI INFERENCE ================= -->
+    <div id="view-ai-inference" class="tab-view hidden space-y-xl">
+        <section id="dashboard-ai-inference" class="space-y-lg bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant/10 dark:border-outline/10 shadow-sm transition-all duration-300">
+            <header class="flex items-center justify-between">
+                <div>
+                    <h2 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">AI Inference — Real-Time Detection</h2>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant dark:text-inverse-on-surface/60">Live pedestrian and action recognition powered by Okutama-Action SSD models. Stream is served at <code class="text-primary">127.0.0.1:5000</code>.</p>
+                </div>
+                <div class="flex items-center gap-sm">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <span class="font-label-md text-label-md text-emerald-600 dark:text-emerald-400">Model Engine Active</span>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-12 gap-lg">
+                <!-- Main video stream (large) -->
+                <div class="col-span-12 xl:col-span-8">
+                    <div class="bg-surface-container-lowest dark:bg-inverse-surface rounded-xl border border-outline-variant/10 dark:border-outline/10 overflow-hidden">
+                        <!-- Stream header -->
+                        <div class="px-lg py-md border-b border-outline-variant/10 dark:border-outline/10 flex items-center justify-between">
+                            <div class="flex items-center gap-sm">
+                                <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">smart_toy</span>
+                                <h3 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">Annotated Video Feed</h3>
+                            </div>
+                            <div class="flex items-center gap-sm">
+                                <span class="text-xs font-mono text-outline dark:text-inverse-on-surface/55" id="ai-full-frame">0/0</span>
+                                <span class="px-sm py-xs rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold flex items-center gap-xs">
+                                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> MJPEG
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- MJPEG Image -->
+                        <div class="relative bg-black" style="aspect-ratio:16/9">
+                            <img id="ai-full-stream" src=""
+                                 alt="Full AI Inference Stream"
+                                 class="w-full h-full object-contain">
+                            <!-- Scanning-line CRT overlay -->
+                            <div class="absolute inset-0 pointer-events-none opacity-[0.03] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.5)_2px,rgba(0,0,0,0.5)_4px)]"></div>
+                            <!-- HUD corners -->
+                            <div class="absolute top-3 left-3 text-[10px] font-mono text-emerald-400 pointer-events-none space-y-0.5">
+                                <div>⬛ REC OKUTAMA-SSD</div>
+                                <div id="ai-full-fps-hud">FPS: —</div>
+                            </div>
+                            <div class="absolute top-3 right-3 text-right text-[10px] font-mono text-sky-400 pointer-events-none space-y-0.5">
+                                <div>PED: <span id="ai-full-ped-hud">0</span></div>
+                                <div>ACT: <span id="ai-full-act-hud">0</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline -->
+                        <div class="px-lg py-sm border-t border-outline-variant/10 dark:border-outline/10">
+                            <div class="w-full h-2 bg-surface-container dark:bg-on-surface-variant/20 rounded-full overflow-hidden">
+                                <div id="ai-full-timeline" class="h-full rounded-full bg-gradient-to-r from-primary to-tertiary-container transition-all duration-150" style="width:0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Controls bar -->
+                        <div class="px-lg py-md flex flex-wrap items-center gap-md border-t border-outline-variant/10 dark:border-outline/10">
+                            <!-- Play/Pause -->
+                            <button id="ai-full-playpause" onclick="liveInferenceTogglePlay()"
+                                class="flex items-center gap-sm px-lg py-sm rounded-xl bg-primary text-white font-label-md text-label-md hover:bg-primary/90 transition-all active:scale-95 shadow-sm">
+                                <span class="material-symbols-outlined text-[18px]" id="ai-full-play-icon">pause</span>
+                                <span id="ai-full-play-label">Pause</span>
+                            </button>
+                            <!-- Restart -->
+                            <button onclick="liveInferenceReset()"
+                                class="flex items-center gap-sm px-md py-sm rounded-xl border border-outline-variant dark:border-outline/20 text-on-surface dark:text-inverse-on-surface hover:bg-surface-variant dark:hover:bg-on-surface-variant/20 transition-all active:scale-95">
+                                <span class="material-symbols-outlined text-[18px]">replay</span>
+                                <span class="font-body-sm">Restart</span>
+                            </button>
+
+                            <!-- Mode selector -->
+                            <div class="flex items-center gap-sm ml-auto flex-wrap">
+                                <span class="font-label-sm text-label-sm text-outline dark:text-inverse-on-surface/55">Mode:</span>
+                                <div class="flex rounded-lg overflow-hidden border border-outline-variant/30 dark:border-outline/20">
+                                    <button onclick="liveInferenceSetMode(1)" data-mode-btn="1" class="mode-btn px-md py-xs text-xs font-semibold transition-all bg-surface-container-low dark:bg-on-surface-variant/10 text-on-surface-variant dark:text-inverse-on-surface/70 hover:bg-primary/10">Pedestrian</button>
+                                    <button onclick="liveInferenceSetMode(2)" data-mode-btn="2" class="mode-btn px-md py-xs text-xs font-semibold transition-all bg-surface-container-low dark:bg-on-surface-variant/10 text-on-surface-variant dark:text-inverse-on-surface/70 hover:bg-primary/10 border-l border-r border-outline-variant/20 dark:border-outline/10">Action</button>
+                                    <button onclick="liveInferenceSetMode(3)" data-mode-btn="3" class="mode-btn px-md py-xs text-xs font-semibold transition-all bg-primary text-white">Both</button>
+                                </div>
+                            </div>
+
+                            <!-- Video selector -->
+                            <div class="flex items-center gap-sm">
+                                <span class="font-label-sm text-label-sm text-outline dark:text-inverse-on-surface/55">Video:</span>
+                                <select id="ai-video-select" onchange="liveInferenceSetVideo(this.value)"
+                                    class="text-xs px-sm py-xs bg-surface-container-lowest dark:bg-inverse-surface border border-outline-variant rounded-lg text-on-surface dark:text-inverse-on-surface font-semibold focus:ring-primary focus:border-primary">
+                                    <option value="test.mp4">Default Flight (test.mp4)</option>
+                                    <option value="C:/Users/Aryan/Desktop/DroneMVP/public/drone cam 2.mp4">Urban Patrol (drone cam 2.mp4)</option>
+                                </select>
+                            </div>
+
+                            <!-- Speed selector -->
+                            <div class="flex items-center gap-sm">
+                                <span class="font-label-sm text-label-sm text-outline dark:text-inverse-on-surface/55">Speed:</span>
+                                <select id="ai-full-speed" onchange="liveInferenceSetSpeed(this.value)"
+                                    class="text-xs px-sm py-xs rounded-lg border border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface">
+                                    <option value="1">1×</option>
+                                    <option value="2">2×</option>
+                                    <option value="3" selected>3×</option>
+                                    <option value="5">5×</option>
+                                    <option value="8">8×</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right side: controls & live telemetry -->
+                <div class="col-span-12 xl:col-span-4 flex flex-col gap-lg">
+
+                    <!-- Confidence slider card -->
+                    <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant/10 dark:border-outline/10">
+                        <h3 class="font-label-md text-label-md text-on-surface-variant dark:text-inverse-on-surface/75 mb-md uppercase">Confidence Threshold</h3>
+                        <div class="flex items-center justify-between mb-sm">
+                            <span class="text-xs text-outline">Min</span>
+                            <span class="font-bold font-mono text-primary dark:text-primary-fixed-dim" id="ai-conf-display">0.40</span>
+                            <span class="text-xs text-outline">Max</span>
+                        </div>
+                        <input type="range" id="ai-conf-slider" min="0.1" max="0.95" step="0.05" value="0.4"
+                               oninput="document.getElementById('ai-conf-display').textContent=parseFloat(this.value).toFixed(2)"
+                               onchange="liveInferenceSetConf(this.value)"
+                               class="w-full accent-primary">
+                    </div>
+
+                    <!-- Live stats cards -->
+                    <div class="grid grid-cols-3 gap-sm">
+                        <div class="bg-surface-container-lowest dark:bg-inverse-surface p-md rounded-xl border border-outline-variant/10 dark:border-outline/10 text-center">
+                            <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim text-xl">speed</span>
+                            <p class="font-bold text-lg text-on-surface dark:text-inverse-on-surface" id="ai-stat-fps">—</p>
+                            <p class="text-[9px] text-outline uppercase">FPS</p>
+                        </div>
+                        <div class="bg-emerald-50 dark:bg-emerald-950/40 p-md rounded-xl border border-emerald-200/30 text-center">
+                            <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-xl">people</span>
+                            <p class="font-bold text-lg text-emerald-700 dark:text-emerald-400" id="ai-stat-ped">0</p>
+                            <p class="text-[9px] text-emerald-600/70 uppercase">Persons</p>
+                        </div>
+                        <div class="bg-amber-50 dark:bg-amber-950/40 p-md rounded-xl border border-amber-200/30 text-center">
+                            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-xl">directions_run</span>
+                            <p class="font-bold text-lg text-amber-700 dark:text-amber-400" id="ai-stat-act">0</p>
+                            <p class="text-[9px] text-amber-600/70 uppercase">Actions</p>
+                        </div>
+                    </div>
+
+                    <!-- Activity chart -->
+                    <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant/10 dark:border-outline/10 flex-1 flex flex-col">
+                        <h3 class="font-label-md text-label-md text-on-surface-variant dark:text-inverse-on-surface/75 mb-md">Live Detection Activity</h3>
+                        <div class="flex-1 relative min-h-[160px]">
+                            <canvas id="aiInferenceChart"></canvas>
+                        </div>
+                        <div class="mt-sm flex justify-between text-[10px] text-on-surface-variant dark:text-inverse-on-surface/55">
+                            <span class="flex items-center gap-xs"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Pedestrians</span>
+                            <span class="flex items-center gap-xs"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Actions</span>
+                        </div>
+                    </div>
+
+                    <!-- Model info card -->
+                    <div class="bg-primary/5 dark:bg-primary-fixed-dim/5 border border-primary/20 dark:border-primary-fixed-dim/20 p-lg rounded-xl">
+                        <h4 class="font-bold text-primary dark:text-primary-fixed-dim text-sm mb-sm">Model Information</h4>
+                        <div class="space-y-xs text-xs text-on-surface-variant dark:text-inverse-on-surface/70">
+                            <div class="flex justify-between"><span>Pedestrian:</span><span class="font-mono">VGG SSD 512×512</span></div>
+                            <div class="flex justify-between"><span>Action:</span><span class="font-mono">VGG SSD 960×540</span></div>
+                            <div class="flex justify-between"><span>Backend:</span><span id="ai-full-backend" class="font-mono text-emerald-600 dark:text-emerald-400">OpenCV DNN (CPU)</span></div>
+                            <div class="flex justify-between"><span>Stream:</span><span class="font-mono">MJPEG @ localhost:5000</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ================= VIEW: DRONES ================= -->
+    <div id="view-drones" class="tab-view hidden space-y-lg">
+        <header class="flex justify-between items-center">
+            <div>
+                <h2 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">Active Drone Fleet</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant dark:text-inverse-on-surface/60">Track and manage drone hardware profiles, payloads, and sensor health states.</p>
+            </div>
+            <button id="openAddDroneModalBtn" class="bg-primary text-white font-label-md text-label-md py-md px-lg rounded-xl hover:bg-primary/95 active:scale-[0.98] transition-all flex items-center gap-sm shadow-sm">
+                <span class="material-symbols-outlined">add</span>
+                <span>Register Drone</span>
+            </button>
+        </header>
+        
+        <!-- Drones List Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-lg" id="dronesGridContainer">
+            <!-- Loaded dynamically in JS -->
+        </div>
+    </div>
+    
+    <!-- ================= VIEW: FLIGHTS ================= -->
+    <div id="view-flights" class="tab-view hidden space-y-lg">
+        <header class="flex justify-between items-center">
+            <div>
+                <h2 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">Flight Operations Planner</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant dark:text-inverse-on-surface/60">Dispatch missions, schedule transports, and audit flight logs.</p>
+            </div>
+            <button id="openFlightPlannerBtn" class="bg-primary text-white font-label-md text-label-md py-md px-lg rounded-xl hover:bg-primary/95 active:scale-[0.98] transition-all flex items-center gap-sm shadow-sm">
+                <span class="material-symbols-outlined">send_to_mobile</span>
+                <span>Launch New Mission</span>
+            </button>
+        </header>
+        
+        <div class="grid grid-cols-12 gap-lg">
+            <!-- Flight Dispatch Form Overlay (if needed) or inline section -->
+            <div id="flightPlannerFormSection" class="col-span-12 lg:col-span-4 bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant/10 dark:border-outline/10 hidden">
+                <h3 class="font-headline-md text-sm text-on-surface dark:text-inverse-on-surface mb-md">Dispatch Parameters</h3>
+                <form id="newFlightForm" class="space-y-md">
+                    <div>
+                        <label class="font-label-md text-xs text-on-surface-variant dark:text-inverse-on-surface/75" for="flightDroneSelect">Select Available Drone</label>
+                        <select id="flightDroneSelect" class="w-full mt-1 p-sm rounded-lg border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface focus:ring-primary focus:border-primary" required>
+                            <!-- Filled dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="font-label-md text-xs text-on-surface-variant dark:text-inverse-on-surface/75" for="flightPilotInput">Pilot Name</label>
+                        <input id="flightPilotInput" type="text" class="w-full mt-1 p-sm rounded-lg border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface focus:ring-primary" placeholder="Alex Rivera" required/>
+                    </div>
+                    <div>
+                        <label class="font-label-md text-xs text-on-surface-variant dark:text-inverse-on-surface/75" for="flightDestSelect">Destination Sector</label>
+                        <input id="flightDestSelect" type="text" class="w-full mt-1 p-sm rounded-lg border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface focus:ring-primary" placeholder="Downtown Hospital Pad" required/>
+                    </div>
+                    <div>
+                        <label class="font-label-md text-xs text-on-surface-variant dark:text-inverse-on-surface/75" for="flightPayloadInput">Payload Cargo</label>
+                        <input id="flightPayloadInput" type="text" class="w-full mt-1 p-sm rounded-lg border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface focus:ring-primary" placeholder="Thermal Scanner Module" required/>
+                    </div>
+                    <div class="flex gap-sm pt-md">
+                        <button type="submit" class="flex-1 bg-primary text-white py-sm rounded-lg hover:bg-primary/95 text-body-sm font-bold shadow-sm">Dispatch</button>
+                        <button type="button" id="closeFlightPlannerBtn" class="flex-1 border border-outline-variant bg-white dark:bg-inverse-surface dark:text-inverse-on-surface py-sm rounded-lg text-body-sm">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Complete Flight Logs Table -->
+            <div class="col-span-12 lg:col-span-12" id="flightLogsTableContainer">
+                <div class="bg-surface-container-lowest dark:bg-inverse-surface rounded-xl shadow-sm border border-outline-variant/10 dark:border-outline/10 overflow-hidden">
+                    <div class="px-lg py-md border-b border-outline-variant/10 dark:border-outline/10 flex justify-between items-center">
+                        <h3 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">All Operations Logs</h3>
+                        <div class="flex gap-sm">
+                            <input id="flightSearchInput" type="text" class="p-sm text-xs rounded-lg border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface" placeholder="Filter logs..."/>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left" id="allFlightsTable">
+                            <thead class="bg-surface-container-low dark:bg-on-surface-variant/10 text-label-sm text-outline dark:text-inverse-on-surface/65">
+                                <tr>
+                                    <th class="px-lg py-md">ID</th>
+                                    <th class="px-lg py-md">Drone</th>
+                                    <th class="px-lg py-md">Date</th>
+                                    <th class="px-lg py-md">Duration</th>
+                                    <th class="px-lg py-md">Distance</th>
+                                    <th class="px-lg py-md">Pilot</th>
+                                    <th class="px-lg py-md">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-outline-variant/10 dark:divide-outline/10 text-on-surface dark:text-inverse-on-surface" id="allFlightsBody">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ================= VIEW: LIVE MONITORING ================= -->
+    <div id="view-live" class="tab-view hidden space-y-lg">
+        <div class="grid grid-cols-12 gap-lg h-[calc(100vh-140px)]">
+            <!-- Full Map tracking container -->
+            <div class="col-span-12 lg:col-span-8 bg-surface-container-lowest dark:bg-inverse-surface rounded-xl border border-outline-variant/10 dark:border-outline/10 overflow-hidden relative h-full">
+                <div id="liveTrackingMap" class="absolute inset-0 bg-slate-200 dark:bg-slate-900 z-0">
+                    <!-- Map dynamically mirrored or created in JS -->
+                </div>
+                <div class="absolute bottom-4 left-4 z-10 glass-panel p-md rounded-lg shadow-lg">
+                    <p class="font-bold text-xs text-on-surface dark:text-inverse-on-surface flex items-center gap-xs">
+                        <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span> Live Tracking Stream
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Side AI Inference Feed -->
+            <div class="col-span-12 lg:col-span-4 flex flex-col gap-md h-full">
+                <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant/10 dark:border-outline/10 flex flex-col gap-md">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-label-md text-label-md text-primary dark:text-primary-fixed-dim uppercase tracking-wider">AI Detection Feed</h3>
+                        <div class="flex items-center gap-xs">
+                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                            <span id="live-inference-status" class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">LIVE</span>
+                        </div>
+                    </div>
+
+                    <!-- MJPEG Stream from Flask -->
+                    <div class="relative w-full rounded-lg overflow-hidden bg-black border border-slate-700" style="aspect-ratio:16/9">
+                        <img id="live-inference-stream" src=""
+                             alt="AI Inference Stream"
+                             class="w-full h-full object-contain"
+                             onerror="this.style.display='none';document.getElementById('live-stream-error').style.display='flex'">
+                        <!-- Error state -->
+                        <div id="live-stream-error" class="absolute inset-0 hidden flex-col items-center justify-center text-center p-md">
+                            <span class="material-symbols-outlined text-3xl text-outline mb-sm">videocam_off</span>
+                            <p class="text-[11px] text-on-surface-variant dark:text-inverse-on-surface/60">AI server offline.<br>Start <code class="text-primary">python app.py</code></p>
+                        </div>
+                        <!-- HUD overlay -->
+                        <div class="absolute top-2 left-2 right-2 flex justify-between text-[9px] font-mono text-emerald-400 pointer-events-none">
+                            <span>REC [●] AI-INFERENCE</span>
+                            <span id="live-hud-fps">— FPS</span>
+                        </div>
+                        <div class="absolute bottom-2 left-2 right-2 flex justify-between text-[9px] font-mono text-sky-300 pointer-events-none">
+                            <span>PED: <span id="live-hud-ped">0</span></span>
+                            <span id="live-hud-frame">0/0</span>
+                            <span>ACT: <span id="live-hud-act">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats Row -->
+                    <div class="grid grid-cols-3 gap-sm text-center">
+                        <div class="bg-surface-container dark:bg-on-surface-variant/10 rounded-lg p-sm">
+                            <p class="text-[9px] text-outline dark:text-inverse-on-surface/55 uppercase">FPS</p>
+                            <p class="font-bold text-sm text-on-surface dark:text-inverse-on-surface" id="live-stat-fps">—</p>
+                        </div>
+                        <div class="bg-emerald-50 dark:bg-emerald-950/40 rounded-lg p-sm border border-emerald-200/30">
+                            <p class="text-[9px] text-emerald-700 dark:text-emerald-400 uppercase">People</p>
+                            <p class="font-bold text-sm text-emerald-700 dark:text-emerald-400" id="live-stat-ped">0</p>
+                        </div>
+                        <div class="bg-amber-50 dark:bg-amber-950/40 rounded-lg p-sm border border-amber-200/30">
+                            <p class="text-[9px] text-amber-700 dark:text-amber-400 uppercase">Actions</p>
+                            <p class="font-bold text-sm text-amber-700 dark:text-amber-400" id="live-stat-act">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Playback Controls -->
+                    <div class="flex items-center gap-sm">
+                        <button id="live-btn-playpause" onclick="liveInferenceTogglePlay()"
+                            class="flex items-center gap-xs px-md py-xs rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-all active:scale-95 shadow-sm">
+                            <span class="material-symbols-outlined text-[16px]" id="live-play-icon">pause</span>
+                            <span id="live-play-label">Pause</span>
+                        </button>
+                        <button onclick="liveInferenceReset()"
+                            class="flex items-center gap-xs px-sm py-xs rounded-lg border border-outline-variant dark:border-outline/20 text-on-surface dark:text-inverse-on-surface text-xs hover:bg-surface-variant dark:hover:bg-on-surface-variant/20 transition-all active:scale-95">
+                            <span class="material-symbols-outlined text-[16px]">replay</span>
+                        </button>
+                        <select id="live-speed-select" onchange="liveInferenceSetSpeed(this.value)"
+                            class="ml-auto text-xs px-sm py-xs rounded-lg border border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface">
+                            <option value="1">1× Speed</option>
+                            <option value="2">2× Speed</option>
+                            <option value="3" selected>3× Speed</option>
+                            <option value="5">5× Speed</option>
+                            <option value="8">8× Speed</option>
+                        </select>
+                    </div>
+
+                    <!-- Timeline bar -->
+                    <div class="w-full h-1.5 bg-surface-container dark:bg-on-surface-variant/20 rounded-full overflow-hidden">
+                        <div id="live-timeline" class="h-full rounded-full bg-gradient-to-r from-primary to-tertiary-container transition-all duration-150" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <!-- Drone telemetry (original) -->
+                <div class="bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant/10 dark:border-outline/10 flex-1">
+                    <div class="space-y-sm text-xs">
+                        <h4 class="font-bold text-on-surface dark:text-inverse-on-surface mb-2">Live Unit Feed</h4>
+                        <div class="flex justify-between">
+                            <span class="text-on-surface-variant dark:text-inverse-on-surface/75">Active Drone:</span>
+                            <span class="font-bold font-mono">ZD-109</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-on-surface-variant dark:text-inverse-on-surface/75">Current Speed:</span>
+                            <span class="font-bold font-mono" id="liveSpeedHUD">12.0 m/s</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-on-surface-variant dark:text-inverse-on-surface/75">Wind Speed:</span>
+                            <span class="font-bold font-mono text-amber-500">22.4 km/h</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-on-surface-variant dark:text-inverse-on-surface/75">Signal strength:</span>
+                            <span class="font-bold text-emerald-600 dark:text-emerald-400">94dB (Excellent)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ================= VIEW: ANALYTICS ================= -->
+    <div id="view-analytics" class="tab-view hidden space-y-lg">
+        <header>
+            <h2 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">Fleet Analytics</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant dark:text-inverse-on-surface/60">Analytical dashboard illustrating historical trends, battery diagnostics, and resource allocation efficiency.</p>
+        </header>
+        
+        <div class="grid grid-cols-12 gap-lg">
+            <div class="col-span-12 lg:col-span-6 bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant/10 dark:border-outline/10 h-96 flex flex-col">
+                <h3 class="font-label-md text-label-md text-on-surface dark:text-inverse-on-surface mb-md">Drone Usage Status distribution</h3>
+                <div class="flex-1 relative">
+                    <canvas id="analyticsUtilizationChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="col-span-12 lg:col-span-6 bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant/10 dark:border-outline/10 h-96 flex flex-col">
+                <h3 class="font-label-md text-label-md text-on-surface dark:text-inverse-on-surface mb-md">Average Battery Health Trends</h3>
+                <div class="flex-1 relative">
+                    <canvas id="analyticsBatteryHealthChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ================= VIEW: ALERTS ================= -->
+    <div id="view-alerts" class="tab-view hidden space-y-lg">
+        <header class="flex justify-between items-center">
+            <div>
+                <h2 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">Security & Operational Warnings</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant dark:text-inverse-on-surface/60">System-wide logs, sensor alerts, and flight interruptions.</p>
+            </div>
+            <button id="resolveAllAlertsBtn" class="border border-outline-variant bg-white dark:bg-inverse-surface dark:text-inverse-on-surface font-label-md text-label-md py-md px-lg rounded-xl hover:bg-surface-container-low transition-colors">
+                Resolve All Active
+            </button>
+        </header>
+        
+        <div class="bg-surface-container-lowest dark:bg-inverse-surface rounded-xl border border-outline-variant/10 dark:border-outline/10 p-lg">
+            <div class="space-y-md" id="allAlertsListContainer">
+                <!-- Filled dynamically in JS -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- ================= VIEW: MAINTENANCE ================= -->
+    <div id="view-maintenance" class="tab-view hidden space-y-lg">
+        <header>
+            <h2 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">Hangar Maintenance</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant dark:text-inverse-on-surface/60">Perform system diagnostics, calibrate optical sensors, and repair propulsion hardware.</p>
+        </header>
+        
+        <div class="grid grid-cols-12 gap-lg">
+            <!-- Left Hangar selection panel -->
+            <div class="col-span-12 lg:col-span-5 bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant/10 dark:border-outline/10 space-y-md">
+                <h3 class="font-label-md text-label-md text-primary dark:text-primary-fixed-dim uppercase tracking-wider mb-md">Select Grounded Unit</h3>
+                <div class="space-y-sm" id="maintenanceGroundedDronesList">
+                    <!-- Filled dynamically with Grounded/Maintenance units -->
+                </div>
+            </div>
+            
+            <!-- Right checklist panel -->
+            <div class="col-span-12 lg:col-span-7 bg-surface-container-lowest dark:bg-inverse-surface p-lg rounded-xl border border-outline-variant/10 dark:border-outline/10 space-y-lg">
+                <h3 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface mb-sm">Diagnostics Checklists</h3>
+                <div id="maintenanceChecklistContent" class="space-y-lg">
+                    <div class="text-center py-xl text-on-surface-variant dark:text-inverse-on-surface/60">
+                        <span class="material-symbols-outlined text-4xl mb-sm text-outline">build_circle</span>
+                        <p class="text-body-sm">Select a grounded drone from the list to begin service checklist.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ================= VIEW: AI INFERENCE REMOVED ================= -->
+
+    <!-- ================= VIEW: USERS ================= -->
+    <div id="view-users" class="tab-view hidden space-y-lg">
+        <header>
+            <h2 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">Operators & Staff Profiles</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant dark:text-inverse-on-surface/60">Audit system personnel, flight coordinators, and active pilot roster status.</p>
+        </header>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-lg" id="usersListGrid">
+            <!-- Loaded dynamically in JS -->
+        </div>
+    </div>
+    
+    <!-- ================= VIEW: SETTINGS ================= -->
+    <div id="view-settings" class="tab-view hidden space-y-lg">
+        <header>
+            <h2 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">System Preferences</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant dark:text-inverse-on-surface/60">Configure flight safety ceilings, sound alerts, and physical simulator environments.</p>
+        </header>
+        
+        <div class="bg-surface-container-lowest dark:bg-inverse-surface rounded-xl border border-outline-variant/10 dark:border-outline/10 p-lg max-w-2xl space-y-lg">
+            <h3 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface pb-md border-b border-outline-variant/10 dark:border-outline/10">Global Configuration</h3>
+            
+            <div class="space-y-md">
+                <!-- Theme Switcher -->
+                <div class="flex justify-between items-center py-md border-b border-outline-variant/10 dark:border-outline/10">
+                    <div>
+                        <h4 class="font-bold text-on-surface dark:text-inverse-on-surface">Dark Theme Mode</h4>
+                        <p class="text-xs text-on-surface-variant dark:text-inverse-on-surface/60">Switch dashboard design style to night mode</p>
+                    </div>
+                    <button id="settingsThemeToggle" class="w-12 h-6 bg-slate-300 dark:bg-primary rounded-full relative transition-all duration-300">
+                        <span class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 dark:left-6 transition-all duration-300 shadow-md"></span>
+                    </button>
+                </div>
+                
+                <!-- Audio Alerts -->
+                <div class="flex justify-between items-center py-md border-b border-outline-variant/10 dark:border-outline/10">
+                    <div>
+                        <h4 class="font-bold text-on-surface dark:text-inverse-on-surface">Audio Warnings</h4>
+                        <p class="text-xs text-on-surface-variant dark:text-inverse-on-surface/60">Sound alerts in web browser on critical low-battery notifications</p>
+                    </div>
+                    <button id="settingsSoundToggle" class="w-12 h-6 bg-primary dark:bg-primary rounded-full relative transition-all">
+                        <span id="settingsSoundTogglePin" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-6 transition-all shadow-md"></span>
+                    </button>
+                </div>
+                
+                <!-- Simulator Speed -->
+                <div class="flex justify-between items-center py-md border-b border-outline-variant/10 dark:border-outline/10">
+                    <div>
+                        <h4 class="font-bold text-on-surface dark:text-inverse-on-surface">Telemetry Simulator Speed</h4>
+                        <p class="text-xs text-on-surface-variant dark:text-inverse-on-surface/60">Rate of position updates along simulated path</p>
+                    </div>
+                    <select id="settingsSimSpeedSelect" class="p-sm text-xs rounded-lg border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface">
+                        <option value="1">1x (Normal)</option>
+                        <option value="2">2x (Fast)</option>
+                        <option value="5">5x (Warp)</option>
+                    </select>
+                </div>
+                
+                <!-- Low Battery Alert Ceiling -->
+                <div class="flex justify-between items-center py-md">
+                    <div>
+                        <h4 class="font-bold text-on-surface dark:text-inverse-on-surface">Low Battery Threshold</h4>
+                        <p class="text-xs text-on-surface-variant dark:text-inverse-on-surface/60">Trigger return-to-base warnings below this percentage</p>
+                    </div>
+                    <div class="flex items-center gap-sm">
+                        <input id="settingsBatteryThreshold" type="number" min="10" max="35" class="w-20 p-sm rounded-lg border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface" value="20"/>
+                        <span class="text-xs">%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- FOOTER -->
+    <footer class="flex justify-center gap-xl py-md mt-xl border-t border-outline-variant/20 dark:border-outline/10">
+        <p class="font-label-sm text-label-sm text-on-secondary-fixed-variant dark:text-inverse-on-surface/60">© 2026 Z-DRONE Fleet Logistics</p>
+        <div class="flex gap-lg">
+            <a class="font-label-sm text-label-sm text-on-secondary-fixed-variant dark:text-inverse-on-surface/60 hover:text-primary transition-colors" href="#">Privacy Policy</a>
+            <a class="font-label-sm text-label-sm text-on-secondary-fixed-variant dark:text-inverse-on-surface/60 hover:text-primary transition-colors" href="#">Terms of Service</a>
+            <a class="font-label-sm text-label-sm text-on-secondary-fixed-variant dark:text-inverse-on-surface/60 hover:text-primary transition-colors" href="#">Support</a>
+        </div>
+    </footer>
+</main>
+
+<!-- ================= MODAL: REGISTER DRONE ================= -->
+<div id="addDroneModal" class="fixed inset-0 z-50 overflow-y-auto hidden flex items-center justify-center p-md bg-black/60 backdrop-blur-sm">
+    <div class="bg-white dark:bg-inverse-surface border border-outline-variant/20 dark:border-outline/10 rounded-2xl max-w-md w-full p-xl shadow-2xl space-y-lg">
+        <header class="flex justify-between items-center">
+            <h3 class="font-headline-md text-headline-md text-on-surface dark:text-inverse-on-surface">Register Fleet Asset</h3>
+            <button id="closeAddDroneModalBtn" class="text-outline hover:text-on-surface dark:text-inverse-on-surface/65">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </header>
+        
+        <form id="addDroneForm" class="space-y-md">
+            <div>
+                <label class="font-label-md text-xs text-on-surface-variant dark:text-inverse-on-surface/75" for="droneModelInput">Model Name</label>
+                <input id="droneModelInput" type="text" class="w-full mt-1 p-sm rounded-lg border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface focus:ring-primary" placeholder="Falcon Cargo X1" required/>
+            </div>
+            
+            <div>
+                <label class="font-label-md text-xs text-on-surface-variant dark:text-inverse-on-surface/75" for="droneTypeSelect">Drone Class</label>
+                <select id="droneTypeSelect" class="w-full mt-1 p-sm rounded-lg border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface focus:ring-primary focus:border-primary" required>
+                    <option value="Cargo Delivery">Cargo Delivery</option>
+                    <option value="Surveillance">Surveillance</option>
+                    <option value="Infrastructure Inspection">Infrastructure Inspection</option>
+                    <option value="Mapping">Mapping</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="font-label-md text-xs text-on-surface-variant dark:text-inverse-on-surface/75" for="dronePayloadInput">Standard Payload</label>
+                <input id="dronePayloadInput" type="text" class="w-full mt-1 p-sm rounded-lg border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface focus:ring-primary" placeholder="Medical Container Pad" required/>
+            </div>
+            
+            <div>
+                <label class="font-label-md text-xs text-on-surface-variant dark:text-inverse-on-surface/75" for="droneOperatorInput">Supervising Operator</label>
+                <input id="droneOperatorInput" type="text" class="w-full mt-1 p-sm rounded-lg border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface focus:ring-primary" placeholder="C. Nolan" required/>
+            </div>
+            
+            <button type="submit" class="w-full bg-primary text-white py-md rounded-xl font-label-md text-label-md hover:bg-primary/95 shadow-sm">Save Register Asset</button>
+        </form>
+    </div>
+</div>
+
+<!-- Leaflet Map JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Main App Scripts -->
+<script type="module" src="/src/js/dashboard.js"></script>
+
+<!-- ===== AI INFERENCE INTEGRATION SCRIPT ===== -->
+<script>
+(function() {
+    const API = '';
+
+    // Set stream sources dynamically through the Vite proxy
+    const fullStreamImg = document.getElementById('ai-full-stream');
+    if (fullStreamImg) fullStreamImg.src = '/video_feed';
+    const liveStreamImg = document.getElementById('live-inference-stream');
+    if (liveStreamImg) liveStreamImg.src = '/video_feed';
+
+    // ── State ──────────────────────────────────────────────────────────────
+    let isPaused = false;
+    let currentMode = 3;
+    let aiChart = null;
+    let sseSource = null;
+    const chartLabels = [], chartPeds = [], chartActs = [];
+    const MAX_POINTS = 50;
+
+    // Active security warnings tracker to avoid spamming logs
+    let activeSecurityAlert = null;
+    let zeroDetectionCounter = 0;
+
+    // ── POST helper ────────────────────────────────────────────────────────
+    function apiPost(path, body={}) {
+        fetch(API + path, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(body)
+        }).catch(()=>{});
+    }
+
+    // ── Public controls (called from inline onclick) ───────────────────────
+    window.liveInferenceTogglePlay = function() {
+        isPaused = !isPaused;
+        apiPost('/api/settings', {paused: isPaused});
+        updatePlayUI(isPaused);
+    };
+    window.liveInferenceReset = function() {
+        apiPost('/api/reset');
+        chartLabels.length = 0; chartPeds.length = 0; chartActs.length = 0;
+        if(aiChart) aiChart.update();
+        if(activeSecurityAlert) {
+            const stateObj = window.state;
+            if (stateObj) {
+                stateObj.resolveAlert(activeSecurityAlert.id);
+            }
+            activeSecurityAlert = null;
+        }
+    };
+    window.liveInferenceSetSpeed = function(val) {
+        apiPost('/api/settings', {frame_skip: parseInt(val)});
+        // Sync all speed selectors
+        ['live-speed-select','ai-full-speed'].forEach(id=>{
+            const el = document.getElementById(id);
+            if(el) el.value = val;
+        });
+    };
+    window.liveInferenceSetConf = function(val) {
+        apiPost('/api/settings', {conf_threshold: parseFloat(val)});
+    };
+    window.liveInferenceSetMode = function(mode) {
+        currentMode = mode;
+        apiPost('/api/settings', {mode: mode});
+        document.querySelectorAll('[data-mode-btn]').forEach(btn=>{
+            const active = parseInt(btn.dataset.modeBtn) === mode;
+            btn.className = btn.className
+                .replace('bg-primary text-white','bg-surface-container-low dark:bg-on-surface-variant/10 text-on-surface-variant dark:text-inverse-on-surface/70 hover:bg-primary/10')
+                .replace('bg-surface-container-low dark:bg-on-surface-variant/10 text-on-surface-variant dark:text-inverse-on-surface/70 hover:bg-primary/10','');
+            if(active) btn.classList.add('bg-primary','text-white');
+            else btn.classList.add('bg-surface-container-low','dark:bg-on-surface-variant/10','text-on-surface-variant','dark:text-inverse-on-surface/70','hover:bg-primary/10');
+        });
+    };
+    window.liveInferenceSetVideo = function(val) {
+        apiPost('/api/settings', {video_path: val});
+        chartLabels.length = 0; chartPeds.length = 0; chartActs.length = 0;
+        if(aiChart) aiChart.update();
+        if(activeSecurityAlert) {
+            const stateObj = window.state;
+            if (stateObj) {
+                stateObj.resolveAlert(activeSecurityAlert.id);
+            }
+            activeSecurityAlert = null;
+        }
+    };
+
+    function updatePlayUI(paused) {
+        ['live-play-icon','ai-full-play-icon'].forEach(id=>{
+            const el = document.getElementById(id);
+            if(el) el.textContent = paused ? 'play_arrow' : 'pause';
+        });
+        ['live-play-label','ai-full-play-label'].forEach(id=>{
+            const el = document.getElementById(id);
+            if(el) el.textContent = paused ? 'Resume' : 'Pause';
+        });
+    }
+
+    // ── Chart init ─────────────────────────────────────────────────────────
+    function initChart() {
+        const canvas = document.getElementById('aiInferenceChart');
+        if(!canvas) return;
+        const isDark = document.documentElement.classList.contains('dark');
+        const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)';
+        const tickColor = isDark ? 'rgba(255,255,255,0.4)' : '#94a3b8';
+        aiChart = new Chart(canvas.getContext('2d'), {
+            type:'line',
+            data:{
+                labels: chartLabels,
+                datasets:[
+                    {label:'Pedestrians', data:chartPeds, borderColor:'#10b981',
+                     backgroundColor:'rgba(16,185,129,0.08)', borderWidth:2,
+                     tension:0.35, fill:true, pointRadius:0},
+                    {label:'Actions', data:chartActs, borderColor:'#f59e0b',
+                     backgroundColor:'rgba(245,158,11,0.08)', borderWidth:2,
+                     tension:0.35, fill:true, pointRadius:0}
+                ]
+            },
+            options:{
+                responsive:true, maintainAspectRatio:false,
+                animation:{duration:0},
+                plugins:{legend:{display:false}},
+                scales:{
+                    x:{display:false, grid:{color:gridColor}},
+                    y:{min:0, suggestedMax:5, grid:{color:gridColor},
+                       ticks:{color:tickColor, stepSize:1, font:{size:9}}}
+                }
+            }
+        });
+    }
+
+    // ── SSE stats feed ─────────────────────────────────────────────────────
+    function connectSSE() {
+        if(sseSource) { sseSource.close(); }
+        sseSource = new EventSource(API + '/stats_feed');
+
+        sseSource.onmessage = function(e) {
+            let d;
+            try { d = JSON.parse(e.data); } catch(_) { return; }
+
+            const fps   = d.fps.toFixed(1);
+            const ped   = d.ped_count;
+            const act   = d.act_count;
+            const fi    = d.frame_idx;
+            const ft    = d.total_frames;
+            const pct   = ft>0 ? (fi/ft*100).toFixed(1) : 0;
+            const serverPaused = d.status === 'Paused';
+
+            // Pause simulated map updates
+            if (window.setSimulationPaused) {
+                window.setSimulationPaused(true);
+            }
+
+            // Move Map drone Marker to real-time coordinate matching frame progress
+            let currentCoord = [34.0522, -118.2437];
+            if (window.detailedPath && window.detailedPath.length > 0 && ft > 0) {
+                const pathIdx = Math.min(window.detailedPath.length - 1, Math.floor((fi / ft) * window.detailedPath.length));
+                currentCoord = window.detailedPath[pathIdx];
+                if (currentCoord && window.droneMarker) {
+                    window.droneMarker.setLatLng(currentCoord);
+                }
+            }
+
+            // Sync active drone ZD-109 telemetry state variables frame-by-frame
+            const baseDrone = window.state ? window.state.drones.find(d => d.id === "ZD-109") : null;
+            if (baseDrone) {
+                const speedFluctuation = (Math.random() - 0.5) * 1.5;
+                const altFluctuation = (Math.random() - 0.5) * 2;
+                const batteryDrain = 0.05;
+
+                const nextSpeed = Math.max(8, Math.min(20, parseFloat((baseDrone.speed + speedFluctuation).toFixed(1))));
+                const nextAlt = Math.max(35, Math.min(65, parseFloat((baseDrone.altitude + altFluctuation).toFixed(1))));
+                const nextBattery = Math.max(0, parseFloat((baseDrone.battery - batteryDrain).toFixed(2)));
+
+                Object.assign(baseDrone, {
+                    lat: parseFloat(currentCoord[0].toFixed(5)),
+                    lng: parseFloat(currentCoord[1].toFixed(5)),
+                    speed: nextSpeed,
+                    altitude: nextAlt,
+                    battery: nextBattery,
+                    status: 'Online'
+                });
+                window.state.triggerUpdate();
+
+                // Feed live speed/altitude into telemetry scrolling charts
+                if (!serverPaused && window.updateTelemetryChart) {
+                    window.updateTelemetryChart(nextAlt, nextSpeed);
+                }
+            }
+
+            // Update KPI elements dynamically
+            const kpiFlightTime = document.getElementById('kpi-flight-time');
+            if (kpiFlightTime) {
+                const elapsedSeconds = Math.floor(fi / 3.0);
+                const minutes = Math.floor(elapsedSeconds / 60);
+                const seconds = elapsedSeconds % 60;
+                kpiFlightTime.textContent = `${minutes}m ${seconds}s`;
+            }
+            const kpiDistanceFlown = document.getElementById('kpi-distance-flown');
+            if (kpiDistanceFlown) {
+                kpiDistanceFlown.textContent = `${((fi / ft) * 12.4).toFixed(2)} km`;
+            }
+            const kpiImagesCaptured = document.getElementById('kpi-images-captured');
+            if (kpiImagesCaptured) {
+                kpiImagesCaptured.textContent = fi.toLocaleString();
+            }
+
+            // Dynamic Active Flight logs update
+            const activeFlight = window.state ? window.state.flights.find(f => f.drone === "ZD-109" && (f.status === "In Progress" || f.status === "Scheduled")) : null;
+            if (activeFlight && window.state) {
+                activeFlight.status = serverPaused ? "Scheduled" : "In Progress";
+                const elapsedSeconds = Math.floor(fi / 3.0);
+                const minutes = Math.floor(elapsedSeconds / 60);
+                const seconds = elapsedSeconds % 60;
+                activeFlight.duration = `${minutes}m ${seconds}s`;
+                activeFlight.distance = `${((fi / ft) * 12.4).toFixed(2)} km`;
+                window.state.triggerUpdate();
+            }
+
+            // Dynamic Security Alerts Logs on intrusion (humans detected in feed)
+            if (ped > 0) {
+                zeroDetectionCounter = 0;
+                if (!activeSecurityAlert && window.state) {
+                    activeSecurityAlert = {
+                        id: `ALT-SEC-${fi}`,
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        unit: "ZD-109",
+                        type: "battery_alert",
+                        title: "Security Intrusion",
+                        description: `Warning: ${ped} unauthorized human presence detected by drone ZD-109 in Sector Alpha!`,
+                        severity: "error",
+                        resolved: false
+                    };
+                    window.state.alerts.unshift(activeSecurityAlert);
+                    window.state.saveState();
+
+                    // Sound Warning Beep
+                    if (window.state.settings && window.state.settings.soundsEnabled) {
+                        try {
+                            const context = new (window.AudioContext || window.webkitAudioContext)();
+                            const osc = context.createOscillator();
+                            const gain = context.createGain();
+                            osc.connect(gain); gain.connect(context.destination);
+                            osc.frequency.setValueAtTime(660, context.currentTime);
+                            gain.gain.setValueAtTime(0.08, context.currentTime);
+                            osc.start(); osc.stop(context.currentTime + 0.15);
+                        } catch(e) {}
+                    }
+                }
+            } else {
+                // If 5 consecutive frames have 0 detections, auto-resolve the active alert
+                if (activeSecurityAlert && window.state) {
+                    zeroDetectionCounter++;
+                    if (zeroDetectionCounter > 5) {
+                        window.state.resolveAlert(activeSecurityAlert.id);
+                        activeSecurityAlert = null;
+                        zeroDetectionCounter = 0;
+                    }
+                }
+            }
+
+            // Update all stat displays
+            ['live-stat-fps','ai-stat-fps'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=fps; });
+            ['live-stat-ped','ai-stat-ped'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=ped; });
+            ['live-stat-act','ai-stat-act'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=act; });
+
+            // HUD overlays
+            const hudFps = document.getElementById('live-hud-fps');  if(hudFps) hudFps.textContent=fps+' FPS';
+            const hudPed = document.getElementById('live-hud-ped');  if(hudPed) hudPed.textContent=ped;
+            const hudAct = document.getElementById('live-hud-act');  if(hudAct) hudAct.textContent=act;
+            const hudFr  = document.getElementById('live-hud-frame');if(hudFr) hudFr.textContent=fi+'/'+ft;
+
+            // Full view HUD
+            const aFps = document.getElementById('ai-full-fps-hud'); if(aFps) aFps.textContent='FPS: '+fps;
+            const aPed = document.getElementById('ai-full-ped-hud'); if(aPed) aPed.textContent=ped;
+            const aAct = document.getElementById('ai-full-act-hud'); if(aAct) aAct.textContent=act;
+            const aFr  = document.getElementById('ai-full-frame');   if(aFr)  aFr.textContent=fi+'/'+ft;
+
+            // Timelines
+            ['live-timeline','ai-full-timeline'].forEach(id=>{
+                const el=document.getElementById(id); if(el) el.style.width=pct+'%';
+            });
+
+            // Status dot & active backend
+            const dot = document.getElementById('live-inference-status');
+            if(dot) { dot.textContent = d.status==='Paused'?'PAUSED':'LIVE'; }
+            const backEl = document.getElementById('ai-full-backend');
+            if(backEl && d.backend) { backEl.textContent = 'OpenCV DNN (' + d.backend + ')'; }
+
+            // Sync play/pause UI from server state
+            if(serverPaused !== isPaused) { isPaused=serverPaused; updatePlayUI(isPaused); }
+
+            // Chart update
+            if(fi > 0 && aiChart) {
+                chartLabels.push('F'+fi);
+                chartPeds.push(ped);
+                chartActs.push(act);
+                if(chartLabels.length > MAX_POINTS) {
+                    chartLabels.shift(); chartPeds.shift(); chartActs.shift();
+                }
+                aiChart.update('none');
+            }
+        };
+
+        sseSource.onerror = function() {
+            const dot = document.getElementById('live-inference-status');
+            if(dot) dot.textContent='OFFLINE';
+            // Resume simulated map updates when offline
+            if (window.setSimulationPaused) {
+                window.setSimulationPaused(false);
+            }
+        };
+    }
+
+    // ── Init on DOM ready ──────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        // Delay chart init slightly so tab switch reveals the canvas first
+        setTimeout(initChart, 600);
+        connectSSE();
+
+        // Re-init chart when the AI Inference tab is clicked
+        document.querySelectorAll('[data-tab="ai-inference"]').forEach(btn=>{
+            btn.addEventListener('click', function(){
+                setTimeout(()=>{ if(aiChart) aiChart.resize(); }, 100);
+            });
+        });
+    });
+})();
+</script>
+</body>
+</html>
