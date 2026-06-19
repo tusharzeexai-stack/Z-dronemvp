@@ -241,10 +241,6 @@ def list_videos():
     available = []
     candidates = [
         ('cam1.mp4', 'Sector Delta — cam1.mp4 (Recorded/Annotated)'),
-        ('test.mp4', 'Sector Alpha — test.mp4 (Surveillance)'),
-        ('test2.mp4', 'Sector Bravo — test2.mp4'),
-        ('test3.mp4', 'Sector Charlie — test3.mp4 (New Footage)'),
-        ('Okutama-Action-Dataset-example.mp4', 'Okutama Action Dataset'),
     ]
     for filename, label in candidates:
         local = os.path.join(base_dir, filename)
