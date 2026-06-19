@@ -626,25 +626,25 @@ function Dashboard({ onLogout }) {
   return (
     <div className="flex h-screen overflow-hidden bg-sky-50/30 dark:bg-[#081C2C]">
       {/* ===== SIDEBAR (Zeex AI Platform) ===== */}
-      <aside className="w-64 bg-gradient-to-b from-sky-600 to-sky-800 text-sky-100 flex flex-col border-r border-sky-600 shrink-0">
+      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-sky-100 dark:border-slate-800 text-sky-900 dark:text-slate-100 flex flex-col shrink-0">
         {/* Brand Header */}
-        <div className="p-5 border-b border-sky-500/20 text-left">
-          <h1 className="font-extrabold text-white text-lg tracking-tight leading-none uppercase">Z-DRONE</h1>
-          <p className="text-[9px] text-sky-200 mt-1.5 uppercase font-bold tracking-widest">Fleet Management</p>
+        <div className="p-5 border-b border-sky-100 dark:border-slate-800 text-left">
+          <h1 className="font-extrabold text-sky-600 dark:text-sky-400 text-lg tracking-tight leading-none uppercase">Z-DRONE</h1>
+          <p className="text-[9px] text-sky-400 mt-1.5 uppercase font-bold tracking-widest">Fleet Management</p>
         </div>
 
         {/* Brand Search */}
         <div className="px-4 py-3">
-          <div className="relative flex items-center bg-white/10 rounded-lg px-3 py-1.5 border border-white/20">
-            <span className="material-symbols-outlined text-sky-200 text-sm">search</span>
+          <div className="relative flex items-center bg-sky-50/50 dark:bg-slate-800 rounded-lg px-3 py-1.5 border border-sky-100 dark:border-slate-700">
+            <span className="material-symbols-outlined text-sky-400 text-sm">search</span>
             <input 
               type="text" 
               placeholder="Search drones, flights, or alerts..." 
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
-              className="bg-transparent border-none text-xs focus:ring-0 focus:outline-none w-full text-white placeholder:text-sky-300 pl-1"
+              className="bg-transparent border-none text-xs focus:ring-0 focus:outline-none w-full text-sky-900 dark:text-white placeholder:text-sky-400 pl-1"
             />
-            <span className="px-1 py-0.5 rounded bg-sky-700 text-[10px] text-sky-200 border border-sky-600">⌘K</span>
+            <span className="px-1 py-0.5 rounded bg-sky-100 dark:bg-slate-700 text-[10px] text-sky-600 dark:text-sky-300 border border-sky-200 dark:border-slate-600 font-semibold">⌘K</span>
           </div>
         </div>
 
@@ -658,8 +658,8 @@ function Dashboard({ onLogout }) {
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all text-left ${
                   isActive 
-                    ? 'bg-white/20 text-white font-bold border-l-4 border-white' 
-                    : 'hover:bg-white/10 hover:text-white text-sky-100'
+                    ? 'bg-sky-500 text-white font-bold border-l-4 border-sky-600 shadow-sm shadow-sky-100 dark:shadow-none' 
+                    : 'hover:bg-sky-50/80 dark:hover:bg-slate-800 hover:text-sky-600 dark:hover:text-sky-300 text-sky-800 dark:text-slate-300'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -678,13 +678,13 @@ function Dashboard({ onLogout }) {
         </nav>
 
         {/* Users at the bottom */}
-        <div className="p-3 border-t border-sky-500/20">
+        <div className="p-3 border-t border-sky-100 dark:border-slate-800">
           <button
             onClick={() => setActiveTab('employee')}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
               activeTab === 'employee'
-                ? 'bg-white/20 text-white font-bold border-l-4 border-white' 
-                : 'hover:bg-white/10 hover:text-white text-sky-100'
+                ? 'bg-sky-500 text-white font-bold border-l-4 border-sky-600 shadow-sm shadow-sky-100 dark:shadow-none' 
+                : 'hover:bg-sky-50/80 dark:hover:bg-slate-800 hover:text-sky-600 dark:hover:text-sky-300 text-sky-800 dark:text-slate-300'
             }`}
           >
             <span className="material-symbols-outlined text-lg">group</span>
@@ -693,7 +693,7 @@ function Dashboard({ onLogout }) {
         </div>
 
         {/* Footer info */}
-        <div className="p-4 border-t border-sky-500/20 flex items-center justify-between text-xs text-sky-200">
+        <div className="p-4 border-t border-sky-100 dark:border-slate-800 flex items-center justify-between text-xs text-sky-400 dark:text-slate-400">
           <span>Version 1.2.0</span>
           <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
         </div>
@@ -780,15 +780,7 @@ function Dashboard({ onLogout }) {
               )}
             </div>
 
-            {/* Quick theme toggle */}
-            <button 
-              onClick={actions.toggleTheme}
-              className="p-2 rounded-lg border border-sky-100 dark:border-sky-900/50 hover:bg-sky-50 dark:hover:bg-sky-900/30 text-sky-600 dark:text-sky-300"
-            >
-              <span className="material-symbols-outlined text-lg">
-                {appState.settings.theme === 'dark' ? 'light_mode' : 'dark_mode'}
-              </span>
-            </button>
+
 
             {/* Notification bell */}
             <div className="relative">
