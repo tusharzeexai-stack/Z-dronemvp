@@ -129,6 +129,8 @@ function Dashboard({ onLogout }) {
   const chartPedsRef = useRef([]);
   const chartActsRef = useRef([]);
   const sseSourceRef = useRef(null);
+  const sseReconnectTimerRef = useRef(null);
+  const sseReconnectDelayRef = useRef(1000); // start at 1s, exponential backoff
 
   // Sync theme to document element
   useEffect(() => {
@@ -144,6 +146,7 @@ function Dashboard({ onLogout }) {
     connectSSE();
     return () => {
       if (sseSourceRef.current) sseSourceRef.current.close();
+      if (sseReconnectTimerRef.current) clearTimeout(sseReconnectTimerRef.current);
     };
   }, []);
 
@@ -277,6 +280,22 @@ function Dashboard({ onLogout }) {
 
     sse.onerror = () => {
       setLiveStatus('OFFLINE');
+      sse.close();
+      sseSourceRef.current = null;
+      // Exponential backoff reconnect (1s → 2s → 4s … max 30s)
+      const delay = sseReconnectDelayRef.current;
+      console.warn(`[SSE] Connection lost. Reconnecting in ${delay}ms…`);
+      sseReconnectTimerRef.current = setTimeout(() => {
+        sseReconnectDelayRef.current = Math.min(delay * 2, 30000);
+        connectSSE();
+      }, delay);
+    };
+
+    // Reset backoff on successful first message
+    const origOnMessage = sse.onmessage;
+    sse.onmessage = (e) => {
+      sseReconnectDelayRef.current = 1000; // reset backoff on success
+      if (origOnMessage) origOnMessage(e);
     };
   };
 

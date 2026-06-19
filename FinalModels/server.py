@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import json
 import threading
 import cv2
 import numpy as np
@@ -179,7 +180,12 @@ def video_feed():
             # Send at a reasonable rate (e.g. 20 FPS max for the stream viewer)
             time.sleep(0.05)
             
-    return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    resp = Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    # Tell reverse proxies (nginx, ngrok, lhr.life tunnels) NOT to buffer this stream
+    resp.headers['X-Accel-Buffering'] = 'no'
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    resp.headers['Pragma'] = 'no-cache'
+    return resp
 
 @app.route('/stats_feed')
 def stats_feed():
@@ -196,14 +202,16 @@ def stats_feed():
                 "status": status_str,
                 "backend": backend_name
             }
-            yield f"data: {import_json_dumps(data)}\n\n"
+            yield f"data: {json.dumps(data)}\n\n"
             time.sleep(0.33)  # update ~3 times per second
-            
-    def import_json_dumps(obj):
-        import json
-        return json.dumps(obj)
 
-    return Response(generate(), mimetype='text/event-stream')
+    resp = Response(generate(), mimetype='text/event-stream')
+    # Tell reverse proxies (nginx, ngrok, lhr.life tunnels) NOT to buffer this stream
+    resp.headers['X-Accel-Buffering'] = 'no'
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Connection'] = 'keep-alive'
+    return resp
 
 @app.route('/api/settings', methods=['POST'])
 def update_settings():
