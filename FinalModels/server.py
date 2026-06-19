@@ -169,29 +169,24 @@ worker_thread.start()
 def video_feed():
     def generate():
         while True:
-            # Retrieve latest frame
             with frame_lock:
                 frame_data = latest_frame
-            
             if frame_data is not None:
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame_data + b'\r\n')
-            
-            # Send at a reasonable rate (e.g. 20 FPS max for the stream viewer)
             time.sleep(0.05)
-            
+
     resp = Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
-    # Tell reverse proxies (nginx, ngrok, lhr.life tunnels) NOT to buffer this stream
     resp.headers['X-Accel-Buffering'] = 'no'
     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
 @app.route('/stats_feed')
 def stats_feed():
     def generate():
         while True:
-            # Construct EventSource message
             status_str = "Paused" if paused else "Playing"
             data = {
                 "fps": float(fps),
@@ -202,15 +197,15 @@ def stats_feed():
                 "status": status_str,
                 "backend": backend_name
             }
-            yield f"data: {json.dumps(data)}\n\n"
-            time.sleep(0.33)  # update ~3 times per second
+            # Yield bytes — required by Waitress/PEP 3333
+            yield f"data: {json.dumps(data)}\n\n".encode('utf-8')
+            time.sleep(0.33)
 
     resp = Response(generate(), mimetype='text/event-stream')
-    # Tell reverse proxies (nginx, ngrok, lhr.life tunnels) NOT to buffer this stream
     resp.headers['X-Accel-Buffering'] = 'no'
     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     resp.headers['Pragma'] = 'no-cache'
-    resp.headers['Connection'] = 'keep-alive'
+    resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
 @app.route('/api/settings', methods=['POST'])
@@ -258,5 +253,18 @@ def list_videos():
     return jsonify(available)
 
 if __name__ == '__main__':
-    # Run server on port 5000
-    app.run(host='0.0.0.0', port=5000, threaded=True)
+    # Use Gevent WSGI server — handles unlimited streaming connections via green threads.
+    # Waitress exhausts its thread pool with long-lived SSE/multipart streams.
+    # Flask dev server drops connections through tunnel proxies (ngrok, lhr.life).
+    try:
+        from gevent import monkey
+        monkey.patch_all()
+        from gevent.pywsgi import WSGIServer
+        print('[INFO] Starting Gevent WSGI server on port 5000...')
+        print('[INFO] Running on http://0.0.0.0:5000')
+        print('[INFO] Running on http://192.168.1.178:5000')
+        server = WSGIServer(('0.0.0.0', 5000), app)
+        server.serve_forever()
+    except ImportError:
+        print('[WARN] gevent not found, falling back to Flask dev server (threaded)')
+        app.run(host='0.0.0.0', port=5000, threaded=True)
