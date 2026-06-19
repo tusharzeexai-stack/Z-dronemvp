@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tunnel-url": "node -e \"const fs = require('fs'); if (fs.existsSync('tunnel_url.txt')) { const data = fs.readFileSync('tunnel_url.txt'); const txt = data.includes(0) ? data.toString('utf16le') : data.toString('utf8'); const matches = [...txt.matchAll(/https:\\/\\/[a-zA-Z0-9-]+\\.lhr\\.life/g)]; if (matches.length) { console.log('Active Tunnel URL:', matches[matches.length - 1][0]); } else { console.log('No active tunnel URL found.'); } } else { console.log('tunnel_url.txt not found.'); }\""
   },
   "devDependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
