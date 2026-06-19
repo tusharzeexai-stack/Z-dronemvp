@@ -866,38 +866,62 @@ function Dashboard({ onLogout }) {
               <section className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
                 <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-white">Drone ZD-109 Video Stream</h3>
-                    <p className="text-xs text-slate-500 mt-1">Live Okutama-Action object detector (OpenVINO accelerated)</p>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                      <span className="material-symbols-outlined text-sky-500 text-xl">smart_toy</span>
+                      AI Inference — Annotated Video Stream
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Running OpenVINO SSD model on: <span className="font-bold text-sky-500">{videoPath}</span> · Pedestrian + Action detection
+                    </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-mono text-slate-500 font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-2 py-1">
-                      Frame index: {liveFrame}
+                      Frame: {liveFrame}
                     </span>
                     <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                      liveStatus === 'LIVE' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700 animate-pulse'
+                      liveStatus === 'LIVE' ? 'bg-emerald-100 text-emerald-700' : liveStatus === 'PAUSED' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700 animate-pulse'
                     }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${liveStatus === 'LIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></span>
+                      <span className={`w-1.5 h-1.5 rounded-full ${liveStatus === 'LIVE' ? 'bg-emerald-500 animate-pulse' : liveStatus === 'PAUSED' ? 'bg-amber-500' : 'bg-red-500'}`}></span>
                       <span>{liveStatus}</span>
                     </span>
                   </div>
                 </header>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  {/* MJPEG video frame */}
-                  <div className="col-span-12 lg:col-span-8 bg-black rounded-xl overflow-hidden relative aspect-video flex items-center justify-center border border-slate-800">
-                    <img 
-                      src={liveStatus === 'OFFLINE' ? '' : `/video_feed?t=${Date.now()}`}
-                      alt="Telemetry CCTV Feed"
+                  {/* MJPEG annotated video frame */}
+                  <div className="col-span-12 lg:col-span-8 bg-black rounded-xl overflow-hidden relative aspect-video flex items-center justify-center border border-slate-800"
+                    style={{ minHeight: '300px' }}>
+                    {/* Always render img tag, set src conditionally */}
+                    <img
+                      key={videoPath}
+                      src={`/video_feed?src=${encodeURIComponent(videoPath)}&t=${Date.now()}`}
+                      alt="AI Annotated Feed"
                       className="w-full h-full object-contain"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
+                      style={{ display: liveStatus === 'OFFLINE' ? 'none' : 'block' }}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                      onLoad={(e) => { e.target.style.display = 'block'; }}
                     />
                     {liveStatus === 'OFFLINE' && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 bg-slate-950 p-6 text-center">
-                        <span className="material-symbols-outlined text-4xl mb-2 animate-bounce">videocam_off</span>
-                        <p className="font-semibold text-slate-400">Stream Connection Offline</p>
-                        <p className="text-xs text-slate-600 mt-1 max-w-sm">Start the backend python inference pipeline or run `run_inference.py` to activate the live feed.</p>
+                        <span className="material-symbols-outlined text-5xl mb-3 text-slate-700">videocam_off</span>
+                        <p className="font-bold text-slate-400 text-base">Backend Inference Server Offline</p>
+                        <p className="text-xs text-slate-600 mt-2 max-w-sm leading-relaxed">
+                          Start the Python inference server to stream annotated video:<br/>
+                          <code className="mt-2 block bg-slate-900 border border-slate-800 rounded px-3 py-2 text-sky-400 font-mono text-xs">
+                            cd FinalModels && python server.py
+                          </code>
+                        </p>
+                      </div>
+                    )}
+                    {/* Overlay HUD when live */}
+                    {liveStatus === 'LIVE' && (
+                      <div className="absolute top-3 left-3 flex gap-2">
+                        <div className="px-2 py-1 rounded text-[10px] font-bold bg-black/70 text-sky-400 border border-sky-900/50 backdrop-blur-sm">
+                          {liveBackend}
+                        </div>
+                        <div className="px-2 py-1 rounded text-[10px] font-bold bg-black/70 text-emerald-400 border border-emerald-900/50 backdrop-blur-sm">
+                          {liveFps} FPS
+                        </div>
                       </div>
                     )}
                   </div>

@@ -1,268 +1,360 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 function Login({ onLogin }) {
-  const [email, setEmail] = useState('admin');
-  const [password, setPassword] = useState('Zeex@admin');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [googleSuccess, setGoogleSuccess] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [showPassword, setShowPassword] = useState(false);
+  const canvasRef = useRef(null);
 
-  // Floating drone parallax effect
+  /* ── Animated particle canvas ── */
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      const x = (e.clientX - window.innerWidth / 2) * 0.01;
-      const y = (e.clientY - window.innerHeight / 2) * 0.01;
-      setMousePos({ x, y });
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animId;
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    resize();
+    window.addEventListener('resize', resize);
+
+    const particles = Array.from({ length: 60 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5 + 0.5,
+      dx: (Math.random() - 0.5) * 0.4,
+      dy: (Math.random() - 0.5) * 0.4,
+      opacity: Math.random() * 0.5 + 0.1,
+    }));
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.x += p.dx; p.y += p.dy;
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(56,189,248,${p.opacity})`;
+        ctx.fill();
+      });
+      // Connect nearby particles
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(56,189,248,${0.12 * (1 - dist / 100)})`;
+            ctx.lineWidth = 0.5;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
   }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (email !== 'admin' || password !== 'Zeex@admin') {
-      setError('Invalid username or password.');
+    if (username !== 'admin' || password !== 'Zeex@admin') {
+      setError('Invalid credentials. Please try again.');
       return;
     }
     setLoading(true);
     setError('');
-
-    // Save session simulation
     localStorage.setItem('z_drone_user', JSON.stringify({
-      email,
-      name: email.includes('@') ? email.split('@')[0].replace('.', ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Admin',
+      email: username,
+      name: 'Admin',
       role: 'Fleet Manager',
       loggedInAt: new Date().toISOString()
     }));
-
     setTimeout(() => {
       setLoading(false);
       setSuccess(true);
-      setTimeout(() => {
-        onLogin();
-      }, 800);
-    }, 1200);
-  };
-
-  const handleGoogleLogin = (e) => {
-    e.preventDefault();
-    setGoogleLoading(true);
-
-    localStorage.setItem('z_drone_user', JSON.stringify({
-      email: 'alex.rivera@gmail.com',
-      name: 'Alex Rivera',
-      role: 'Fleet Manager',
-      loggedInAt: new Date().toISOString()
-    }));
-
-    setTimeout(() => {
-      setGoogleLoading(false);
-      setGoogleSuccess(true);
-      setTimeout(() => {
-        onLogin();
-      }, 800);
-    }, 1200);
+      setTimeout(() => onLogin(), 800);
+    }, 1400);
   };
 
   return (
-    <div className="min-h-screen flex bg-white text-slate-800 overflow-hidden">
-      {/* Left Section: Branding & Imagery */}
-      <section className="hidden lg:flex lg:w-3/5 bg-gradient-to-br from-sky-400 to-sky-600 relative overflow-hidden items-center justify-center p-3xl">
-        {/* Atmospheric Pattern Overlay */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-        <div className="relative z-10 flex flex-col items-center text-center">
-          <div 
-            className="mb-xl transition-transform duration-200 ease-out"
-            style={{ 
-              transform: `translate(${mousePos.x}px, ${mousePos.y}px)`,
-              animation: 'float 6s ease-in-out infinite'
-            }}
-          >
-            <img 
-              alt="Advanced surveillance drone hovering" 
-              className="max-w-2xl drop-shadow-2xl" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKUnbuL1mGP15HYzszEK7WDn2uYUI2b9eTg-vW4JFUr_JHzsHpN6P6h7CsTZz8hTmutjPwI3jWmNpQhitX4EAZQFdFkdzlokmGOEwjq8V9-qDOHrlkJhnBxUbEnC_Oiq5rEJty4fZ4T11UogLN77DEYSVMOQwV2SGSnRMJjRoMZ8HE0x4EEHtAPyY7waqN0XLmyNqcWGNvwoFRYZ1TQUfXg2xkHFWaCKJ9Aa4sInwE1nWTQ_2ixo0XotGIoF-wkiSuh3_ZEWcSQ6A"
-            />
+    <div className="min-h-screen flex overflow-hidden" style={{ background: 'linear-gradient(135deg, #020c1b 0%, #0a1628 40%, #071120 100%)' }}>
+
+      {/* ── Left: Animated brand panel ── */}
+      <div className="hidden lg:flex lg:w-[58%] relative flex-col items-center justify-center p-16 overflow-hidden">
+        {/* Particle canvas */}
+        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none' }} />
+
+        {/* Radial glow orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full" style={{ background: 'radial-gradient(circle, rgba(14,165,233,0.12) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full" style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+
+        {/* Main content */}
+        <div className="relative z-10 flex flex-col items-center text-center max-w-xl">
+          {/* Drone icon HUD */}
+          <div className="mb-10 relative">
+            <div className="w-40 h-40 rounded-full flex items-center justify-center relative"
+              style={{ background: 'linear-gradient(135deg, rgba(14,165,233,0.15), rgba(14,165,233,0.05))', border: '1px solid rgba(14,165,233,0.3)', boxShadow: '0 0 60px rgba(14,165,233,0.15), inset 0 0 40px rgba(14,165,233,0.05)' }}>
+              {/* Rotating ring */}
+              <div className="absolute inset-0 rounded-full" style={{ border: '1px dashed rgba(14,165,233,0.3)', animation: 'spin 20s linear infinite' }} />
+              <div className="absolute inset-4 rounded-full" style={{ border: '1px dashed rgba(14,165,233,0.15)', animation: 'spin 15s linear infinite reverse' }} />
+              {/* Drone image */}
+              <img src="/drone1.jpg" alt="Z-DRONE" className="w-24 h-24 object-cover rounded-full" style={{ filter: 'drop-shadow(0 0 20px rgba(14,165,233,0.6))' }} />
+            </div>
+            {/* Pulsing dot */}
+            <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-emerald-400 flex items-center justify-center" style={{ boxShadow: '0 0 12px rgba(52,211,153,0.8)' }}>
+              <div className="w-2 h-2 rounded-full bg-emerald-300 animate-ping" />
+            </div>
           </div>
-          <h1 className="font-display-lg text-display-lg text-white max-w-xl font-bold">
-            Intelligent Drone Monitoring & Fleet Management
+
+          {/* Brand name */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-px flex-1 w-12" style={{ background: 'linear-gradient(to right, transparent, rgba(14,165,233,0.5))' }} />
+            <span className="text-xs font-bold tracking-[0.3em] uppercase" style={{ color: 'rgba(56,189,248,0.7)' }}>Powered by AI</span>
+            <div className="h-px flex-1 w-12" style={{ background: 'linear-gradient(to left, transparent, rgba(14,165,233,0.5))' }} />
+          </div>
+
+          <h1 className="text-5xl font-black tracking-tight mb-4 leading-tight" style={{ background: 'linear-gradient(135deg, #fff 0%, #93c5fd 60%, #38bdf8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Z-DRONE<br />Platform
           </h1>
-          <p className="font-body-lg text-body-lg text-white/95 mt-md max-w-lg">
-            Real-time telemetry, automated logistics, and predictive maintenance for global drone operations.
+          <p className="text-base leading-relaxed mb-10" style={{ color: 'rgba(148,163,184,0.85)' }}>
+            Enterprise-grade drone fleet management with AI-powered surveillance, real-time telemetry, and predictive maintenance.
+          </p>
+
+          {/* Feature chips */}
+          <div className="flex flex-wrap gap-3 justify-center">
+            {[
+              { icon: 'smart_toy', label: 'AI Inference' },
+              { icon: 'my_location', label: 'Live Tracking' },
+              { icon: 'shield', label: 'Secure Fleet' },
+              { icon: 'analytics', label: 'Analytics' },
+            ].map(f => (
+              <div key={f.label} className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold"
+                style={{ background: 'rgba(14,165,233,0.08)', border: '1px solid rgba(14,165,233,0.2)', color: 'rgba(186,230,253,0.9)' }}>
+                <span className="material-symbols-outlined text-sm" style={{ color: '#38bdf8' }}>{f.icon}</span>
+                {f.label}
+              </div>
+            ))}
+          </div>
+
+          {/* Stats row */}
+          <div className="mt-10 grid grid-cols-3 gap-6 w-full">
+            {[
+              { val: '240+', sub: 'Active Drones' },
+              { val: '99.9%', sub: 'Uptime SLA' },
+              { val: '< 50ms', sub: 'Latency' },
+            ].map(s => (
+              <div key={s.sub} className="text-center">
+                <div className="text-2xl font-black" style={{ color: '#38bdf8' }}>{s.val}</div>
+                <div className="text-[11px] mt-0.5" style={{ color: 'rgba(148,163,184,0.6)' }}>{s.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom tagline */}
+        <div className="absolute bottom-8 left-0 right-0 text-center">
+          <p className="text-xs" style={{ color: 'rgba(100,116,139,0.6)' }}>
+            © 2025 Z-DRONE Technologies · Enterprise Edition
           </p>
         </div>
-        {/* Abstract Decoration */}
-        <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute -top-16 -right-16 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-      </section>
-      
-      {/* Right Section: Login Form */}
-      <section className="w-full lg:w-2/5 flex flex-col items-center justify-center p-lg bg-sky-50/10">
-        {/* Mobile Brand Indicator */}
-        <div className="lg:hidden mb-xl flex items-center gap-sm">
-          <div className="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center">
-            <span className="material-symbols-outlined text-white">flight_takeoff</span>
+      </div>
+
+      {/* ── Right: Login form panel ── */}
+      <div className="w-full lg:w-[42%] flex flex-col items-center justify-center px-6 py-12 relative"
+        style={{ background: 'rgba(255,255,255,0.03)', borderLeft: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)' }}>
+
+        {/* Mobile brand */}
+        <div className="lg:hidden flex items-center gap-3 mb-10">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0ea5e9, #0369a1)' }}>
+            <span className="material-symbols-outlined text-white text-xl">flight_takeoff</span>
           </div>
-          <span className="font-headline-md text-headline-md font-bold tracking-tight text-sky-600">Z-DRONE</span>
+          <span className="text-xl font-black text-white tracking-tight">Z-DRONE</span>
         </div>
-        
-        <div className="bg-white border border-sky-100 shadow-xl shadow-sky-900/5 w-full max-w-md p-xl rounded-2xl flex flex-col gap-lg transition-all duration-300">
-          <header className="flex flex-col items-center text-center gap-sm">
-            <div className="hidden lg:flex w-14 h-14 bg-sky-50 rounded-2xl items-center justify-center mb-base border border-sky-100">
-              <span className="material-symbols-outlined text-sky-500 text-[32px]">flight_takeoff</span>
+
+        <div className="w-full max-w-sm">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0ea5e9, #0369a1)', boxShadow: '0 4px 20px rgba(14,165,233,0.4)' }}>
+                <span className="material-symbols-outlined text-white text-base">flight_takeoff</span>
+              </div>
+              <span className="text-sm font-bold tracking-widest uppercase" style={{ color: '#38bdf8' }}>Z-DRONE</span>
             </div>
-            <div className="hidden lg:block font-headline-md text-headline-md font-extrabold tracking-tighter text-sky-600">Z-DRONE</div>
-            <h2 className="font-headline-md text-headline-md text-slate-800 mt-base font-bold">Welcome Back</h2>
-            <p className="font-body-sm text-body-sm text-slate-500">Access your fleet operations center</p>
-          </header>
-          
-          <form className="flex flex-col gap-md" onSubmit={handleSubmit}>
+            <h2 className="text-3xl font-black text-white mb-2">Welcome back</h2>
+            <p className="text-sm" style={{ color: 'rgba(148,163,184,0.7)' }}>Sign in to your operations center</p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+
+            {/* Error alert */}
             {error && (
-              <div className="bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/40 text-xs py-2 px-3 rounded-lg text-center font-semibold animate-pulse">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium"
+                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171' }}>
+                <span className="material-symbols-outlined text-base">error</span>
                 {error}
               </div>
             )}
-            {/* Email Input */}
-            <div className="flex flex-col gap-xs">
-              <label className="font-label-md text-label-md text-slate-600 font-semibold" htmlFor="email">Username or Email</label>
+
+            {/* Username */}
+            <div>
+              <label className="block text-xs font-semibold mb-2 uppercase tracking-wider" style={{ color: 'rgba(148,163,184,0.7)' }}>
+                Username
+              </label>
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline text-sm">mail</span>
-                <input 
-                  className="w-full pl-xl pr-md py-md rounded-xl border border-outline-variant bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-md text-body-md" 
-                  id="email" 
-                  placeholder="admin" 
-                  required 
-                  type="text" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg" style={{ color: 'rgba(56,189,248,0.6)' }}>person</span>
+                <input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={e => { setUsername(e.target.value); setError(''); }}
+                  placeholder="admin"
+                  required
+                  autoFocus
+                  className="w-full pl-11 pr-4 py-3.5 rounded-xl text-sm font-medium text-white placeholder-slate-600 outline-none transition-all"
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: error ? '1px solid rgba(239,68,68,0.5)' : '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)'
+                  }}
+                  onFocus={e => e.target.style.border = '1px solid rgba(14,165,233,0.6)'}
+                  onBlur={e => e.target.style.border = error ? '1px solid rgba(239,68,68,0.5)' : '1px solid rgba(255,255,255,0.1)'}
                 />
               </div>
             </div>
-            {/* Password Input */}
-            <div className="flex flex-col gap-xs">
-              <div className="flex justify-between items-center">
-                <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="password">Security Key</label>
-                <a className="font-label-sm text-label-sm text-primary hover:underline" href="#">Forgot Password?</a>
+
+            {/* Password */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(148,163,184,0.7)' }}>
+                  Password
+                </label>
+                <a href="#" className="text-xs font-semibold transition-colors" style={{ color: '#38bdf8' }}
+                  onMouseEnter={e => e.target.style.color = '#7dd3fc'}
+                  onMouseLeave={e => e.target.style.color = '#38bdf8'}>
+                  Forgot password?
+                </a>
               </div>
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline text-sm">lock</span>
-                <input 
-                  className="w-full pl-xl pr-md py-md rounded-xl border border-outline-variant bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-body-md text-body-md" 
-                  id="password" 
-                  placeholder="••••••••" 
-                  required 
-                  type="password" 
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg" style={{ color: 'rgba(56,189,248,0.6)' }}>lock</span>
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => { setPassword(e.target.value); setError(''); }}
+                  placeholder="••••••••••"
+                  required
+                  className="w-full pl-11 pr-12 py-3.5 rounded-xl text-sm font-medium text-white placeholder-slate-600 outline-none transition-all"
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: error ? '1px solid rgba(239,68,68,0.5)' : '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)'
+                  }}
+                  onFocus={e => e.target.style.border = '1px solid rgba(14,165,233,0.6)'}
+                  onBlur={e => e.target.style.border = error ? '1px solid rgba(239,68,68,0.5)' : '1px solid rgba(255,255,255,0.1)'}
                 />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2"
+                  style={{ color: 'rgba(148,163,184,0.5)' }}>
+                  <span className="material-symbols-outlined text-lg">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                </button>
               </div>
             </div>
-            {/* Remember Me */}
-            <label className="flex items-center gap-sm cursor-pointer w-fit group">
-              <input className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/20 transition-all" type="checkbox" defaultChecked />
-              <span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Keep me signed in for 30 days</span>
+
+            {/* Remember me */}
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative w-5 h-5 flex-shrink-0">
+                <input type="checkbox" defaultChecked className="peer sr-only" />
+                <div className="w-5 h-5 rounded-md border transition-all peer-checked:border-sky-500"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)' }} />
+                <div className="absolute inset-0 rounded-md hidden peer-checked:flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg, #0ea5e9, #0369a1)' }}>
+                  <span className="material-symbols-outlined text-white text-sm">check</span>
+                </div>
+              </div>
+              <span className="text-xs" style={{ color: 'rgba(148,163,184,0.7)' }}>Keep me signed in for 30 days</span>
             </label>
-            
-            {/* Primary Action */}
-            <button 
-              className={`mt-base w-full font-label-md text-label-md py-md rounded-xl active:scale-[0.98] transition-all flex items-center justify-center gap-sm shadow-sm text-white ${
-                success 
-                  ? 'bg-emerald-500 hover:bg-emerald-600' 
-                  : 'bg-primary hover:bg-primary/95'
-              }`} 
+
+            {/* Submit button */}
+            <button
               type="submit"
               disabled={loading || success}
+              className="w-full py-4 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2.5 transition-all relative overflow-hidden"
+              style={{
+                background: success
+                  ? 'linear-gradient(135deg, #10b981, #059669)'
+                  : 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)',
+                boxShadow: success
+                  ? '0 4px 30px rgba(16,185,129,0.4)'
+                  : '0 4px 30px rgba(14,165,233,0.35)',
+                transform: 'translateY(0)',
+                opacity: loading ? 0.85 : 1,
+              }}
+              onMouseEnter={e => { if (!loading && !success) e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
             >
               {loading ? (
                 <>
                   <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
                   <span>Authenticating...</span>
                 </>
               ) : success ? (
                 <>
-                  <span className="material-symbols-outlined">check_circle</span>
-                  <span>Success</span>
+                  <span className="material-symbols-outlined text-xl">verified</span>
+                  <span>Access Granted</span>
                 </>
               ) : (
                 <>
-                  <span>Sign In</span>
-                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                  <span>Sign In to Dashboard</span>
+                  <span className="material-symbols-outlined text-lg">arrow_forward</span>
                 </>
               )}
             </button>
           </form>
-          
-          <div className="relative flex items-center py-md">
-            <div className="flex-grow border-t border-outline-variant/30"></div>
-            <span className="flex-shrink mx-md font-label-sm text-label-sm text-outline">or continue with</span>
-            <div className="flex-grow border-t border-outline-variant/30"></div>
+
+          {/* Hint */}
+          <div className="mt-6 px-4 py-3 rounded-xl flex items-start gap-3" style={{ background: 'rgba(14,165,233,0.06)', border: '1px solid rgba(14,165,233,0.15)' }}>
+            <span className="material-symbols-outlined text-base mt-0.5 flex-shrink-0" style={{ color: '#38bdf8' }}>info</span>
+            <p className="text-xs leading-relaxed" style={{ color: 'rgba(148,163,184,0.7)' }}>
+              Use credentials: <span className="font-bold" style={{ color: '#7dd3fc' }}>admin</span> / <span className="font-bold" style={{ color: '#7dd3fc' }}>Zeex@admin</span>
+            </p>
           </div>
-          
-          {/* Secondary Actions */}
-          <button 
-            onClick={handleGoogleLogin} 
-            disabled={googleLoading || googleSuccess}
-            className={`w-full flex items-center justify-center gap-sm py-md px-lg rounded-xl border transition-colors active:scale-[0.98] ${
-              googleSuccess 
-                ? 'border-emerald-500 bg-emerald-50 text-emerald-600' 
-                : 'border-outline-variant/50 bg-white hover:bg-surface-container-low text-on-surface'
-            }`}
-          >
-            {googleLoading ? (
-              <>
-                <svg className="animate-spin h-5 w-5 text-slate-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span className="ml-2 font-label-md text-label-md">Connecting to Google...</span>
-              </>
-            ) : googleSuccess ? (
-              <>
-                <span className="material-symbols-outlined text-emerald-600">check_circle</span>
-                <span className="font-label-md text-label-md">Google Verified</span>
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
-                </svg>
-                <span className="font-label-md text-label-md">Login with Google</span>
-              </>
-            )}
-          </button>
-          
-          {/* Support/Register Footer */}
-          <footer className="mt-lg pt-lg border-t border-outline-variant/20 flex flex-wrap justify-center gap-xl">
-            <a className="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors" href="#">Privacy Policy</a>
-            <a className="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors" href="#">Terms & Conditions</a>
-            <a className="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors" href="#">Support Center</a>
-          </footer>
+
+          {/* Footer links */}
+          <div className="mt-8 flex justify-center gap-6">
+            {['Privacy Policy', 'Terms of Service', 'Support'].map(l => (
+              <a key={l} href="#" className="text-xs transition-colors"
+                style={{ color: 'rgba(100,116,139,0.6)' }}
+                onMouseEnter={e => e.target.style.color = '#38bdf8'}
+                onMouseLeave={e => e.target.style.color = 'rgba(100,116,139,0.6)'}>
+                {l}
+              </a>
+            ))}
+          </div>
         </div>
-        
-        {/* Language/Theme Selector Floating */}
-        <div className="fixed bottom-lg right-lg flex gap-md">
-          <button className="p-sm bg-white border border-outline-variant/30 rounded-lg shadow-sm hover:bg-surface-container-low transition-all">
-            <span className="material-symbols-outlined text-outline">language</span>
-          </button>
-          <button className="p-sm bg-white border border-outline-variant/30 rounded-lg shadow-sm hover:bg-surface-container-low transition-all">
-            <span className="material-symbols-outlined text-outline">help</span>
-          </button>
-        </div>
-      </section>
+      </div>
 
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(1deg); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus {
+          -webkit-text-fill-color: #fff !important;
+          -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,0.05) inset !important;
+          transition: background-color 5000s ease-in-out 0s;
         }
       `}</style>
     </div>
