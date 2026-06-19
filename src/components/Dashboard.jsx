@@ -50,6 +50,19 @@ function Dashboard({ onLogout }) {
   });
   const [backendSettingsOpen, setBackendSettingsOpen] = useState(false);
 
+  // Shared AudioContext ref — created once, reused to avoid autoplay policy errors
+  const audioCtxRef = useRef(null);
+  const getAudioContext = () => {
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    // Resume if suspended (Chrome suspends until user gesture)
+    if (audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume();
+    }
+    return audioCtxRef.current;
+  };
+
   // Helper to dynamically get API base URL to connect to the local server from Vercel/production
   const getApiUrl = (path) => {
     const hostname = window.location.hostname;
@@ -68,15 +81,23 @@ function Dashboard({ onLogout }) {
     return base + path;
   };
 
+  // Detect if the browser will block the request due to HTTPS mixed content.
+  // Browsers CANNOT upgrade HTTP→HTTPS when the target host is a raw IP address.
+  const isMixedContentBlocked = () => {
+    if (window.location.protocol !== 'https:') return false;
+    if (customBackendUrl.startsWith('https://')) return false;
+    // http:// + any non-localhost host = blocked
+    try {
+      const u = new URL(customBackendUrl);
+      return u.protocol === 'http:' && u.hostname !== 'localhost' && u.hostname !== '127.0.0.1';
+    } catch { return false; }
+  };
+
   const [activeTab, setActiveTab] = useState('overview'); // Mapped to Zeex AI sections
   const [activeDroneSimId, setActiveDroneSimId] = useState('ZD-109');
   
-  // Detect if browser will block connection due to HTTPS mixed content
-  const showMixedContentWarning = 
-    window.location.protocol === 'https:' && 
-    customBackendUrl.startsWith('http://') && 
-    !customBackendUrl.includes('127.0.0.1') && 
-    !customBackendUrl.includes('localhost');
+  // Show warning when page is HTTPS but backend URL is HTTP+IP (browser will block it)
+  const showMixedContentWarning = isMixedContentBlocked();
   const [selectedMaintenanceDroneId, setSelectedMaintenanceDroneId] = useState(null);
   
   // Search state
@@ -301,7 +322,8 @@ function Dashboard({ onLogout }) {
 
   const playWarningBeep = () => {
     try {
-      const context = new (window.AudioContext || window.webkitAudioContext)();
+      // Use shared AudioContext — avoids Chrome autoplay policy error
+      const context = getAudioContext();
       const osc = context.createOscillator();
       const gain = context.createGain();
       osc.connect(gain);
@@ -315,7 +337,8 @@ function Dashboard({ onLogout }) {
 
   const playCalibrationBeep = () => {
     try {
-      const context = new (window.AudioContext || window.webkitAudioContext)();
+      // Use shared AudioContext — avoids Chrome autoplay policy error
+      const context = getAudioContext();
       const osc = context.createOscillator();
       const gain = context.createGain();
       osc.connect(gain);
@@ -636,12 +659,23 @@ function Dashboard({ onLogout }) {
                       />
                     </div>
                     {showMixedContentWarning && (
-                      <p className="text-[9px] text-amber-500 leading-normal font-semibold">
-                        ⚠️ Warning: Browsers block http:// connections on https:// sites. Use https:// (e.g. ngrok tunnel) or load this dashboard via http://.
-                      </p>
+                      <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 p-2.5 flex flex-col gap-1">
+                        <p className="text-[9px] text-red-600 dark:text-red-400 font-bold leading-normal">
+                          🚫 Blocked: This page is HTTPS but your backend URL uses HTTP + an IP address.
+                        </p>
+                        <p className="text-[9px] text-red-500 dark:text-red-400 leading-normal">
+                          Browsers cannot upgrade HTTP→HTTPS for raw IP addresses. All requests will fail with <code className="font-mono">ERR_MIXED_CONTENT</code>.
+                        </p>
+                        <p className="text-[9px] text-red-500 dark:text-red-400 font-semibold leading-normal">
+                          ✅ Fix: Use your HTTPS tunnel URL instead (e.g. <code className="font-mono">https://xxxx.lhr.life</code> or ngrok).
+                        </p>
+                      </div>
                     )}
                     <p className="text-[10px] text-slate-500 leading-normal">
-                      On other devices (like phone/tablet), enter your PC's IP (e.g. <code className="text-sky-500">http://192.168.1.178:5000</code>) or an HTTPS tunnel URL (e.g. ngrok).
+                      {window.location.protocol === 'https:'
+                        ? <>⚠️ Page is on HTTPS — backend URL <strong>must</strong> use <code className="text-sky-500">https://</code>. Use a tunnel like <code className="text-sky-500">lhr.life</code> or <code className="text-sky-500">ngrok</code>.</>
+                        : <>On other devices (same WiFi), enter your PC IP e.g. <code className="text-sky-500">http://192.168.1.178:5000</code>. On different networks, use an HTTPS tunnel URL.</>
+                      }
                     </p>
                     <button 
                       onClick={() => {
