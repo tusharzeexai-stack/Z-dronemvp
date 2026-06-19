@@ -1,0 +1,14 @@
+# Exclude large AI model files - these run locally only, not on Vercel
+FinalModels/Final-Models/
+FinalModels/test.mp4
+FinalModels/test3.mp4
+FinalModels/test_annotated.avi
+
+# Exclude local video copies
+public/test1.mp4
+public/test2.mp4
+public/test3.mp4
+
+# Exclude build artifacts
+dist/
+node_modules/
