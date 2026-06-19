@@ -433,6 +433,9 @@ function Dashboard({ onLogout }) {
     }, 100);
   };
 
+  // Derived values - MUST be defined before sidebarMenu
+  const activeAlerts = appState.alerts.filter(a => !a.resolved);
+
   // Sidebar Menu Array
   const sidebarMenu = [
     { id: 'overview', label: 'Dashboard', icon: 'dashboard' },
@@ -449,13 +452,14 @@ function Dashboard({ onLogout }) {
   const activeDrone = appState.drones.find(d => d.id === activeDroneSimId) || appState.drones[0];
 
   // Filtered lists
-  const filteredDrones = appState.drones.filter(d => 
+  const filteredDrones = appState.drones.filter(d =>
     d.id.toLowerCase().includes(globalSearch.toLowerCase()) ||
     d.model.toLowerCase().includes(globalSearch.toLowerCase()) ||
     d.type.toLowerCase().includes(globalSearch.toLowerCase())
   );
 
   const activeAlertsCount = activeAlerts.length;
+
 
   return (
     <div className="flex h-screen overflow-hidden bg-sky-50/30 dark:bg-[#081C2C]">
