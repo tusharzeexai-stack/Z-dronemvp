@@ -603,7 +603,7 @@ function renderDronesGrid(searchQuery = '') {
         }
 
         // Image selection
-        let droneImg = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBEtS7NrbcgfHg99hJ425acZI8rj7dosDJgoUynLj7qinbew2xRZmz7cKonHa-f8N9tg_4iyeOeBXWhUmyYhZZx4fOxlVuPePX9o7jXezHyqGk44ybU46cO7ypt_PN1rQGZuzZAcvZBhgdqhFz1amjREou-ZHhfk1eu5UUapiEGxMoqznDDRATtXQJZhOfjlI_ZXhM13t_3YFg2Ew45ezU4JT6qMHZ1VCtj-RZxwOiufSfecRxS6XGQClvLIKnjvPS5PyNZs3FFPRw';
+        let droneImg = 'drone1.jpg';
         
         gridContainer.innerHTML += `
             <div class="bg-white dark:bg-inverse-surface border border-outline-variant/20 dark:border-outline/10 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 drone-card flex flex-col justify-between">

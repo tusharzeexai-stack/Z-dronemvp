@@ -1140,7 +1140,7 @@ function Dashboard({ onLogout }) {
                     <div>
                       <div className="relative h-40 bg-slate-100 dark:bg-slate-900">
                         <img 
-                          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEtS7NrbcgfHg99hJ425acZI8rj7dosDJgoUynLj7qinbew2xRZmz7cKonHa-f8N9tg_4iyeOeBXWhUmyYhZZx4fOxlVuPePX9o7jXezHyqGk44ybU46cO7ypt_PN1rQGZuzZAcvZBhgdqhFz1amjREou-ZHhfk1eu5UUapiEGxMoqznDDRATtXQJZhOfjlI_ZXhM13t_3YFg2Ew45ezU4JT6qMHZ1VCtj-RZxwOiufSfecRxS6XGQClvLIKnjvPS5PyNZs3FFPRw" 
+                          src="/drone1.jpg" 
                           className="w-full h-full object-cover" 
                           alt="Drone Asset"
                         />
