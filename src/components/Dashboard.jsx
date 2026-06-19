@@ -70,6 +70,13 @@ function Dashboard({ onLogout }) {
 
   const [activeTab, setActiveTab] = useState('overview'); // Mapped to Zeex AI sections
   const [activeDroneSimId, setActiveDroneSimId] = useState('ZD-109');
+  
+  // Detect if browser will block connection due to HTTPS mixed content
+  const showMixedContentWarning = 
+    window.location.protocol === 'https:' && 
+    customBackendUrl.startsWith('http://') && 
+    !customBackendUrl.includes('127.0.0.1') && 
+    !customBackendUrl.includes('localhost');
   const [selectedMaintenanceDroneId, setSelectedMaintenanceDroneId] = useState(null);
   
   // Search state
@@ -609,6 +616,11 @@ function Dashboard({ onLogout }) {
                         className="w-full text-xs px-3 py-2 rounded-lg border border-sky-100 dark:border-sky-900/60 bg-sky-50/20 dark:bg-sky-950/30 text-slate-800 dark:text-white focus:outline-none focus:border-sky-400"
                       />
                     </div>
+                    {showMixedContentWarning && (
+                      <p className="text-[9px] text-amber-500 leading-normal font-semibold">
+                        ⚠️ Warning: Browsers block http:// connections on https:// sites. Use https:// (e.g. ngrok tunnel) or load this dashboard via http://.
+                      </p>
+                    )}
                     <p className="text-[10px] text-slate-500 leading-normal">
                       On other devices (like phone/tablet), enter your PC's IP (e.g. <code className="text-sky-500">http://192.168.1.178:5000</code>) or an HTTPS tunnel URL (e.g. ngrok).
                     </p>
@@ -1018,6 +1030,11 @@ function Dashboard({ onLogout }) {
                               Connect
                             </button>
                           </div>
+                          {showMixedContentWarning && (
+                            <span className="block text-[9px] text-amber-500 mt-2 leading-normal font-semibold">
+                              ⚠️ Mixed Content Block: Browsers block HTTP requests from HTTPS sites. Use an HTTPS URL (like ngrok) or access the dashboard via HTTP.
+                            </span>
+                          )}
                           <span className="block text-[9px] text-slate-600 mt-2 leading-normal">
                             Enter your PC's network IP (e.g., <code className="text-slate-400">http://192.168.1.178:5000</code>) or an HTTPS tunnel URL.
                           </span>
