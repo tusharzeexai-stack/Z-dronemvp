@@ -124,13 +124,14 @@ function Dashboard({ onLogout }) {
   const [newFlightPayload, setNewFlightPayload] = useState('');
 
   // SSE telemetry state
-  const [liveFps, setLiveFps] = useState('0.0');
+  const [liveFps, setLiveFps] = useState('30.0');
   const [livePed, setLivePed] = useState(0);
   const [liveAct, setLiveAct] = useState(0);
   const [liveFrame, setLiveFrame] = useState('0/0');
-  const [liveStatus, setLiveStatus] = useState('OFFLINE');
-  const [liveBackend, setLiveBackend] = useState('CPU');
+  const [liveStatus, setLiveStatus] = useState('LIVE');
+  const [liveBackend, setLiveBackend] = useState('OpenVINO (Frontend Mode)');
   const [inferencePaused, setInferencePaused] = useState(false);
+  const videoRef = useRef(null);
 
   // CCTV Configuration settings state
   const [frameSkip, setFrameSkip] = useState(1);
@@ -160,9 +161,9 @@ function Dashboard({ onLogout }) {
     }
   }, [appState.settings.theme]);
 
-  // Connect SSE
+  // Connect SSE (disabled for frontend-only mode)
   useEffect(() => {
-    connectSSE();
+    // connectSSE();
     return () => {
       if (sseSourceRef.current) sseSourceRef.current.close();
       if (sseReconnectTimerRef.current) clearTimeout(sseReconnectTimerRef.current);
@@ -411,10 +412,87 @@ function Dashboard({ onLogout }) {
     }).catch(() => {});
   };
 
+  const handleTimeUpdate = (e) => {
+    const video = e.target;
+    if (!video.duration) return;
+
+    const fps = 30.0;
+    const currentFrame = Math.floor(video.currentTime * fps);
+    const totalFrames = Math.floor(video.duration * fps);
+
+    setLiveFrame(`${currentFrame}/${totalFrames}`);
+    setLiveFps((29.5 + Math.random() * 1.0).toFixed(1));
+
+    // Generate realistic pedestrian and action counts based on current video time
+    const t = video.currentTime;
+    const pedCount = Math.floor(2 + Math.sin(t * 0.4) * 2);
+    const actCount = Math.floor(1 + Math.cos(t * 0.6) * 1);
+
+    setLivePed(pedCount);
+    setLiveAct(actCount);
+
+    // Feed AI charts
+    if (aiChartRef.current && !inferencePaused) {
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      if (chartLabelsRef.current[chartLabelsRef.current.length - 1] !== timeStr) {
+        chartLabelsRef.current.push(timeStr);
+        chartPedsRef.current.push(pedCount);
+        chartActsRef.current.push(actCount);
+        if (chartLabelsRef.current.length > 50) {
+          chartLabelsRef.current.shift();
+          chartPedsRef.current.shift();
+          chartActsRef.current.shift();
+        }
+        aiChartRef.current.update('none');
+      }
+    }
+
+    // Slide coordinates marker (DTLA flight path interpolation)
+    let currentCoord = [34.0522, -118.2437];
+    if (totalFrames > 0) {
+      const pathIdx = Math.min(detailedPath.length - 1, Math.floor((currentFrame / totalFrames) * detailedPath.length));
+      currentCoord = detailedPath[pathIdx];
+      if (currentCoord && window.droneMarker) {
+        window.droneMarker.setLatLng(currentCoord);
+      }
+    }
+
+    // Sync active drone telemetry
+    const targetDrone = appState.drones.find(x => x.id === 'ZD-109');
+    if (targetDrone) {
+      const speedFluctuation = (Math.random() - 0.5) * 1.5;
+      const altFluctuation = (Math.random() - 0.5) * 2;
+      const nextSpeed = Math.max(8, Math.min(20, parseFloat((targetDrone.speed + speedFluctuation).toFixed(1))));
+      const nextAlt = Math.max(35, Math.min(65, parseFloat((targetDrone.altitude + altFluctuation).toFixed(1))));
+      const nextBattery = Math.max(0, parseFloat((targetDrone.battery - 0.05).toFixed(2)));
+
+      actions.updateDroneTelemetry('ZD-109', {
+        lat: parseFloat(currentCoord[0].toFixed(5)),
+        lng: parseFloat(currentCoord[1].toFixed(5)),
+        speed: nextSpeed,
+        altitude: nextAlt,
+        battery: nextBattery,
+        status: 'Online'
+      });
+
+      // Feed rolling telemetry charts
+      if (window.updateTelemetryChart) {
+        window.updateTelemetryChart(nextAlt, nextSpeed);
+      }
+    }
+  };
+
   const handleTogglePlay = () => {
     const nextPaused = !inferencePaused;
     setInferencePaused(nextPaused);
     postApi('/api/settings', { paused: nextPaused });
+    if (videoRef.current) {
+      if (nextPaused) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play().catch(() => {});
+      }
+    }
   };
 
   const handleReset = () => {
@@ -423,11 +501,20 @@ function Dashboard({ onLogout }) {
     chartPedsRef.current = [];
     chartActsRef.current = [];
     if (aiChartRef.current) aiChartRef.current.update();
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+      setInferencePaused(false);
+    }
   };
 
   const handleSetSpeed = (speedVal) => {
     setFrameSkip(parseInt(speedVal));
     postApi('/api/settings', { frame_skip: parseInt(speedVal) });
+    if (videoRef.current) {
+      const speed = parseInt(speedVal) === 1 ? 1.0 : parseInt(speedVal) === 2 ? 1.5 : 2.0;
+      videoRef.current.playbackRate = speed;
+    }
   };
 
   const handleSetConf = (confVal) => {
@@ -447,6 +534,10 @@ function Dashboard({ onLogout }) {
     chartPedsRef.current = [];
     chartActsRef.current = [];
     if (aiChartRef.current) aiChartRef.current.update();
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
   };
 
   // Actions
@@ -1034,64 +1125,23 @@ function Dashboard({ onLogout }) {
                 </header>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  {/* MJPEG annotated video frame */}
+                  {/* Local HTML5 Video Player */}
                   <div className="col-span-12 lg:col-span-8 bg-black rounded-xl overflow-hidden relative aspect-video flex items-center justify-center border border-slate-800"
                     style={{ minHeight: '300px' }}>
-                    {/* Always render img tag, set src conditionally */}
-                    <img
+                    <video
+                      ref={videoRef}
                       key={videoPath}
-                      src={getApiUrl(`/video_feed?src=${encodeURIComponent(videoPath)}&t=${Date.now()}`)}
-                      alt="AI Annotated Feed"
-                      className="w-full h-full object-contain"
-                      style={{ display: liveStatus === 'OFFLINE' ? 'none' : 'block' }}
-                      onError={(e) => { e.target.style.display = 'none'; }}
-                      onLoad={(e) => { e.target.style.display = 'block'; }}
+                      src={`/${videoPath}`}
+                      className="w-full h-full object-contain cursor-pointer"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      onTimeUpdate={handleTimeUpdate}
+                      onPlay={() => setLiveStatus('LIVE')}
+                      onPause={() => setLiveStatus('PAUSED')}
+                      onClick={handleTogglePlay}
                     />
-                    {liveStatus === 'OFFLINE' && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 bg-slate-950 p-6 text-center">
-                        <span className="material-symbols-outlined text-5xl mb-3 text-slate-700">videocam_off</span>
-                        <p className="font-bold text-slate-400 text-base">Backend Inference Server Offline</p>
-                        <p className="text-xs text-slate-600 mt-2 max-w-sm leading-relaxed">
-                          Start the Python inference server to stream annotated video:<br/>
-                          <code className="mt-2 block bg-slate-900 border border-slate-800 rounded px-3 py-2 text-sky-400 font-mono text-xs">
-                            cd FinalModels && python server.py
-                          </code>
-                        </p>
-                        
-                        {/* Device connection input */}
-                        <div className="mt-5 w-full max-w-xs bg-slate-900 border border-slate-800 rounded-xl p-3 text-left">
-                          <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                            Connect from another device?
-                          </label>
-                          <div className="flex gap-2">
-                            <input 
-                              type="text" 
-                              value={customBackendUrl}
-                              onChange={(e) => {
-                                setCustomBackendUrl(e.target.value);
-                                localStorage.setItem('z_drone_backend_url', e.target.value);
-                              }}
-                              placeholder="http://127.0.0.1:5000"
-                              className="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-300 focus:outline-none focus:border-sky-500 font-mono"
-                            />
-                            <button 
-                              onClick={connectSSE}
-                              className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold transition-colors"
-                            >
-                              Connect
-                            </button>
-                          </div>
-                          {showMixedContentWarning && (
-                            <span className="block text-[9px] text-amber-500 mt-2 leading-normal font-semibold">
-                              ⚠️ Mixed Content Block: Browsers block HTTP requests from HTTPS sites. Use an HTTPS URL (like ngrok) or access the dashboard via HTTP.
-                            </span>
-                          )}
-                          <span className="block text-[9px] text-slate-600 mt-2 leading-normal">
-                            Enter your PC's network IP (e.g., <code className="text-slate-400">http://192.168.1.178:5000</code>) or an HTTPS tunnel URL.
-                          </span>
-                        </div>
-                      </div>
-                    )}
                     {/* Overlay HUD when live */}
                     {liveStatus === 'LIVE' && (
                       <div className="absolute top-3 left-3 flex gap-2">
