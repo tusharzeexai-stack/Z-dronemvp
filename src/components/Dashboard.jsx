@@ -45,11 +45,26 @@ const detailedPath = interpolatePoints(FLIGHT_PATH, 50);
 function Dashboard({ onLogout }) {
   const { state: appState, actions } = useAppState();
   
+  const [customBackendUrl, setCustomBackendUrl] = useState(() => {
+    return localStorage.getItem('z_drone_backend_url') || 'http://127.0.0.1:5000';
+  });
+  const [backendSettingsOpen, setBackendSettingsOpen] = useState(false);
+
   // Helper to dynamically get API base URL to connect to the local server from Vercel/production
   const getApiUrl = (path) => {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    // If not local, use absolute URL pointing to http://127.0.0.1:5000 (local Flask backend)
-    const base = isLocal ? '' : 'http://127.0.0.1:5000';
+    const hostname = window.location.hostname;
+    const isLocal = 
+      hostname === 'localhost' || 
+      hostname === '127.0.0.1' ||
+      hostname.startsWith('192.168.') ||
+      hostname.startsWith('10.') ||
+      hostname.startsWith('172.');
+      
+    if (isLocal) {
+      return path;
+    }
+    // Remove trailing slash if present
+    const base = customBackendUrl.replace(/\/$/, '');
     return base + path;
   };
 
@@ -557,6 +572,60 @@ function Dashboard({ onLogout }) {
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Backend URL Settings */}
+            <div className="relative">
+              <button 
+                onClick={() => { setBackendSettingsOpen(!backendSettingsOpen); setNotifOpen(false); setProfileOpen(false); }}
+                className={`p-2 rounded-lg border hover:bg-sky-50 dark:hover:bg-sky-900/30 flex items-center justify-center relative ${
+                  liveStatus === 'OFFLINE' 
+                    ? 'border-red-200 text-red-500 bg-red-50/10' 
+                    : 'border-sky-100 dark:border-sky-900/50 text-sky-600 dark:text-sky-300'
+                }`}
+                title="Configure Backend Connection"
+              >
+                <span className="material-symbols-outlined text-lg">
+                  {liveStatus === 'OFFLINE' ? 'wifi_off' : 'wifi'}
+                </span>
+              </button>
+
+              {backendSettingsOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#0c4a6e] border border-sky-100 dark:border-sky-900/60 rounded-xl shadow-xl z-50 overflow-hidden text-slate-800 dark:text-white">
+                  <div className="px-4 py-3 border-b border-sky-100 dark:border-sky-900/40 bg-sky-50/50 dark:bg-sky-950/20">
+                    <span className="font-bold text-xs">Backend Connection Settings</span>
+                  </div>
+                  <div className="p-4 flex flex-col gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                        Inference Server URL
+                      </label>
+                      <input 
+                        type="text" 
+                        value={customBackendUrl}
+                        onChange={(e) => {
+                          setCustomBackendUrl(e.target.value);
+                          localStorage.setItem('z_drone_backend_url', e.target.value);
+                        }}
+                        placeholder="http://127.0.0.1:5000"
+                        className="w-full text-xs px-3 py-2 rounded-lg border border-sky-100 dark:border-sky-900/60 bg-sky-50/20 dark:bg-sky-950/30 text-slate-800 dark:text-white focus:outline-none focus:border-sky-400"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-500 leading-normal">
+                      On other devices (like phone/tablet), enter your PC's IP (e.g. <code className="text-sky-500">http://192.168.1.178:5000</code>) or an HTTPS tunnel URL (e.g. ngrok).
+                    </p>
+                    <button 
+                      onClick={() => {
+                        setBackendSettingsOpen(false);
+                        connectSSE(); // reconnect
+                      }}
+                      className="w-full py-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-semibold text-xs transition-colors"
+                    >
+                      Apply & Reconnect
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Quick theme toggle */}
             <button 
               onClick={actions.toggleTheme}
@@ -925,6 +994,34 @@ function Dashboard({ onLogout }) {
                             cd FinalModels && python server.py
                           </code>
                         </p>
+                        
+                        {/* Device connection input */}
+                        <div className="mt-5 w-full max-w-xs bg-slate-900 border border-slate-800 rounded-xl p-3 text-left">
+                          <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                            Connect from another device?
+                          </label>
+                          <div className="flex gap-2">
+                            <input 
+                              type="text" 
+                              value={customBackendUrl}
+                              onChange={(e) => {
+                                setCustomBackendUrl(e.target.value);
+                                localStorage.setItem('z_drone_backend_url', e.target.value);
+                              }}
+                              placeholder="http://127.0.0.1:5000"
+                              className="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-300 focus:outline-none focus:border-sky-500 font-mono"
+                            />
+                            <button 
+                              onClick={connectSSE}
+                              className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold transition-colors"
+                            >
+                              Connect
+                            </button>
+                          </div>
+                          <span className="block text-[9px] text-slate-600 mt-2 leading-normal">
+                            Enter your PC's network IP (e.g., <code className="text-slate-400">http://192.168.1.178:5000</code>) or an HTTPS tunnel URL.
+                          </span>
+                        </div>
                       </div>
                     )}
                     {/* Overlay HUD when live */}
