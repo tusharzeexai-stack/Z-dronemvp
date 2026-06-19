@@ -139,7 +139,8 @@ function Dashboard({ onLogout }) {
   const [inferenceMode, setInferenceMode] = useState(3);
   const [videoPath, setVideoPath] = useState('cam1.mp4');
   const [videoSources, setVideoSources] = useState([
-    { value: 'cam1.mp4', label: '📹 Sector Delta — cam1.mp4 (Recorded/Annotated)' }
+    { value: 'cam1.mp4', label: '📹 Sector Delta — cam1.mp4 (Recorded/Annotated)' },
+    { value: 'cam2.mp4', label: '📹 Sector Charlie — cam2.mp4 (New Footage)' }
   ]);
 
   // Chart ref for AI Inference tab
