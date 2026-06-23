@@ -115,6 +115,7 @@ function Dashboard({ onLogout }) {
   // Modals state
   const [addDroneOpen, setAddDroneOpen] = useState(false);
   const [flightPlannerOpen, setFlightPlannerOpen] = useState(false);
+  const [selectedAlert, setSelectedAlert] = useState(null);
 
   // Forms inputs
   const [newDroneModel, setNewDroneModel] = useState('');
@@ -291,6 +292,11 @@ function Dashboard({ onLogout }) {
         const hasWarning = appState.alerts.some(a => a.unit === 'ZD-109' && a.title === 'Security Intrusion' && !a.resolved);
         if (!hasWarning) {
           const alertId = `ALT-SEC-${d.frame_idx}-${Math.floor(1000 + Math.random() * 9000)}`;
+          const totalFrames = d.total_frames || 2253;
+          const duration = 145;
+          const startSec = Math.max(0, Math.floor((d.frame_idx / totalFrames) * duration) - 2);
+          const endSec = Math.min(duration, startSec + 5);
+
           const newAlert = {
             id: alertId,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -299,7 +305,8 @@ function Dashboard({ onLogout }) {
             title: 'Security Intrusion',
             description: `Warning: ${d.ped_count} unauthorized human presence detected by drone ZD-109 in Sector Alpha!`,
             severity: 'error',
-            resolved: false
+            resolved: false,
+            videoUrl: `/cam2.mp4#t=${startSec},${endSec}`
           };
           appState.alerts.unshift(newAlert);
           localStorage.setItem('z_drone_alerts', JSON.stringify(appState.alerts));
@@ -1054,12 +1061,21 @@ function Dashboard({ onLogout }) {
                               <span className="text-[9px] text-slate-400 font-semibold">{alert.time} • Unit: {alert.unit}</span>
                               <div className="flex justify-between items-start gap-1">
                                 <h5 className="font-bold text-xs text-slate-800 dark:text-white">{alert.title}</h5>
-                                <button 
-                                  onClick={() => actions.resolveAlert(alert.id)}
-                                  className="text-[10px] text-sky-500 hover:underline font-semibold"
-                                >
-                                  Ack
-                                </button>
+                                <div className="flex gap-2 shrink-0">
+                                  <button 
+                                    onClick={() => setSelectedAlert(alert)}
+                                    className="text-[10px] text-sky-500 hover:underline font-semibold flex items-center gap-0.5"
+                                  >
+                                    <span className="material-symbols-outlined text-[10px]">visibility</span>
+                                    <span>View</span>
+                                  </button>
+                                  <button 
+                                    onClick={() => actions.resolveAlert(alert.id)}
+                                    className="text-[10px] text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 font-semibold"
+                                  >
+                                    Ack
+                                  </button>
+                                </div>
                               </div>
                               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{alert.description}</p>
                             </div>
@@ -1499,12 +1515,21 @@ function Dashboard({ onLogout }) {
                           <h4 className="font-bold text-sm text-slate-800 dark:text-white">{alert.title}</h4>
                           <p className="text-xs text-slate-500 dark:text-slate-400">{alert.description}</p>
                         </div>
-                        <button 
-                          onClick={() => actions.resolveAlert(alert.id)}
-                          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 text-xs py-1.5 px-3 rounded-lg font-bold shrink-0 shadow-xs"
-                        >
-                          Acknowledge
-                        </button>
+                        <div className="flex gap-2 shrink-0">
+                          <button 
+                            onClick={() => setSelectedAlert(alert)}
+                            className="bg-sky-500 hover:bg-sky-600 text-white text-xs py-1.5 px-3 rounded-lg font-semibold flex items-center gap-1 shadow-sm transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-sm">visibility</span>
+                            <span>View Capture</span>
+                          </button>
+                          <button 
+                            onClick={() => actions.resolveAlert(alert.id)}
+                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-350 text-xs py-1.5 px-3 rounded-lg font-semibold shadow-xs transition-colors"
+                          >
+                            Acknowledge
+                          </button>
+                        </div>
                       </div>
                     ))
                   )}
@@ -2098,6 +2123,118 @@ function Dashboard({ onLogout }) {
                 Dispatch Flight Mission
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL: ALERT EVIDENCE VIEW ===== */}
+      {selectedAlert && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#1E293B] rounded-2xl max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden text-left flex flex-col">
+            <header className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 px-6 py-4">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-red-500 animate-pulse">videocam</span>
+                <h3 className="font-extrabold text-slate-800 dark:text-white">Incident Capture Evidence</h3>
+              </div>
+              <button 
+                onClick={() => setSelectedAlert(null)} 
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
+            </header>
+
+            <div className="p-6 space-y-4">
+              {/* Telemetry info */}
+              <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                <div>
+                  <span className="text-slate-400 font-semibold uppercase text-[9px] block">Alert Event</span>
+                  <span className="font-bold text-slate-800 dark:text-white">{selectedAlert.title}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold uppercase text-[9px] block">Trigger Unit</span>
+                  <span className="font-bold text-slate-800 dark:text-white">{selectedAlert.unit}</span>
+                </div>
+                <div className="mt-1">
+                  <span className="text-slate-400 font-semibold uppercase text-[9px] block">Time Logged</span>
+                  <span className="font-bold text-slate-800 dark:text-white">{selectedAlert.time}</span>
+                </div>
+                <div className="mt-1">
+                  <span className="text-slate-400 font-semibold uppercase text-[9px] block">Status</span>
+                  <span className={`font-bold ${selectedAlert.resolved ? 'text-emerald-500' : 'text-amber-500'}`}>
+                    {selectedAlert.resolved ? 'Acknowledged' : 'Active Warning'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Video Player Box */}
+              <div className="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-black aspect-video flex items-center justify-center group">
+                <video
+                  key={selectedAlert.id} // force reload on alert change
+                  src={selectedAlert.videoUrl || "/cam2.mp4#t=10,15"}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+                
+                {/* HUD Overlay Scan line & text */}
+                <div className="absolute inset-0 pointer-events-none border-2 border-red-500/30 rounded-xl flex flex-col justify-between p-4 font-mono text-[10px] text-red-500/90 tracking-wider">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div>SYS: Z-DRONE INF_DET</div>
+                      <div>UNIT: {selectedAlert.unit}</div>
+                      <div>LOC: SECTOR ALPHA</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="flex items-center gap-1 justify-end font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
+                        <span>PLAYING CLIP</span>
+                      </div>
+                      <div>5.0s LOOP</div>
+                    </div>
+                  </div>
+                  
+                  {/* Bounding box mock scan HUD */}
+                  <div className="absolute inset-1/4 border border-dashed border-red-500/40 pointer-events-none flex items-center justify-center">
+                    <span className="bg-red-600 text-white text-[8px] px-1 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-tight">PEDESTRIAN</span>
+                  </div>
+
+                  <div className="flex justify-between items-end">
+                    <div>WATERMARK: {selectedAlert.id}</div>
+                    <div>FPS: 30.1 // OpenVINO</div>
+                  </div>
+                </div>
+
+                {/* Scanline CRT style effect */}
+                <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,6px_100%] opacity-40"></div>
+              </div>
+
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed italic">
+                "{selectedAlert.description}"
+              </p>
+            </div>
+
+            <footer className="border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-end gap-2.5 bg-slate-50 dark:bg-slate-900/30">
+              <button
+                onClick={() => setSelectedAlert(null)}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold py-2 px-4 rounded-xl shadow-xs"
+              >
+                Close
+              </button>
+              {!selectedAlert.resolved && (
+                <button
+                  onClick={() => {
+                    actions.resolveAlert(selectedAlert.id);
+                    setSelectedAlert({ ...selectedAlert, resolved: true });
+                  }}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 px-4 rounded-xl shadow-sm transition-colors"
+                >
+                  Acknowledge Incident
+                </button>
+              )}
+            </footer>
           </div>
         </div>
       )}
