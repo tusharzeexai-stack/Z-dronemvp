@@ -673,9 +673,16 @@ function Dashboard({ onLogout }) {
       {/* ===== SIDEBAR (Zeex AI Platform) ===== */}
       <aside className="w-64 bg-white dark:bg-slate-900 border-r border-sky-100 dark:border-slate-800 text-sky-900 dark:text-slate-100 flex flex-col shrink-0">
         {/* Brand Header */}
-        <div className="p-5 border-b border-sky-100 dark:border-slate-800 text-left">
-          <h1 className="font-extrabold text-sky-600 dark:text-sky-400 text-lg tracking-tight leading-none uppercase">Z-DRONE</h1>
-          <p className="text-[9px] text-sky-400 mt-1.5 uppercase font-bold tracking-widest">Fleet Management</p>
+        <div className="p-4 border-b border-sky-100 dark:border-slate-800 text-left flex items-center gap-3">
+          <img 
+            src="/Z-Drone logo.png" 
+            alt="Z-DRONE Logo" 
+            className="w-10 h-10 rounded-lg object-contain bg-slate-50 dark:bg-slate-800 p-0.5 border border-sky-100 dark:border-slate-800 shrink-0"
+          />
+          <div>
+            <h1 className="font-extrabold text-sky-600 dark:text-sky-400 text-base tracking-tight leading-none uppercase">Z-DRONE</h1>
+            <p className="text-[9px] text-sky-400 mt-1 uppercase font-bold tracking-widest">Fleet Management</p>
+          </div>
         </div>
 
         {/* Brand Search */}
