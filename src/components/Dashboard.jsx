@@ -2130,21 +2130,21 @@ function Dashboard({ onLogout }) {
       {/* ===== MODAL: ALERT EVIDENCE VIEW ===== */}
       {selectedAlert && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#1E293B] rounded-2xl max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden text-left flex flex-col">
-            <header className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 px-6 py-4">
+          <div className="bg-white dark:bg-[#1E293B] rounded-2xl max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden text-left p-6">
+            <header className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-red-500 animate-pulse">videocam</span>
                 <h3 className="font-extrabold text-slate-800 dark:text-white">Incident Capture Evidence</h3>
               </div>
               <button 
                 onClick={() => setSelectedAlert(null)} 
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="text-slate-400 hover:text-slate-650 dark:hover:text-slate-200"
               >
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
             </header>
 
-            <div className="p-6 space-y-4">
+            <div className="space-y-4">
               {/* Telemetry info */}
               <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                 <div>
@@ -2189,7 +2189,7 @@ function Dashboard({ onLogout }) {
                     </div>
                     <div className="text-right">
                       <div className="flex items-center gap-1 justify-end font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-655 animate-ping"></span>
                         <span>PLAYING CLIP</span>
                       </div>
                       <div>5.0s LOOP</div>
@@ -2216,7 +2216,7 @@ function Dashboard({ onLogout }) {
               </p>
             </div>
 
-            <footer className="border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-end gap-2.5 bg-slate-50 dark:bg-slate-900/30">
+            <footer className="flex justify-end gap-2.5 mt-6 border-t border-slate-100 dark:border-slate-800 pt-4">
               <button
                 onClick={() => setSelectedAlert(null)}
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold py-2 px-4 rounded-xl shadow-xs"
