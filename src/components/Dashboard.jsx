@@ -290,7 +290,7 @@ function Dashboard({ onLogout }) {
       if (d.ped_count > 0) {
         const hasWarning = appState.alerts.some(a => a.unit === 'ZD-109' && a.title === 'Security Intrusion' && !a.resolved);
         if (!hasWarning) {
-          const alertId = `ALT-SEC-${d.frame_idx}`;
+          const alertId = `ALT-SEC-${d.frame_idx}-${Math.floor(1000 + Math.random() * 9000)}`;
           const newAlert = {
             id: alertId,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -705,8 +705,8 @@ function Dashboard({ onLogout }) {
           })}
         </nav>
 
-        {/* Users at the bottom */}
-        <div className="p-3 border-t border-sky-100 dark:border-slate-800">
+        {/* Users & Logout at the bottom */}
+        <div className="p-3 border-t border-sky-100 dark:border-slate-800 flex flex-col gap-1.5">
           <button
             onClick={() => setActiveTab('employee')}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
@@ -717,6 +717,14 @@ function Dashboard({ onLogout }) {
           >
             <span className="material-symbols-outlined text-lg">group</span>
             <span className="text-xs font-semibold">Users</span>
+          </button>
+
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 dark:text-red-400 hover:text-red-700 font-semibold"
+          >
+            <span className="material-symbols-outlined text-lg">logout</span>
+            <span className="text-xs font-semibold">Logout</span>
           </button>
         </div>
 
@@ -1029,8 +1037,8 @@ function Dashboard({ onLogout }) {
                           <p className="text-[10px] text-slate-400 mt-0.5">Drones running clean telemetry.</p>
                         </div>
                       ) : (
-                        activeAlerts.map(alert => (
-                          <div key={alert.id} className="flex gap-3 text-left">
+                        activeAlerts.map((alert, idx) => (
+                          <div key={`${alert.id}-${idx}`} className="flex gap-3 text-left">
                             <div className="flex flex-col items-center">
                               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                                 alert.severity === 'error' ? 'bg-red-50 dark:bg-red-950/20 text-red-500' :
@@ -1472,9 +1480,9 @@ function Dashboard({ onLogout }) {
                       <p className="text-xs text-slate-400 mt-0.5">Excellent! All registered hardware clusters are cleared for duty cycles.</p>
                     </div>
                   ) : (
-                    activeAlerts.map(alert => (
+                    activeAlerts.map((alert, idx) => (
                       <div 
-                        key={alert.id} 
+                        key={`${alert.id}-${idx}`} 
                         className={`p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center gap-4 ${
                           alert.severity === 'error' ? 'border-l-4 border-l-red-500 bg-red-50/10' :
                           'border-l-4 border-l-amber-500 bg-amber-50/10'
