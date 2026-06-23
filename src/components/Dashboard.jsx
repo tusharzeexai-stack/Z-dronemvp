@@ -117,6 +117,16 @@ function Dashboard({ onLogout }) {
   const [flightPlannerOpen, setFlightPlannerOpen] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState(null);
 
+  // User state
+  const [currentUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('z_drone_user');
+      return stored ? JSON.parse(stored) : { name: 'Admin', role: 'Fleet Manager' };
+    } catch {
+      return { name: 'Admin', role: 'Fleet Manager' };
+    }
+  });
+
   // Forms inputs
   const [newDroneModel, setNewDroneModel] = useState('');
   const [newDroneType, setNewDroneType] = useState('Cargo Delivery');
@@ -883,14 +893,14 @@ function Dashboard({ onLogout }) {
                   alt="avatar" 
                   className="w-7 h-7 rounded-full object-cover"
                 />
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 hidden md:block">Alex Rivera</span>
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 hidden md:block">{currentUser.name || 'Admin'}</span>
               </button>
 
               {profileOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#0c4a6e] border border-sky-100 dark:border-sky-900/60 rounded-xl shadow-xl z-50 py-2">
                   <div className="px-4 py-2 border-b border-sky-100 dark:border-sky-900/40 text-left">
-                    <p className="text-xs font-bold text-slate-800 dark:text-white">Alex Rivera</p>
-                    <p className="text-[10px] text-slate-500">Fleet Manager</p>
+                    <p className="text-xs font-bold text-slate-800 dark:text-white">{currentUser.name || 'Admin'}</p>
+                    <p className="text-[10px] text-slate-500">{currentUser.role || 'Fleet Manager'}</p>
                   </div>
                   <button 
                     onClick={onLogout}
