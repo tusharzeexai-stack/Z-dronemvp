@@ -2130,7 +2130,7 @@ function Dashboard({ onLogout }) {
       {/* ===== MODAL: ALERT EVIDENCE VIEW ===== */}
       {selectedAlert && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#1E293B] rounded-2xl max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden text-left p-6">
+          <div className="bg-white dark:bg-[#1E293B] rounded-2xl w-full max-w-xl min-w-[280px] sm:min-w-[480px] md:min-w-[576px] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden text-left p-6">
             <header className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-red-500 animate-pulse">videocam</span>
