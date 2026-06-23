@@ -5,6 +5,10 @@ import TrackingMap from './TrackingMap';
 import TelemetryChart from './TelemetryChart';
 import { UtilizationChart, BatteryHealthChart } from './AnalyticsCharts';
 import Chart from 'chart.js/auto';
+import MissionMap from './MissionMap';
+import MissionPlannerCard from './MissionPlannerCard';
+import UpcomingMissionsWidget from './UpcomingMissionsWidget';
+import WeatherWidget from './WeatherWidget';
 
 // DTLA flight path interpolation
 const FLIGHT_PATH = [
@@ -122,6 +126,28 @@ function Dashboard({ onLogout }) {
   const [newFlightPilot, setNewFlightPilot] = useState('');
   const [newFlightDest, setNewFlightDest] = useState('Westside Hospital Pad');
   const [newFlightPayload, setNewFlightPayload] = useState('');
+
+  // Mission Planner states
+  const [missionWaypoints, setMissionWaypoints] = useState([
+    { lat: 34.056, lng: -118.245, altitude: 40, action: 'Hover' },
+    { lat: 34.058, lng: -118.242, altitude: 50, action: 'Capture Image' }
+  ]);
+  const [geofenceCoords, setGeofenceCoords] = useState([
+    [34.062, -118.252],
+    [34.064, -118.240],
+    [34.053, -118.234],
+    [34.050, -118.246]
+  ]);
+  const [noFlyZones, setNoFlyZones] = useState([
+    { center: [34.052, -118.243], radius: 150, name: "Tall Building Sector A" },
+    { center: [34.059, -118.248], radius: 200, name: "Helipad Airspace Delta" }
+  ]);
+  const [upcomingMissions, setUpcomingMissions] = useState([
+    { name: 'Sector Delta Thermal Scan', drone: 'ZD-109', time: '04:30 PM Today', status: 'Scheduled' },
+    { name: 'Westside Delivery Cycle', drone: 'ZD-109', time: '06:15 PM Today', status: 'Pending Approval' },
+    { name: 'Grid Area Mapping Alpha', drone: 'ZD-088', time: '09:00 AM Tomorrow', status: 'Scheduled' }
+  ]);
+  const [satelliteMode, setSatelliteMode] = useState(false);
 
   // SSE telemetry state
   const [liveFps, setLiveFps] = useState('30.0');
@@ -605,6 +631,7 @@ function Dashboard({ onLogout }) {
     { id: 'cctv', label: 'AI Inference', icon: 'smart_toy', badgeText: 'LIVE' },
     { id: 'machines', label: 'Drones', icon: 'flight_takeoff' },
     { id: 'reports', label: 'Flights', icon: 'route' },
+    { id: 'mission_planner', label: 'Mission Planner', icon: 'explore' },
     { id: 'live_mon', label: 'Live Monitoring', icon: 'sensors' },
     { id: 'analytics', label: 'Analytics', icon: 'analytics' },
     { id: 'safety', label: 'Alerts', icon: 'notifications', badge: activeAlerts.length },
@@ -984,52 +1011,61 @@ function Dashboard({ onLogout }) {
                   </div>
                 </div>
 
-                {/* Alerts list timeline */}
-                <div className="col-span-12 lg:col-span-4 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col">
-                  <header className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-red-500">notifications_active</span>
-                      <h4 className="font-bold text-slate-800 dark:text-white">Security Alerts Log</h4>
-                    </div>
-                  </header>
-                  <div className="flex-1 overflow-y-auto space-y-4 max-h-[250px] pr-2 scrollbar-thin">
-                    {activeAlerts.length === 0 ? (
-                      <div className="py-8 text-center text-xs text-slate-500 flex flex-col items-center">
-                        <span className="material-symbols-outlined text-emerald-500 text-3xl mb-2">check_circle</span>
-                        <p className="font-semibold">Network Clear</p>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Drones running clean telemetry.</p>
+                {/* Alerts list timeline & Mission/Weather widgets */}
+                <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+                  {/* Alerts list timeline */}
+                  <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col">
+                    <header className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-red-500">notifications_active</span>
+                        <h4 className="font-bold text-slate-800 dark:text-white">Security Alerts Log</h4>
                       </div>
-                    ) : (
-                      activeAlerts.map(alert => (
-                        <div key={alert.id} className="flex gap-3 text-left">
-                          <div className="flex flex-col items-center">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              alert.severity === 'error' ? 'bg-red-50 dark:bg-red-950/20 text-red-500' :
-                              alert.severity === 'warning' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-500' :
-                              'bg-emerald-50 text-emerald-500'
-                            }`}>
-                              <span className="material-symbols-outlined text-base">
-                                {alert.severity === 'error' ? 'battery_alert' : alert.severity === 'warning' ? 'air' : 'check_circle'}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex-1">
-                            <span className="text-[9px] text-slate-400 font-semibold">{alert.time} • Unit: {alert.unit}</span>
-                            <div className="flex justify-between items-start gap-1">
-                              <h5 className="font-bold text-xs text-slate-800 dark:text-white">{alert.title}</h5>
-                              <button 
-                                onClick={() => actions.resolveAlert(alert.id)}
-                                className="text-[10px] text-sky-500 hover:underline font-semibold"
-                              >
-                                Ack
-                              </button>
-                            </div>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{alert.description}</p>
-                          </div>
+                    </header>
+                    <div className="flex-1 overflow-y-auto space-y-4 max-h-[250px] pr-2 scrollbar-thin">
+                      {activeAlerts.length === 0 ? (
+                        <div className="py-8 text-center text-xs text-slate-500 flex flex-col items-center">
+                          <span className="material-symbols-outlined text-emerald-500 text-3xl mb-2">check_circle</span>
+                          <p className="font-semibold">Network Clear</p>
+                          <p className="text-[10px] text-slate-400 mt-0.5">Drones running clean telemetry.</p>
                         </div>
-                      ))
-                    )}
+                      ) : (
+                        activeAlerts.map(alert => (
+                          <div key={alert.id} className="flex gap-3 text-left">
+                            <div className="flex flex-col items-center">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                alert.severity === 'error' ? 'bg-red-50 dark:bg-red-950/20 text-red-500' :
+                                alert.severity === 'warning' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-500' :
+                                'bg-emerald-50 text-emerald-500'
+                              }`}>
+                                <span className="material-symbols-outlined text-base">
+                                  {alert.severity === 'error' ? 'battery_alert' : alert.severity === 'warning' ? 'air' : 'check_circle'}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-[9px] text-slate-400 font-semibold">{alert.time} • Unit: {alert.unit}</span>
+                              <div className="flex justify-between items-start gap-1">
+                                <h5 className="font-bold text-xs text-slate-800 dark:text-white">{alert.title}</h5>
+                                <button 
+                                  onClick={() => actions.resolveAlert(alert.id)}
+                                  className="text-[10px] text-sky-500 hover:underline font-semibold"
+                                >
+                                  Ack
+                                </button>
+                              </div>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{alert.description}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
+
+                  {/* Upcoming Missions */}
+                  <UpcomingMissionsWidget missions={upcomingMissions} />
+
+                  {/* Weather Conditions Widget */}
+                  <WeatherWidget />
                 </div>
               </div>
 
@@ -1086,6 +1122,89 @@ function Dashboard({ onLogout }) {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: MISSION PLANNER */}
+          {activeTab === 'mission_planner' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-120px)] min-h-[500px]">
+              {/* Left Section (60%): Interactive Map */}
+              <div className="col-span-12 lg:col-span-7 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden p-4 flex flex-col justify-between h-full">
+                <header className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-sky-500">near_me</span>
+                    <h3 className="font-bold text-slate-800 dark:text-white">Flight Route Workspace Map</h3>
+                  </div>
+                  <span className="text-[10px] bg-sky-500/10 text-sky-500 font-bold rounded px-2 py-0.5 uppercase">Waypoint Editor</span>
+                </header>
+                <div className="w-full flex-1 relative min-h-[400px]">
+                  <MissionMap 
+                    waypoints={missionWaypoints}
+                    onAddWaypoint={(lat, lng) => {
+                      setMissionWaypoints([...missionWaypoints, { lat, lng, altitude: 50, action: 'Hover' }]);
+                    }}
+                    onUpdateWaypoint={(idx, updated) => {
+                      const updatedWps = [...missionWaypoints];
+                      updatedWps[idx] = { ...updatedWps[idx], ...updated };
+                      setMissionWaypoints(updatedWps);
+                    }}
+                    onDeleteWaypoint={(idx) => {
+                      setMissionWaypoints(missionWaypoints.filter((_, i) => i !== idx));
+                    }}
+                    onClearRoute={() => setMissionWaypoints([])}
+                    geofence={geofenceCoords}
+                    noFlyZones={noFlyZones}
+                    satelliteMode={satelliteMode}
+                    setSatelliteMode={setSatelliteMode}
+                  />
+                </div>
+              </div>
+
+              {/* Right Section (40%): Mission Planner Form and controls */}
+              <div className="col-span-12 lg:col-span-5 h-full">
+                <MissionPlannerCard 
+                  drones={appState.drones}
+                  waypoints={missionWaypoints}
+                  onUpdateWaypoint={(idx, updated) => {
+                    const updatedWps = [...missionWaypoints];
+                    updatedWps[idx] = { ...updatedWps[idx], ...updated };
+                    setMissionWaypoints(updatedWps);
+                  }}
+                  onDeleteWaypoint={(idx) => {
+                    setMissionWaypoints(missionWaypoints.filter((_, i) => i !== idx));
+                  }}
+                  onClearRoute={() => setMissionWaypoints([])}
+                  onSubmitMission={(mission) => {
+                    if (mission.status === 'In Progress') {
+                      // Add to flights in AppState
+                      actions.addFlight({
+                        drone: mission.drone,
+                        pilot: 'A. Rivera',
+                        destination: 'DTLA Coordinates Grid',
+                        payload: mission.name,
+                        status: 'In Progress'
+                      });
+                      
+                      // Also add to upcoming/active list
+                      setUpcomingMissions([
+                        { name: mission.name, drone: mission.drone, time: 'In Progress (Active)', status: 'In Progress' },
+                        ...upcomingMissions
+                      ]);
+
+                      // Change tab to overview to view tracking
+                      setActiveTab('overview');
+                    } else {
+                      // Schedule
+                      setUpcomingMissions([
+                        { name: mission.name, drone: mission.drone, time: mission.time, status: 'Scheduled' },
+                        ...upcomingMissions
+                      ]);
+                      // Stay or view dashboard
+                      setActiveTab('overview');
+                    }
+                  }}
+                />
               </div>
             </div>
           )}
