@@ -7,14 +7,18 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "tunnel-url": "node -e \"const fs = require('fs'); if (fs.existsSync('tunnel_url.txt')) { const data = fs.readFileSync('tunnel_url.txt'); const txt = data.includes(0) ? data.toString('utf16le') : data.toString('utf8'); const matches = [...txt.matchAll(/https:\\/\\/[a-zA-Z0-9-]+\\.lhr\\.life/g)]; if (matches.length) { console.log('Active Tunnel URL:', matches[matches.length - 1][0]); } else { console.log('No active tunnel URL found.'); } } else { console.log('tunnel_url.txt not found.'); }\""
+    "tunnel-url": "node -e \"const fs = require('fs'); if (fs.existsSync('tunnel_url.txt')) { const data = fs.readFileSync('tunnel_url.txt'); const txt = data.includes(0) ? data.toString('utf16le') : data.toString('utf8'); const matches = [...txt.matchAll(/https:\\/\\/[a-zA-Z0-9-]+\\.lhr\\.life/g)]; if (matches.length) { console.log('Active Tunnel URL:', matches[matches.length - 1][0]); } else { console.log('No active tunnel URL found.'); } } else { console.log('tunnel_url.txt not found.'); }\"",
+    "deploy:aws": "node scripts/deploy-aws.js"
   },
   "devDependencies": {
+    "@aws-sdk/client-cloudfront": "^3.500.0",
+    "@aws-sdk/client-s3": "^3.500.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/postcss": "^4.3.1",
     "@vitejs/plugin-react": "^6.0.2",
     "autoprefixer": "^10.5.0",
+    "mime-types": "^2.1.35",
     "postcss": "^8.5.15",
     "tailwindcss": "^4.3.1",
     "vite": "^8.0.12"
