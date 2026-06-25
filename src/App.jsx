@@ -3,6 +3,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 
 function App() {
+  // Main entry point for Z-DRONE frontend application
   const [page, setPage] = useState('login');
 
   useEffect(() => {
