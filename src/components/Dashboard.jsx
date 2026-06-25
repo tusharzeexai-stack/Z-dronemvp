@@ -720,7 +720,8 @@ function Dashboard({ onLogout }) {
 
 
   return (
-    <div className="flex h-screen overflow-hidden bg-sky-50/30 dark:bg-[#081C2C]">
+    <>
+      <div className="flex h-screen overflow-hidden bg-sky-50/30 dark:bg-[#081C2C]">
       {/* ===== SIDEBAR (Zeex AI Platform) ===== */}
       <aside className="w-64 bg-white dark:bg-slate-900 border-r border-sky-100 dark:border-slate-800 text-sky-900 dark:text-slate-100 flex flex-col shrink-0">
         {/* Brand Header */}
@@ -2137,6 +2138,7 @@ function Dashboard({ onLogout }) {
           )}
         </main>
       </div>
+      </div>
 
       {/* ===== MODAL: REGISTER DRONE ===== */}
       {addDroneOpen && (
@@ -2397,7 +2399,7 @@ function Dashboard({ onLogout }) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
