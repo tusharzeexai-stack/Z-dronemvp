@@ -12,3 +12,9 @@ public/test3.mp4
 # Exclude build artifacts
 dist/
 node_modules/
+
+# Exclude backend and non-frontend folders from Vercel uploads
+backend/
+drone-client/
+terraform/
+
