@@ -29,6 +29,7 @@ export function useAppState() {
   return {
     state: currentState,
     actions: {
+      setDrones: (drones) => state.setDrones(drones),
       addDrone: (d) => state.addDrone(d),
       updateDroneTelemetry: (id, t) => state.updateDroneTelemetry(id, t),
       addFlight: (f) => state.addFlight(f),

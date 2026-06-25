@@ -154,6 +154,11 @@ export class AppState {
         this.listeners.forEach(cb => cb(this));
     }
 
+    setDrones(dronesList) {
+        this.drones = dronesList;
+        this.saveState();
+    }
+
     // Drone Operations
     addDrone(drone) {
         this.drones.push({

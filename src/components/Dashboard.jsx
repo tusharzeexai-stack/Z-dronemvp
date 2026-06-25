@@ -208,6 +208,21 @@ function Dashboard({ onLogout }) {
     }
   }, [appState.drones, selectedLiveDroneId]);
 
+  // Fetch initial list of drones from backend database
+  useEffect(() => {
+    fetch(getApiUrl('/drones'))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error('Failed to load drones');
+      })
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          actions.setDrones(data);
+        }
+      })
+      .catch(err => console.warn('Could not sync drones with backend:', err));
+  }, []);
+
   // Connect SSE (disabled for frontend-only mode)
   useEffect(() => {
     // connectSSE();
@@ -610,18 +625,45 @@ function Dashboard({ onLogout }) {
     }
   };
 
-  const handleAddDrone = (e) => {
+  const handleAddDrone = async (e) => {
     e.preventDefault();
-    actions.addDrone({
+    const droneData = {
       model: newDroneModel,
       type: newDroneType,
       payload: newDronePayload,
       operator: newDroneOperator
-    });
+    };
+
+    try {
+      const response = await fetch(getApiUrl('/drones'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(droneData)
+      });
+      
+      if (response.ok) {
+        const createdDrone = await response.json();
+        // Add to local state (will keep the backend generated ID)
+        actions.addDrone(createdDrone);
+        // Select this drone in Live Monitoring
+        setSelectedLiveDroneId(createdDrone.id);
+      } else {
+        console.warn('Backend rejected registration, falling back to local simulation');
+        actions.addDrone(droneData);
+      }
+    } catch (err) {
+      console.error('Failed to post drone to backend:', err);
+      actions.addDrone(droneData);
+    }
+
+    // Reset fields and close modal
     setNewDroneModel('');
     setNewDronePayload('');
     setNewDroneOperator('');
     setAddDroneOpen(false);
+
+    // Switch tab to Live Monitoring immediately
+    setActiveTab('live_mon');
   };
 
   const handleDispatchFlight = (e) => {

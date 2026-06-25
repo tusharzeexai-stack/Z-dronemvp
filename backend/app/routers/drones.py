@@ -3,6 +3,8 @@ Drones router — CRUD + telemetry update for drone fleet.
 """
 import random
 import string
+import boto3
+from botocore.exceptions import ClientError
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -16,6 +18,15 @@ from app.ws_manager import telemetry_manager, alert_manager
 
 router = APIRouter(prefix="/drones", tags=["Drones"])
 settings = get_settings()
+
+
+def get_kvs_client():
+    return boto3.client(
+        "kinesisvideo",
+        region_name=settings.aws_region,
+        aws_access_key_id=settings.aws_access_key_id,
+        aws_secret_access_key=settings.aws_secret_access_key,
+    )
 
 
 def generate_drone_id() -> str:
@@ -42,6 +53,20 @@ async def register_drone(payload: DroneCreate, db: AsyncSession = Depends(get_db
     drone_id = payload.id or generate_drone_id()
     # Generate Kinesis stream name for this drone's camera
     stream_name = f"{settings.kvs_stream_name_prefix}-{drone_id.lower()}-cam"
+
+    # Auto-provision AWS KVS Signaling Channel
+    try:
+        kvs = get_kvs_client()
+        kvs.create_signaling_channel(
+            ChannelName=stream_name,
+            ChannelType="SINGLE_MASTER",
+            SingleMasterConfiguration={"MessageTtlSeconds": 60},
+        )
+    except ClientError as e:
+        if "ResourceAlreadyExists" not in str(e):
+            print(f"[AWS KVS WARNING] Failed to pre-provision channel on AWS: {e}")
+    except Exception as e:
+        print(f"[AWS KVS WARNING] Error connecting to KVS client: {e}")
 
     drone = Drone(
         id=drone_id,
