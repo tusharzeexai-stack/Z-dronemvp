@@ -9,6 +9,7 @@ import MissionMap from './MissionMap';
 import MissionPlannerCard from './MissionPlannerCard';
 import UpcomingMissionsWidget from './UpcomingMissionsWidget';
 import WeatherWidget from './WeatherWidget';
+import LiveStreamViewer from './LiveStreamViewer';
 
 // DTLA flight path interpolation
 const FLIGHT_PATH = [
@@ -98,6 +99,7 @@ function Dashboard({ onLogout }) {
   };
 
   const [activeTab, setActiveTab] = useState('overview'); // Mapped to Zeex AI sections
+  const [selectedLiveDroneId, setSelectedLiveDroneId] = useState('');
   const [activeDroneSimId, setActiveDroneSimId] = useState('ZD-109');
   
   // Show warning when page is HTTPS but backend URL is HTTP+IP (browser will block it)
@@ -198,6 +200,13 @@ function Dashboard({ onLogout }) {
       document.documentElement.classList.remove('dark');
     }
   }, [appState.settings.theme]);
+
+  // Initialize default live monitoring drone
+  useEffect(() => {
+    if (!selectedLiveDroneId && appState.drones.length > 0) {
+      setSelectedLiveDroneId(appState.drones[0].id);
+    }
+  }, [appState.drones, selectedLiveDroneId]);
 
   // Connect SSE (disabled for frontend-only mode)
   useEffect(() => {
@@ -1251,7 +1260,7 @@ function Dashboard({ onLogout }) {
           )}
 
           {/* TAB 2: LIVE CCTV MONITOR */}
-          {(activeTab === 'cctv' || activeTab === 'live_mon') && (
+          {activeTab === 'cctv' && (
             <div className="space-y-6">
               <section className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
                 <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
@@ -1432,6 +1441,97 @@ function Dashboard({ onLogout }) {
                   <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-3 text-left">Model Detection Curves</span>
                   <div className="h-44 w-full bg-slate-50 dark:bg-slate-900/40 rounded-xl p-2 border border-slate-100 dark:border-slate-800">
                     <canvas ref={aiChartCanvasRef} />
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
+
+          {/* TAB: LIVE DRONE MONITORING (WebRTC via AWS KVS) */}
+          {activeTab === 'live_mon' && (
+            <div className="space-y-6">
+              <section className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
+                <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                      <span className="material-symbols-outlined text-sky-500 text-xl">sensors</span>
+                      Live Drone Telemetry & Kinesis Stream
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Direct low-latency WebRTC streams from drone hardware to browser via AWS Kinesis Video Streams.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="px-2 py-1 rounded text-[10px] font-bold bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 uppercase tracking-wider">
+                      AWS Cloud Enabled
+                    </span>
+                  </div>
+                </header>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* WebRTC Video Viewer */}
+                  <div className="col-span-12 lg:col-span-8">
+                    {selectedLiveDroneId ? (
+                      <LiveStreamViewer
+                        droneId={selectedLiveDroneId}
+                        droneName={appState.drones.find(d => d.id === selectedLiveDroneId)?.model || selectedLiveDroneId}
+                        className="w-full aspect-video shadow-lg border border-slate-200 dark:border-slate-800"
+                      />
+                    ) : (
+                      <div className="bg-slate-900 rounded-xl overflow-hidden aspect-video flex flex-col items-center justify-center gap-3 text-center p-4 border border-slate-800" style={{ minHeight: 300 }}>
+                        <span className="material-symbols-outlined text-4xl text-slate-500">videocam_off</span>
+                        <p className="text-slate-400 text-sm">Select a drone to start live video monitoring</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Sidebar with Drone List */}
+                  <div className="col-span-12 lg:col-span-4 flex flex-col gap-4">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block text-left">Select Drone Camera Feed</span>
+                    <div className="space-y-3 overflow-y-auto max-h-[400px] pr-1">
+                      {appState.drones.map((drone) => {
+                        const isSelected = selectedLiveDroneId === drone.id;
+                        return (
+                          <div
+                            key={drone.id}
+                            onClick={() => setSelectedLiveDroneId(drone.id)}
+                            className={`p-4 rounded-xl border transition-all cursor-pointer text-left ${
+                              isSelected
+                                ? 'bg-sky-50/50 dark:bg-sky-950/20 border-sky-400 dark:border-sky-500/50 shadow-sm'
+                                : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h4 className="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-1.5">
+                                  <span className={`w-2 h-2 rounded-full ${
+                                    drone.status === 'flying' || drone.status === 'Active' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                                  }`} />
+                                  {drone.model}
+                                </h4>
+                                <p className="text-[10px] text-slate-400 font-semibold font-mono mt-0.5">{drone.id}</p>
+                              </div>
+                              <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
+                                drone.status === 'flying' || drone.status === 'Active' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                              }`}>
+                                {drone.status}
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-200/50 dark:border-slate-800/50 text-[11px]">
+                              <div className="flex items-center gap-1 text-slate-500">
+                                <span className="material-symbols-outlined text-xs">battery_charging_full</span>
+                                <span className="font-semibold text-slate-700 dark:text-slate-300">{drone.battery}%</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-slate-500">
+                                <span className="material-symbols-outlined text-xs">signal_cellular_alt</span>
+                                <span className="font-semibold text-slate-700 dark:text-slate-300">{drone.signal || '92%'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </section>
