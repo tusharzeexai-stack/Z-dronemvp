@@ -34,3 +34,9 @@ env/
 
 # Videos
 *.avi
+
+# Environment secrets — NEVER commit these
+.env.local
+.env.production
+backend/.env
+drone-client/.env
