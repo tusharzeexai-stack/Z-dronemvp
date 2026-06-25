@@ -99,6 +99,7 @@ async def get_stream_info(drone_id: str, db: AsyncSession = Depends(get_db)):
         channel_arn=channel_arn,
         endpoint_url=wss_endpoint,
         ice_servers=ice_servers,
+        region=settings.aws_region,
         status="active",
     )
 

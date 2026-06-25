@@ -71,7 +71,7 @@ export default function LiveStreamViewer({ droneId, droneName, className = '' })
         channelARN: streamInfo.channel_arn,
         channelEndpoint: streamInfo.endpoint_url,
         role: Role.VIEWER,
-        region: import.meta.env.VITE_AWS_REGION || 'us-east-1',
+        region: streamInfo.region || import.meta.env.VITE_AWS_REGION || 'ap-south-1',
         credentials: {
           // These are fetched from your backend, not exposed directly
           // The backend already did the signaling handshake

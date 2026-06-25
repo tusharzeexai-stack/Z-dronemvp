@@ -155,6 +155,7 @@ class StreamInfo(BaseModel):
     channel_arn: Optional[str] = None
     endpoint_url: Optional[str] = None
     ice_servers: Optional[List[Dict[str, Any]]] = None
+    region: Optional[str] = None
     status: str  # "active", "inactive", "creating"
 
 
