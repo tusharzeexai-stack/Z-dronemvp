@@ -125,3 +125,4 @@ function TrackingMap({ detailedPath }) {
 }
 
 export default TrackingMap;
+

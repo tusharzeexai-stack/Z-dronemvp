@@ -136,3 +136,4 @@ export function TelemetryChart({ dataPoints = 15 }) {
 }
 
 export default TelemetryChart;
+

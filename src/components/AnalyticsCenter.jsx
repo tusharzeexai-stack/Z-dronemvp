@@ -353,7 +353,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       <div className="sticky top-0 z-30 bg-gradient-to-r from-sky-600 to-sky-700 border border-sky-500 rounded-2xl p-4 shadow-2xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-sky-200" />
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
             <input 
               type="text" 
               placeholder="Search intelligence logs..."
@@ -371,7 +371,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
               className="bg-transparent border-none text-xs focus:ring-0 text-white focus:outline-none font-bold"
             >
               {MOCK_MISSIONS.map(m => (
-                <option key={m.id} value={m.id} className="bg-sky-850 text-white">{m.name}</option>
+                <option key={m.id} value={m.id} className="bg-sky-900 text-white">{m.name}</option>
               ))}
             </select>
           </div>
@@ -383,10 +383,10 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
               onChange={(e) => setFilterDrone(e.target.value)}
               className="bg-transparent border-none text-xs focus:ring-0 text-white focus:outline-none font-bold"
             >
-              <option value="all" className="bg-sky-850 text-white">All Drones</option>
-              <option value="ZD-109" className="bg-sky-850 text-white">ZD-109</option>
-              <option value="ZD-088" className="bg-sky-850 text-white">ZD-088</option>
-              <option value="ZD-112" className="bg-sky-850 text-white">ZD-112</option>
+              <option value="all" className="bg-sky-900 text-white">All Drones</option>
+              <option value="ZD-109" className="bg-sky-900 text-white">ZD-109</option>
+              <option value="ZD-088" className="bg-sky-900 text-white">ZD-088</option>
+              <option value="ZD-112" className="bg-sky-900 text-white">ZD-112</option>
             </select>
           </div>
         </div>
@@ -420,21 +420,21 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       {/* ── 1. EXECUTIVE KPI CARDS ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Missions', value: '142', trend: '+12.4%', icon: Compass, color: 'text-white' },
-          { label: 'Active Drones', value: appState.drones.filter(d => d.status === 'Online').length, trend: 'Stable', icon: Cpu, color: 'text-white' },
-          { label: 'Flight Hours', value: '348.5h', trend: '+8.2h today', icon: Activity, color: 'text-white' },
-          { label: 'Area Surveyed', value: '1,240.2 km²', trend: '+18.1%', icon: Navigation, color: 'text-white' },
-          { label: 'Objects Detected', value: '24,982', trend: '+5.4% last run', icon: Eye, color: 'text-white' },
-          { label: 'AI Accuracy', value: '98.4%', trend: '+0.2%', icon: Bot, color: 'text-white' },
-          { label: 'Active Alerts', value: appState.alerts.filter(a => !a.resolved).length, trend: '-3 resolved', icon: ShieldAlert, color: 'text-white' },
-          { label: 'Avg Battery Health', value: '94.2%', trend: 'Optimum', icon: Battery, color: 'text-white' },
+          { label: 'Total Missions', value: '142', trend: '+12.4%', icon: Compass, color: 'text-slate-800' },
+          { label: 'Active Drones', value: appState.drones.filter(d => d.status === 'Online').length, trend: 'Stable', icon: Cpu, color: 'text-slate-800' },
+          { label: 'Flight Hours', value: '348.5h', trend: '+8.2h today', icon: Activity, color: 'text-slate-800' },
+          { label: 'Area Surveyed', value: '1,240.2 km²', trend: '+18.1%', icon: Navigation, color: 'text-slate-800' },
+          { label: 'Objects Detected', value: '24,982', trend: '+5.4% last run', icon: Eye, color: 'text-slate-800' },
+          { label: 'AI Accuracy', value: '98.4%', trend: '+0.2%', icon: Bot, color: 'text-slate-800' },
+          { label: 'Active Alerts', value: appState.alerts.filter(a => !a.resolved).length, trend: '-3 resolved', icon: ShieldAlert, color: 'text-slate-800' },
+          { label: 'Avg Battery Health', value: '94.2%', trend: 'Optimum', icon: Battery, color: 'text-slate-800' },
         ].map((kpi, idx) => (
           <div 
             key={idx} 
-            className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 hover:border-white/50 rounded-2xl p-5 flex items-center justify-between transition-all duration-300 transform hover:-translate-y-1 shadow-xl"
+            className="bg-sky-600 border border-sky-500 hover:border-white/50 rounded-2xl p-5 flex items-center justify-between transition-all duration-300 transform hover:-translate-y-1 shadow-xl"
           >
             <div className="space-y-1 text-left">
-              <span className="text-[10px] uppercase font-bold tracking-widest text-sky-200">{kpi.label}</span>
+              <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500">{kpi.label}</span>
               <h3 className="text-2xl font-black text-white">{kpi.value}</h3>
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] text-white font-bold bg-white/20 border border-white/25 px-1.5 py-0.5 rounded">{kpi.trend}</span>
@@ -451,11 +451,11 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       {/* ── 2. AI MISSION SUMMARY & COCKPIT ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Mission Details Spec Sheet */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
+        <div className="lg:col-span-2 bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
           <div>
             <div className="flex justify-between items-start mb-6">
               <div>
-                <span className="text-xs font-bold text-sky-200 uppercase tracking-wider">{activeMission.id}</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{activeMission.id}</span>
                 <h3 className="text-lg font-black text-white mt-1">{activeMission.name}</h3>
               </div>
               <span className="px-3 py-1 bg-white/20 text-white border border-white/30 text-xs font-bold rounded-full">
@@ -475,7 +475,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                 { label: 'Thermal Incidents', val: activeMission.incidents }
               ].map((item, idx) => (
                 <div key={idx} className="bg-sky-900/40 border border-sky-400/60 p-3.5 rounded-xl">
-                  <span className="text-[10px] text-sky-200 font-semibold block">{item.label}</span>
+                  <span className="text-[10px] text-slate-500 font-semibold block">{item.label}</span>
                   <span className="text-sm font-black text-white mt-1 block">{item.val}</span>
                 </div>
               ))}
@@ -488,7 +488,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
               <Bot className="w-5 h-5" />
             </div>
             <div className="space-y-1">
-              <span className="text-xs font-bold text-white">Zeex-AI Co-Pilot Integration</span>
+              <span className="text-xs font-bold text-slate-800">Zeex-AI Co-Pilot Integration</span>
               <p className="text-xs text-sky-100 leading-relaxed">
                 "Active drone analytics for Sector Alpha processed. Traffic volumes are elevated by 18% near coordinates [28.8308, 76.9311]. Anomalous thermal signature detected in warehouse zone Sector B — recommend deploying target mission check immediately."
               </p>
@@ -498,11 +498,11 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
         </div>
 
         {/* AI Insight Chat & Prompt Card */}
-        <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
+        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3">
               <Bot className="w-5 h-5 text-white" />
-              <h3 className="font-bold text-sm text-white">AI Intelligence Recommendations</h3>
+              <h3 className="font-bold text-sm text-slate-800">AI Intelligence Recommendations</h3>
             </div>
             
             <div className="space-y-2.5">
@@ -516,7 +516,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                     rec.level === 'high' ? 'bg-rose-400 animate-pulse' : 'bg-amber-400'
                   }`}></span>
                   <div className="text-xs space-y-0.5">
-                    <p className="font-bold text-white">{rec.title}</p>
+                    <p className="font-bold text-slate-800">{rec.title}</p>
                     <p className="text-[10px] text-sky-100">{rec.desc}</p>
                   </div>
                 </div>
@@ -534,7 +534,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       {/* ── 3. LIVE DETECTION ANALYTICS (GRID OF NEON CARD LABELS) ── */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-extrabold uppercase tracking-widest text-sky-900 dark:text-sky-200 text-left">Live Detection AI Index</h3>
+          <h3 className="text-sm font-extrabold uppercase tracking-widest text-sky-900 dark:text-slate-500 text-left">Live Detection AI Index</h3>
           <span className="flex items-center gap-1.5 text-xs text-sky-600 dark:text-sky-300">
             <span className="w-2 h-2 bg-sky-500 rounded-full animate-ping"></span>
             Live Monitoring Stream Active
@@ -556,15 +556,15 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
             { name: 'Road Damage', count: 1, confidence: 82, trend: 'Logged' },
             { name: 'Construction Sites', count: 3, confidence: 94, trend: '+2%' }
           ].map((item, idx) => (
-            <div key={idx} className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-4 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
-              <span className="text-[10px] text-sky-200 font-bold uppercase">{item.name}</span>
+            <div key={idx} className="bg-sky-600 border border-sky-500 rounded-2xl p-4 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
+              <span className="text-[10px] text-slate-500 font-bold uppercase">{item.name}</span>
               <div className="my-3 flex items-baseline justify-between">
                 <span className="text-xl font-black text-white">{item.count}</span>
                 <span className="text-[10px] text-white bg-white/20 border border-white/20 px-1.5 py-0.5 rounded">{item.trend}</span>
               </div>
               <div className="flex justify-between items-center text-[10px] border-t border-sky-400/40 pt-2 text-sky-150">
                 <span>Confidence:</span>
-                <span className="font-bold text-white">{item.confidence}%</span>
+                <span className="font-bold text-slate-800">{item.confidence}%</span>
               </div>
             </div>
           ))}
@@ -574,9 +574,9 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       {/* ── 4. GIS ANALYTICS COMMAND CENTER ── */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Leaflet map frame */}
-        <div className="lg:col-span-3 bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-4 flex flex-col h-[550px] relative overflow-hidden shadow-xl">
+        <div className="lg:col-span-3 bg-sky-600 border border-sky-500 rounded-2xl p-4 flex flex-col h-[550px] relative overflow-hidden shadow-xl">
           <header className="flex justify-between items-center mb-3">
-            <h3 className="font-bold text-sm text-white text-left flex items-center gap-1.5">
+            <h3 className="font-bold text-sm text-slate-800 text-left flex items-center gap-1.5">
               <Layers3 className="w-4 h-4 text-white" />
               GIS Tactical Operations Map
             </h3>
@@ -585,7 +585,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
               <button 
                 onClick={() => setSatelliteView(false)}
                 className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${
-                  !satelliteView ? 'bg-white text-sky-900 shadow' : 'text-sky-200 hover:text-white'
+                  !satelliteView ? 'bg-white text-sky-900 shadow' : 'text-slate-500 hover:text-white'
                 }`}
               >
                 Vector Dark
@@ -593,7 +593,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
               <button 
                 onClick={() => setSatelliteView(true)}
                 className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${
-                  satelliteView ? 'bg-white text-sky-900 shadow' : 'text-sky-200 hover:text-white'
+                  satelliteView ? 'bg-white text-sky-900 shadow' : 'text-slate-500 hover:text-white'
                 }`}
               >
                 Satellite Imagery
@@ -605,7 +605,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
           <div ref={gisMapRef} className="flex-1 rounded-xl overflow-hidden z-10 border border-sky-400/50" />
 
           {/* GIS Legend / HUD layer */}
-          <div className="absolute bottom-6 left-6 z-20 bg-sky-955/95 border border-sky-400/60 rounded-xl p-3.5 text-xs text-left shadow-2xl space-y-2">
+          <div className="absolute bottom-6 left-6 z-20 bg-sky-950/95 border border-sky-400/60 rounded-xl p-3.5 text-xs text-left shadow-2xl space-y-2">
             <p className="font-bold border-b border-sky-400/40 pb-1.5 text-white">GIS Layer Legend</p>
             <div className="space-y-1 text-sky-150">
               <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>Vehicles</div>
@@ -617,11 +617,11 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
         </div>
 
         {/* Heatmap Control Sidebar */}
-        <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
+        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
           <div className="space-y-6">
             <div>
-              <h4 className="font-bold text-sm text-white mb-2">GIS Density Heatmap</h4>
-              <p className="text-xs text-sky-200">Overlay dynamic detection density models onto the spatial coordinates path.</p>
+              <h4 className="font-bold text-sm text-slate-800 mb-2">GIS Density Heatmap</h4>
+              <p className="text-xs text-slate-500">Overlay dynamic detection density models onto the spatial coordinates path.</p>
             </div>
 
             <div className="space-y-3">
@@ -636,20 +636,20 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                   className={`w-full text-left p-3.5 rounded-xl border transition-all ${
                     heatmapType === layer.id 
                       ? 'bg-white border-white text-sky-900 shadow-xl' 
-                      : 'bg-sky-900/40 border-sky-550 hover:bg-sky-800/45'
+                      : 'bg-sky-900/40 border-sky-500 hover:bg-sky-800/45'
                   } ${layer.color}`}
                 >
                   <p className={`font-bold text-xs ${heatmapType === layer.id ? 'text-sky-900' : 'text-white'}`}>{layer.label}</p>
-                  <p className={`text-[10px] mt-0.5 ${heatmapType === layer.id ? 'text-sky-700' : 'text-sky-200'}`}>{layer.desc}</p>
+                  <p className={`text-[10px] mt-0.5 ${heatmapType === layer.id ? 'text-sky-700' : 'text-slate-500'}`}>{layer.desc}</p>
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="border-t border-sky-400/40 pt-4 mt-6 text-xs text-sky-200 space-y-2">
+          <div className="border-t border-sky-400/40 pt-4 mt-6 text-xs text-slate-500 space-y-2">
             <div className="flex justify-between"><span>Coordinate Center:</span><span className="font-mono text-white">28.8308, 76.9311</span></div>
-            <div className="flex justify-between"><span>Tracking Nodes:</span><span className="font-bold text-white">12 Waypoints</span></div>
-            <div className="flex justify-between"><span>Mission Perimeter:</span><span className="font-bold text-white">1.4 km²</span></div>
+            <div className="flex justify-between"><span>Tracking Nodes:</span><span className="font-bold text-slate-800">12 Waypoints</span></div>
+            <div className="flex justify-between"><span>Mission Perimeter:</span><span className="font-bold text-slate-800">1.4 km²</span></div>
           </div>
 
         </div>
@@ -657,40 +657,40 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
       {/* ── 5. DETAILED ANALYTICS CHARTJS GRAPHS ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-6 text-left shadow-xl">
+        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
           <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3 mb-4">
             <BarChart3 className="w-4 h-4 text-white" />
-            <h4 className="font-bold text-sm text-white">Object Detections Category Distribution</h4>
+            <h4 className="font-bold text-sm text-slate-800">Object Detections Category Distribution</h4>
           </div>
           <div className="h-64">
             <canvas ref={canvas2Ref} />
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-6 text-left shadow-xl">
+        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
           <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3 mb-4">
             <TrendingUp className="w-4 h-4 text-white" />
-            <h4 className="font-bold text-sm text-white">Hourly AI Inference Detection Rates</h4>
+            <h4 className="font-bold text-sm text-slate-800">Hourly AI Inference Detection Rates</h4>
           </div>
           <div className="h-64">
             <canvas ref={canvas3Ref} />
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-6 text-left shadow-xl">
+        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
           <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3 mb-4">
             <Database className="w-4 h-4 text-white" />
-            <h4 className="font-bold text-sm text-white">Vehicle Class Ratio Breakdown</h4>
+            <h4 className="font-bold text-sm text-slate-800">Vehicle Class Ratio Breakdown</h4>
           </div>
           <div className="h-64">
             <canvas ref={canvas1Ref} />
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-6 text-left shadow-xl">
+        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
           <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3 mb-4">
             <Compass className="w-4 h-4 text-white" />
-            <h4 className="font-bold text-sm text-white">Performance Metrics by Sector Zone</h4>
+            <h4 className="font-bold text-sm text-slate-800">Performance Metrics by Sector Zone</h4>
           </div>
           <div className="h-64">
             <canvas ref={canvas4Ref} />
@@ -701,10 +701,10 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       {/* ── 6. TIMELINE & 7. FLIGHT PERFORMANCE ANALYTICS ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Timeline Log */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-6 text-left shadow-xl">
+        <div className="lg:col-span-2 bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
           <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3 mb-4">
             <Activity className="w-4 h-4 text-white" />
-            <h4 className="font-bold text-sm text-white">Chronological Detection Timeline</h4>
+            <h4 className="font-bold text-sm text-slate-800">Chronological Detection Timeline</h4>
           </div>
 
           <div className="space-y-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-sky-400/40">
@@ -718,11 +718,11 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                 />
                 <div className="flex-1 flex justify-between items-center">
                   <div className="space-y-0.5 text-xs">
-                    <p className="font-bold text-white">{det.object} Identified</p>
-                    <p className="text-[10px] text-sky-200">{det.time} • Coords: {det.coords}</p>
+                    <p className="font-bold text-slate-800">{det.object} Identified</p>
+                    <p className="text-[10px] text-slate-500">{det.time} • Coords: {det.coords}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-bold text-white bg-white/20 border border-white/20 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-slate-800 bg-white/20 border border-white/20 px-1.5 py-0.5 rounded">
                       {det.confidence}%
                     </span>
                     <button 
@@ -739,19 +739,19 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
         </div>
 
         {/* Flight Performance health stats */}
-        <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
+        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3">
               <Activity className="w-5 h-5 text-white" />
-              <h3 className="font-bold text-sm text-white">Hardware Telemetry Health</h3>
+              <h3 className="font-bold text-sm text-slate-800">Hardware Telemetry Health</h3>
             </div>
 
             <div className="space-y-4">
               {[
-                { label: 'Propulsion Motors', val: 98, icon: Gauge, color: 'text-white' },
-                { label: 'Core Temp', val: 42, icon: Thermometer, color: 'text-white', unit: '°C' },
-                { label: 'Signal strength link', val: 95, icon: Radio, color: 'text-white' },
-                { label: 'Wind Resistance Factor', val: 14, icon: Wind, color: 'text-white', unit: ' km/h' }
+                { label: 'Propulsion Motors', val: 98, icon: Gauge, color: 'text-slate-800' },
+                { label: 'Core Temp', val: 42, icon: Thermometer, color: 'text-slate-800', unit: '°C' },
+                { label: 'Signal strength link', val: 95, icon: Radio, color: 'text-slate-800' },
+                { label: 'Wind Resistance Factor', val: 14, icon: Wind, color: 'text-slate-800', unit: ' km/h' }
               ].map((stat, idx) => (
                 <div key={idx} className="bg-sky-900/40 border border-sky-450 p-3.5 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -759,7 +759,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                       <stat.icon className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-[10px] text-sky-200 font-semibold">{stat.label}</p>
+                      <p className="text-[10px] text-slate-500 font-semibold">{stat.label}</p>
                       <p className="text-xs font-black text-white mt-0.5">{stat.val}{stat.unit || '%'}</p>
                     </div>
                   </div>
@@ -777,7 +777,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
           </div>
 
           <div className="border-t border-sky-400/40 pt-4 mt-6 flex justify-between items-center text-xs">
-            <span className="text-sky-200">Autonomous Calibration Check:</span>
+            <span className="text-slate-500">Autonomous Calibration Check:</span>
             <span className="font-black text-white flex items-center gap-1">
               <CheckCircle className="w-3.5 h-3.5" /> Passed
             </span>
@@ -786,16 +786,16 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       </div>
 
       {/* ── 9. MISSION COMPARISON ── */}
-      <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-6 text-left shadow-xl">
+      <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-sky-400/40 pb-3 mb-6">
           <div className="flex items-center gap-2">
             <Sliders className="w-4 h-4 text-white" />
-            <h4 className="font-bold text-sm text-white">Mission Performance Comparison</h4>
+            <h4 className="font-bold text-sm text-slate-800">Mission Performance Comparison</h4>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 bg-sky-900/40 px-3 py-1.5 rounded-xl border border-sky-400">
-              <span className="text-[10px] text-sky-200 uppercase font-bold">Mission A</span>
+              <span className="text-[10px] text-slate-500 uppercase font-bold">Mission A</span>
               <select 
                 value={comparisonMissionA}
                 onChange={(e) => setComparisonMissionA(e.target.value)}
@@ -808,7 +808,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
             </div>
 
             <div className="flex items-center gap-2 bg-sky-900/40 px-3 py-1.5 rounded-xl border border-sky-400">
-              <span className="text-[10px] text-sky-200 uppercase font-bold">Mission B</span>
+              <span className="text-[10px] text-slate-500 uppercase font-bold">Mission B</span>
               <select 
                 value={comparisonMissionB}
                 onChange={(e) => setComparisonMissionB(e.target.value)}
@@ -826,7 +826,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-sky-400/40 text-sky-200">
+              <tr className="border-b border-sky-400/40 text-slate-500">
                 <th className="py-2.5">Metrics Spec</th>
                 <th className="py-2.5">Mission A</th>
                 <th className="py-2.5">Mission B</th>
@@ -850,9 +850,9 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
                 return (
                   <tr key={idx} className="hover:bg-white/5">
-                    <td className="py-3 font-semibold text-sky-200">{row.label}</td>
-                    <td className="py-3 font-bold text-white">{valA}</td>
-                    <td className="py-3 font-bold text-white">{valB}</td>
+                    <td className="py-3 font-semibold text-slate-500">{row.label}</td>
+                    <td className="py-3 font-bold text-slate-800">{valA}</td>
+                    <td className="py-3 font-bold text-slate-800">{valB}</td>
                     <td className="py-3 text-right font-mono">
                       {getDifferenceIndicator(valA, valB, row.unit)}
                     </td>
@@ -866,18 +866,18 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
       {/* ── 10. FLEET ANALYTICS & DRONE STATUS ── */}
       <div>
-        <h3 className="text-sm font-extrabold uppercase tracking-widest text-sky-900 dark:text-sky-200 text-left mb-4">
+        <h3 className="text-sm font-extrabold uppercase tracking-widest text-sky-900 dark:text-slate-500 text-left mb-4">
           Fleet Aircraft Performance Indices
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {appState.drones.map((drone, idx) => (
-            <div key={idx} className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-5 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
+            <div key={idx} className="bg-sky-600 border border-sky-500 rounded-2xl p-5 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b border-sky-400/40 pb-2.5">
                   <div>
-                    <span className="text-[10px] text-sky-200 uppercase font-bold">{drone.type}</span>
-                    <h4 className="font-extrabold text-sm text-white mt-0.5">{drone.id}</h4>
+                    <span className="text-[10px] text-slate-500 uppercase font-bold">{drone.type}</span>
+                    <h4 className="font-extrabold text-sm text-slate-800 mt-0.5">{drone.id}</h4>
                   </div>
                   <span className="px-2.5 py-0.5 rounded text-[9px] font-bold bg-white/20 text-white border border-white/25">
                     {drone.status}
@@ -885,15 +885,15 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                 </div>
 
                 <div className="space-y-2 text-xs">
-                  <div className="flex justify-between"><span className="text-sky-200">Drone Model:</span><span className="font-bold text-white">{drone.model}</span></div>
-                  <div className="flex justify-between"><span className="text-sky-200">Battery Level:</span><span className="font-bold text-white">{drone.battery}%</span></div>
-                  <div className="flex justify-between"><span className="text-sky-200">Signal strength link:</span><span className="font-bold text-white">{drone.signal}</span></div>
-                  <div className="flex justify-between"><span className="text-sky-200">Pilot In Command:</span><span className="font-bold text-white">{drone.operator}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Drone Model:</span><span className="font-bold text-slate-800">{drone.model}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Battery Level:</span><span className="font-bold text-slate-800">{drone.battery}%</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Signal strength link:</span><span className="font-bold text-slate-800">{drone.signal}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Pilot In Command:</span><span className="font-bold text-slate-800">{drone.operator}</span></div>
                 </div>
               </div>
 
               <div className="mt-4 pt-3.5 border-t border-sky-400/40 flex items-center justify-between">
-                <div className="flex items-center gap-1 text-[10px] text-sky-200">
+                <div className="flex items-center gap-1 text-[10px] text-slate-500">
                   <Heart className="w-3.5 h-3.5 text-rose-350" />
                   Health Score
                 </div>
@@ -906,7 +906,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
       {/* ── 11. PINTEREST-STYLE DETECTION GALLERY ── */}
       <div>
-        <h3 className="text-sm font-extrabold uppercase tracking-widest text-sky-900 dark:text-sky-200 text-left mb-4">
+        <h3 className="text-sm font-extrabold uppercase tracking-widest text-sky-900 dark:text-slate-500 text-left mb-4">
           Spatial Inference Capture Gallery
         </h3>
 
@@ -915,7 +915,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
             <div 
               key={idx} 
               onClick={() => setActiveModalDetection(det)}
-              className="break-inside-avoid bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl overflow-hidden text-left cursor-pointer hover:border-white/50 transition-all shadow-xl group"
+              className="break-inside-avoid bg-sky-600 border border-sky-500 rounded-2xl overflow-hidden text-left cursor-pointer hover:border-white/50 transition-all shadow-xl group"
             >
               <div className="relative">
                 <img 
@@ -933,13 +933,13 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
               <div className="p-4 space-y-2">
                 <div className="flex justify-between items-center">
                   <h4 className="font-bold text-xs text-white">{det.object} Identified</h4>
-                  <span className="text-[10px] text-sky-200">{det.time}</span>
+                  <span className="text-[10px] text-slate-500">{det.time}</span>
                 </div>
                 <p className="text-[10px] text-sky-100 flex items-center gap-1">
                   <MapPin className="w-3 h-3 text-white" />
                   {det.location}
                 </p>
-                <div className="flex justify-between items-center text-[9px] text-sky-200 border-t border-sky-400/40 pt-2 font-mono">
+                <div className="flex justify-between items-center text-[9px] text-slate-500 border-t border-sky-400/40 pt-2 font-mono">
                   <span>GPS: {det.coords}</span>
                   <span className="text-white font-sans font-bold">Inspect details →</span>
                 </div>
@@ -951,17 +951,17 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
       {/* ── 12. PREDICTIVE ANALYTICS CARD BOARD ── */}
       <div>
-        <h3 className="text-sm font-extrabold uppercase tracking-widest text-sky-900 dark:text-sky-200 text-left mb-4">
+        <h3 className="text-sm font-extrabold uppercase tracking-widest text-sky-900 dark:text-slate-500 text-left mb-4">
           AI Predictive Intelligence Logs
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
-            { title: 'Expected Traffic Volume Peak', desc: 'Predicting a 24% increase in vehicle congestion near Hospital Pad between 17:00 and 18:30 due to local shifts.', level: 87, color: 'text-white' },
-            { title: 'Elevated High Wind Risk Alert', desc: 'Weather modeling forecasts crosswinds exceeding 32km/h between 14:00 - 15:30. Recommend grounding lightweight drones.', level: 92, color: 'text-white' },
-            { title: 'Crowd Accumulation Indicator', desc: 'Socio-spatial analysis indicates a high probability (81%) of crowd gathers near Central Warehouse Sector during shifts.', level: 81, color: 'text-white' }
+            { title: 'Expected Traffic Volume Peak', desc: 'Predicting a 24% increase in vehicle congestion near Hospital Pad between 17:00 and 18:30 due to local shifts.', level: 87, color: 'text-slate-800' },
+            { title: 'Elevated High Wind Risk Alert', desc: 'Weather modeling forecasts crosswinds exceeding 32km/h between 14:00 - 15:30. Recommend grounding lightweight drones.', level: 92, color: 'text-slate-800' },
+            { title: 'Crowd Accumulation Indicator', desc: 'Socio-spatial analysis indicates a high probability (81%) of crowd gathers near Central Warehouse Sector during shifts.', level: 81, color: 'text-slate-800' }
           ].map((pred, idx) => (
-            <div key={idx} className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-5 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
+            <div key={idx} className="bg-sky-600 border border-sky-500 rounded-2xl p-5 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
               <div className="space-y-3">
                 <div className="flex items-center gap-2 border-b border-sky-400/40 pb-2">
                   <Bot className={`w-4 h-4 ${pred.color}`} />
@@ -971,7 +971,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
               </div>
 
               <div className="mt-4 pt-3 border-t border-sky-400/40 flex items-center justify-between">
-                <span className="text-[10px] text-sky-200 uppercase font-bold">Prediction Confidence</span>
+                <span className="text-[10px] text-slate-500 uppercase font-bold">Prediction Confidence</span>
                 <span className="text-xs font-black text-white">{pred.level}% Probability</span>
               </div>
             </div>
@@ -985,7 +985,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
           <div className="bg-gradient-to-br from-sky-700 to-sky-900 border border-sky-500 rounded-2xl w-full max-w-2xl min-w-[280px] sm:min-w-[500px] md:min-w-[650px] shrink-0 shadow-2xl overflow-hidden text-left flex flex-col md:flex-row">
             
             {/* Modal Image Block */}
-            <div className="w-full md:w-1/2 relative bg-sky-955 flex items-center justify-center border-b md:border-b-0 md:border-r border-sky-500/50 min-h-[220px]">
+            <div className="w-full md:w-1/2 relative bg-sky-950 flex items-center justify-center border-b md:border-b-0 md:border-r border-sky-500/50 min-h-[220px]">
               <img 
                 src={activeModalDetection.thumbnail} 
                 alt={activeModalDetection.object} 
@@ -1003,7 +1003,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
               <div className="space-y-4">
                 <header className="flex justify-between items-start border-b border-sky-400/40 pb-3">
                   <div>
-                    <span className="text-[10px] font-bold text-sky-200 uppercase tracking-widest">{activeModalDetection.id}</span>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{activeModalDetection.id}</span>
                     <h3 className="text-base font-extrabold text-white mt-0.5">{activeModalDetection.object} Identified</h3>
                   </div>
                   <button 
@@ -1015,11 +1015,11 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                 </header>
 
                 <div className="space-y-2.5 text-xs text-sky-100">
-                  <div className="flex justify-between"><span className="text-sky-200">Sensor Class:</span><span className="font-semibold text-white">{activeModalDetection.object}</span></div>
-                  <div className="flex justify-between"><span className="text-sky-200">Confidence Match:</span><span className="font-bold text-white">{activeModalDetection.confidence}%</span></div>
-                  <div className="flex justify-between"><span className="text-sky-200">Detection Coords:</span><span className="font-mono text-white">{activeModalDetection.coords}</span></div>
-                  <div className="flex justify-between"><span className="text-sky-200">Capture Time:</span><span className="font-semibold text-white">{activeModalDetection.time}</span></div>
-                  <div className="flex justify-between"><span className="text-sky-200">Sector Region:</span><span className="font-semibold text-white">{activeModalDetection.location}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Sensor Class:</span><span className="font-semibold text-white">{activeModalDetection.object}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Confidence Match:</span><span className="font-bold text-slate-800">{activeModalDetection.confidence}%</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Detection Coords:</span><span className="font-mono text-white">{activeModalDetection.coords}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Capture Time:</span><span className="font-semibold text-white">{activeModalDetection.time}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Sector Region:</span><span className="font-semibold text-white">{activeModalDetection.location}</span></div>
                 </div>
               </div>
 
@@ -1048,3 +1048,4 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
     </div>
   );
 }
+

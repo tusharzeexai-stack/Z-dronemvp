@@ -170,3 +170,20 @@ class AlertMessage(BaseModel):
     type: str = "alert"
     alert: Dict[str, Any]
     timestamp: str
+
+# ── Detections ────────────────────────────────────────────────
+class BoundingBox(BaseModel):
+    id: int
+    confidence: float
+    x: int
+    y: int
+    w: int
+    h: int
+
+class DetectionPayload(BaseModel):
+    device_id: str
+    timestamp: int
+    fps: int
+    person_count: int
+    detections: List[BoundingBox]
+

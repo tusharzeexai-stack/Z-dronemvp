@@ -13,11 +13,11 @@ function WeatherWidget() {
   const isSafe = weather.suitabilityScore >= 75;
 
   return (
-    <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-4 shadow-xl flex flex-col text-left text-white">
+    <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xl flex flex-col text-left text-slate-800">
       <header className="flex items-center justify-between mb-4 border-b border-sky-400/40 pb-2">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-white text-lg">partly_cloudy_day</span>
-          <h4 className="font-bold text-white text-sm">Weather Conditions</h4>
+          <span className="material-symbols-outlined text-slate-600 text-lg">partly_cloudy_day</span>
+          <h4 className="font-bold text-slate-800 text-sm">Weather Conditions</h4>
         </div>
         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
           isSafe 
@@ -36,10 +36,10 @@ function WeatherWidget() {
           { label: 'Visibility', val: weather.visibility, icon: 'visibility' }
         ].map((item, idx) => (
           <div key={idx} className="bg-sky-900/40 p-2.5 rounded-xl border border-sky-400/40 flex items-center gap-2.5">
-            <span className="material-symbols-outlined text-sky-200 text-lg">{item.icon}</span>
+            <span className="material-symbols-outlined text-slate-500 text-lg">{item.icon}</span>
             <div>
-              <p className="text-[10px] text-sky-200 font-bold uppercase tracking-wider">{item.label}</p>
-              <p className="text-xs font-bold text-white mt-0.5">{item.val}</p>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{item.label}</p>
+              <p className="text-xs font-bold text-slate-800 mt-0.5">{item.val}</p>
             </div>
           </div>
         ))}
@@ -47,8 +47,8 @@ function WeatherWidget() {
 
       <div className="bg-sky-900/40 p-3 rounded-xl border border-sky-400/40 flex items-center justify-between">
         <div>
-          <span className="text-[10px] text-sky-200 font-semibold uppercase tracking-wider">Flight Suitability Score</span>
-          <p className="text-sm font-bold text-white mt-1 flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Flight Suitability Score</span>
+          <p className="text-sm font-bold text-slate-800 mt-1 flex items-center gap-1.5">
             <span className={`w-2.5 h-2.5 rounded-full ${isSafe ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`}></span>
             <span>Optimal Conditions ({weather.suitabilityScore}%)</span>
           </p>
@@ -68,7 +68,7 @@ function WeatherWidget() {
               className="transition-all duration-500"
             />
           </svg>
-          <span className="absolute text-[10px] font-bold text-white">{weather.suitabilityScore}%</span>
+          <span className="absolute text-[10px] font-bold text-slate-800">{weather.suitabilityScore}%</span>
         </div>
       </div>
     </div>
@@ -76,3 +76,4 @@ function WeatherWidget() {
 }
 
 export default WeatherWidget;
+
