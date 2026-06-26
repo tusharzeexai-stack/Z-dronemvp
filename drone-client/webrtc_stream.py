@@ -37,10 +37,26 @@ from aiortc import (
 )
 from av import VideoFrame
 
+# Try to load local .env file manually if it exists
+if os.path.exists(".env"):
+    with open(".env") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, val = line.split("=", 1)
+                os.environ[key.strip()] = val.strip()
+
+# Determine default backend URL from API_LOGIN_URL if present
+default_backend = "http://localhost:8000"
+if "API_LOGIN_URL" in os.environ:
+    from urllib.parse import urlparse
+    parsed = urlparse(os.environ["API_LOGIN_URL"])
+    default_backend = f"{parsed.scheme}://{parsed.netloc}"
+
 # ── Command Line Arguments ──────────────────────────────────
 parser = argparse.ArgumentParser(description="Z-DRONE WebRTC Master Client")
-parser.add_argument("--drone-id", required=True, help="Registered Drone ID, e.g. ZD-109")
-parser.add_argument("--backend-url", default="http://localhost:8000", help="FastAPI backend URL")
+parser.add_argument("--drone-id", default=os.environ.get("DEVICE_ID", "ZD-109"), help="Registered Drone ID, e.g. ZD-109")
+parser.add_argument("--backend-url", default=default_backend, help="FastAPI backend URL")
 parser.add_argument("--region", default=os.environ.get("AWS_REGION", "ap-south-1"), help="AWS region")
 parser.add_argument("--camera", default="0", help="Camera index or path (set to empty/mock to force synthetic test pattern)")
 args = parser.parse_args()
@@ -48,7 +64,8 @@ args = parser.parse_args()
 DRONE_ID = args.drone_id
 REGION = args.region
 BACKEND = args.backend_url
-STREAM_NAME = f"zdrone-{DRONE_ID.lower()}-cam"
+# Use KVS Channel directly from env if set, otherwise build it from drone ID
+STREAM_NAME = os.environ.get("AWS_KVS_CHANNEL", f"zdrone-{DRONE_ID.lower()}-cam")
 
 # Retrieve AWS Credentials from Environment
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
