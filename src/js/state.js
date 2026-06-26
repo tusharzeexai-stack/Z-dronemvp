@@ -86,7 +86,8 @@ const DEFAULT_ALERTS = [
         title: "Critical Low Battery",
         description: "Battery level dropped below 15% during transit. Automated return-to-base initiated.",
         severity: "error", // error, warning, success
-        resolved: false
+        resolved: false,
+        imageUrl: "/alert_battery.png"
     },
     {
         id: "ALT-002",
@@ -96,7 +97,8 @@ const DEFAULT_ALERTS = [
         title: "High Wind Warning",
         description: "Wind speeds exceeding 35km/h. All lightweight units grounded until further notice.",
         severity: "warning",
-        resolved: false
+        resolved: false,
+        imageUrl: "/alert_gps.png" // fallback/ambient drone FPV view
     },
     {
         id: "ALT-004",
@@ -107,7 +109,8 @@ const DEFAULT_ALERTS = [
         description: "AI Inference model detected unauthorized human presence in restricted Hangar Zone C. Perimeter locks engaged.",
         severity: "error",
         resolved: false,
-        videoUrl: "/cam2.mp4#t=15,20"
+        videoUrl: "/cam2.mp4#t=15,20",
+        imageUrl: "/alert_intrusion.png"
     },
     {
         id: "ALT-005",
@@ -118,7 +121,8 @@ const DEFAULT_ALERTS = [
         description: "FLIR infrared camera detected a thermal anomaly exceeding 88°C in Warehouse Roof Sector 4. High fire risk.",
         severity: "error",
         resolved: false,
-        videoUrl: "/cam1.mp4#t=25,30"
+        videoUrl: "/cam1.mp4#t=25,30",
+        imageUrl: "/alert_thermal.png"
     },
     {
         id: "ALT-006",
@@ -129,7 +133,8 @@ const DEFAULT_ALERTS = [
         description: "Ultrasonic proximity and LIDAR sensors detected tower crane arm obstruction within 3.5 meters. Auto-hover engaged.",
         severity: "warning",
         resolved: false,
-        videoUrl: "/cam1.mp4#t=45,50"
+        videoUrl: "/cam1.mp4#t=45,50",
+        imageUrl: "/alert_collision.png"
     },
     {
         id: "ALT-007",
@@ -140,7 +145,8 @@ const DEFAULT_ALERTS = [
         description: "AI visual analytics verified smoke pattern propagation in Sector Beta North utility ducts. Dispatched local response.",
         severity: "warning",
         resolved: true,
-        videoUrl: "/cam2.mp4#t=8,13"
+        videoUrl: "/cam2.mp4#t=8,13",
+        imageUrl: "/alert_smoke.png"
     },
     {
         id: "ALT-008",
@@ -151,7 +157,8 @@ const DEFAULT_ALERTS = [
         description: "Receiver reported signal lock lost and abnormal multi-path noise floor in Sector Delta. Switched to visual navigation.",
         severity: "warning",
         resolved: false,
-        videoUrl: "/cam1.mp4#t=5,10"
+        videoUrl: "/cam1.mp4#t=5,10",
+        imageUrl: "/alert_gps.png"
     },
     {
         id: "ALT-009",
@@ -162,7 +169,8 @@ const DEFAULT_ALERTS = [
         description: "AI optical inspection detected ground worker in Sector Gamma without mandatory safety helmet. Visual warning issued.",
         severity: "warning",
         resolved: false,
-        videoUrl: "/cam2.mp4#t=5,10"
+        videoUrl: "/cam2.mp4#t=5,10",
+        imageUrl: "/alert_no_helmet.png"
     },
     {
         id: "ALT-010",
@@ -173,7 +181,8 @@ const DEFAULT_ALERTS = [
         description: "Visual inspection flagged pilot trainee in Hangar Pad 2 missing high-visibility safety vest. Operations halted.",
         severity: "warning",
         resolved: false,
-        videoUrl: "/cam2.mp4#t=10,15"
+        videoUrl: "/cam2.mp4#t=10,15",
+        imageUrl: "/alert_no_vest.png"
     },
     {
         id: "ALT-011",
@@ -184,7 +193,8 @@ const DEFAULT_ALERTS = [
         description: "Pose estimation model detected worker down on ground in Sector Alpha loading bay. Emergency medical services contacted.",
         severity: "error",
         resolved: false,
-        videoUrl: "/cam1.mp4#t=12,17"
+        videoUrl: "/cam1.mp4#t=12,17",
+        imageUrl: "/alert_man_down.png"
     },
     {
         id: "ALT-012",
@@ -195,7 +205,8 @@ const DEFAULT_ALERTS = [
         description: "AI SSD visual inference layer identified an active open flame source in Sector Delta brush boundary zone.",
         severity: "error",
         resolved: false,
-        videoUrl: "/cam1.mp4#t=20,25"
+        videoUrl: "/cam1.mp4#t=20,25",
+        imageUrl: "/alert_fire.png"
     },
     {
         id: "ALT-013",
@@ -206,7 +217,8 @@ const DEFAULT_ALERTS = [
         description: "LIDAR photogrammetry map and volumetric data scan verify structural development progress is at 60.0% completion.",
         severity: "success",
         resolved: false,
-        videoUrl: "/cam1.mp4#t=30,35"
+        videoUrl: "/cam1.mp4#t=30,35",
+        imageUrl: "/alert_progress.png"
     },
     {
         id: "ALT-003",
@@ -216,7 +228,8 @@ const DEFAULT_ALERTS = [
         title: "Maintenance Complete",
         description: "Routine sensor calibration and propeller replacement successful. Unit cleared for service.",
         severity: "success",
-        resolved: true
+        resolved: true,
+        imageUrl: "/alert_progress.png"
     }
 ];
 

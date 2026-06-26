@@ -2256,15 +2256,12 @@ function Dashboard({ onLogout }) {
                 </div>
               </div>
 
-              {/* Video Player Box */}
+              {/* Video/Image Capture Box */}
               <div className="relative rounded-xl overflow-hidden border border-sky-400/50 bg-black aspect-video flex items-center justify-center group">
-                <video
-                  key={selectedAlert.id} // force reload on alert change
-                  src={selectedAlert.videoUrl || "/cam2.mp4#t=10,15"}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
+                <img
+                  key={selectedAlert.id}
+                  src={selectedAlert.imageUrl || "/alert_gps.png"}
+                  alt={selectedAlert.title}
                   className="w-full h-full object-cover"
                 />
                 
@@ -2274,20 +2271,22 @@ function Dashboard({ onLogout }) {
                     <div>
                       <div>SYS: Z-DRONE INF_DET</div>
                       <div>UNIT: {selectedAlert.unit}</div>
-                      <div>LOC: SECTOR ALPHA</div>
+                      <div>LOC: HARYANA IMT KHARKHODA</div>
                     </div>
                     <div className="text-right">
-                      <div className="flex items-center gap-1 justify-end font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-655 animate-ping"></span>
-                        <span>PLAYING CLIP</span>
+                      <div className="flex items-center gap-1 justify-end font-bold text-red-500">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
+                        <span>FEED CAPTURE</span>
                       </div>
-                      <div>5.0s LOOP</div>
+                      <div>MEDIUM HEIGHT FPV</div>
                     </div>
                   </div>
                   
                   {/* Bounding box mock scan HUD */}
-                  <div className="absolute inset-1/4 border border-dashed border-red-500/40 pointer-events-none flex items-center justify-center">
-                    <span className="bg-red-600 text-white text-[8px] px-1 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-tight">PEDESTRIAN</span>
+                  <div className="absolute inset-1/4 border border-dashed border-red-500/60 pointer-events-none flex items-center justify-center">
+                    <span className="bg-red-600 text-white text-[8px] px-1.5 py-0.5 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-wider shadow">
+                      {selectedAlert.type?.toUpperCase() || "DETECTION"}
+                    </span>
                   </div>
 
                   <div className="flex justify-between items-end">
@@ -2297,7 +2296,7 @@ function Dashboard({ onLogout }) {
                 </div>
 
                 {/* Scanline CRT style effect */}
-                <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,6px_100%] opacity-40"></div>
+                <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,6px_100%] opacity-45"></div>
               </div>
 
               <p className="text-xs text-sky-100 leading-relaxed italic">
