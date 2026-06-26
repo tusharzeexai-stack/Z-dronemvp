@@ -563,6 +563,16 @@ function Dashboard({ onLogout }) {
     setTotalBulldozers(totBulldozers);
     setTotalConcreteMixers(totConcreteMixers);
 
+    // Save to localStorage so sibling tabs (like Analytics) can consume this live data
+    localStorage.setItem('z_drone_ai_stats', JSON.stringify({
+      totalPeds: totPeds,
+      totalHelmets: totHelmets,
+      totalVests: totVests,
+      totalCranes: totCranes,
+      totalBulldozers: totBulldozers,
+      totalConcreteMixers: totConcreteMixers
+    }));
+
     // Feed AI charts
     if (aiChartRef.current && !inferencePaused) {
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -642,6 +652,7 @@ function Dashboard({ onLogout }) {
     setTotalBulldozers(0);
     setTotalConcreteMixers(0);
     lastSecondRef.current = -1;
+    localStorage.removeItem('z_drone_ai_stats');
 
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
@@ -685,6 +696,7 @@ function Dashboard({ onLogout }) {
     setTotalBulldozers(0);
     setTotalConcreteMixers(0);
     lastSecondRef.current = -1;
+    localStorage.removeItem('z_drone_ai_stats');
 
     if (videoRef.current) {
       videoRef.current.load();

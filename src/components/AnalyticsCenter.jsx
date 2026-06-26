@@ -192,133 +192,157 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
   }, [heatmapType]);
 
-  // Render Charts with high contrast white labels
+  // Render Charts with high contrast labels styled for light card panels
   useEffect(() => {
-    // 1. Chart 1: Vehicle Distribution Donut
-    if (canvas1Ref.current) {
-      if (chart1Ref.current) chart1Ref.current.destroy();
-      chart1Ref.current = new Chart(canvas1Ref.current.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-          labels: ['Cars', 'Motorcycles', 'Trucks', 'Buses'],
-          datasets: [{
-            data: [65, 15, 12, 8],
-            backgroundColor: ['#38bdf8', '#60a5fa', '#c084fc', '#e879f9'],
-            borderColor: '#0284c7',
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'right', labels: { color: '#ffffff', font: { family: 'Inter', size: 11, weight: 'bold' } } }
-          },
-          cutout: '70%'
-        }
-      });
-    }
+    const renderCharts = () => {
+      // Read live/stored AI stats
+      const storedStats = JSON.parse(localStorage.getItem('z_drone_ai_stats') || '{}');
+      const totalPedsVal = storedStats.totalPeds !== undefined ? storedStats.totalPeds : 142;
+      const totalHelmetsVal = storedStats.totalHelmets !== undefined ? storedStats.totalHelmets : 98;
+      const totalVestsVal = storedStats.totalVests !== undefined ? storedStats.totalVests : 76;
+      const totalCranesVal = storedStats.totalCranes !== undefined ? storedStats.totalCranes : 12;
+      const totalBulldozersVal = storedStats.totalBulldozers !== undefined ? storedStats.totalBulldozers : 18;
+      const totalConcreteMixersVal = storedStats.totalConcreteMixers !== undefined ? storedStats.totalConcreteMixers : 9;
 
-    // 2. Chart 2: Category Detection Bar Chart
-    if (canvas2Ref.current) {
-      if (chart2Ref.current) chart2Ref.current.destroy();
-      chart2Ref.current = new Chart(canvas2Ref.current.getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: ['Vehicles', 'Pedestrians', 'Thermal Heat', 'Construction', 'Obstacles'],
-          datasets: [{
-            label: 'Detected Counts',
-            data: [284, 142, 38, 92, 14],
-            backgroundColor: 'rgba(255, 255, 255, 0.75)',
-            borderColor: '#ffffff',
-            borderWidth: 1.5,
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { display: false }, ticks: { color: '#ffffff', font: { weight: 'bold' } } },
-            y: { grid: { color: 'rgba(255,255,255,0.2)' }, ticks: { color: '#ffffff', font: { weight: 'bold' } } }
-          }
-        }
-      });
-    }
-
-    // 3. Chart 3: Hourly Detection Frequency
-    if (canvas3Ref.current) {
-      if (chart3Ref.current) chart3Ref.current.destroy();
-      chart3Ref.current = new Chart(canvas3Ref.current.getContext('2d'), {
-        type: 'line',
-        data: {
-          labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
-          datasets: [{
-            label: 'AI Inference Event Rate',
-            data: [25, 45, 95, 70, 85, 30],
-            borderColor: '#ffffff',
-            backgroundColor: 'rgba(255, 255, 255, 0.25)',
-            fill: true,
-            tension: 0.4,
-            borderWidth: 3,
-            pointRadius: 5,
-            pointBackgroundColor: '#ffffff'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { labels: { color: '#ffffff', font: { weight: 'bold' } } } },
-          scales: {
-            x: { grid: { display: false }, ticks: { color: '#ffffff', font: { weight: 'bold' } } },
-            y: { grid: { color: 'rgba(255,255,255,0.2)' }, ticks: { color: '#ffffff', font: { weight: 'bold' } } }
-          }
-        }
-      });
-    }
-
-    // 4. Chart 4: Radar Zone Metric Comparison
-    if (canvas4Ref.current) {
-      if (chart4Ref.current) chart4Ref.current.destroy();
-      chart4Ref.current = new Chart(canvas4Ref.current.getContext('2d'), {
-        type: 'radar',
-        data: {
-          labels: ['Propulsion', 'Optical Performance', 'Link Signal', 'Sensory Hub', 'Structural Frame'],
-          datasets: [
-            {
-              label: 'Sector Alpha',
-              data: [98, 92, 95, 88, 94],
+      // 1. Chart 1: Vehicle Distribution Donut
+      if (canvas1Ref.current) {
+        if (chart1Ref.current) chart1Ref.current.destroy();
+        chart1Ref.current = new Chart(canvas1Ref.current.getContext('2d'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Cars', 'Motorcycles', 'Trucks', 'Buses'],
+            datasets: [{
+              data: [65, 15, 12, 8],
+              backgroundColor: ['#38bdf8', '#60a5fa', '#c084fc', '#e879f9'],
               borderColor: '#ffffff',
-              backgroundColor: 'rgba(255, 255, 255, 0.3)',
-              borderWidth: 2.5
-            },
-            {
-              label: 'Sector Beta',
-              data: [92, 85, 78, 80, 88],
-              borderColor: '#e0f2fe',
-              backgroundColor: 'rgba(224, 242, 254, 0.15)',
               borderWidth: 2
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { labels: { color: '#ffffff', font: { weight: 'bold' } } } },
-          scales: {
-            r: {
-              grid: { color: 'rgba(255,255,255,0.25)' },
-              angleLines: { color: 'rgba(255,255,255,0.25)' },
-              pointLabels: { color: '#ffffff', font: { size: 10, weight: 'bold' } },
-              ticks: { display: false }
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right', labels: { color: '#334155', font: { family: 'Inter', size: 11, weight: 'bold' } } }
+            },
+            cutout: '70%'
+          }
+        });
+      }
+
+      // 2. Chart 2: Category Detection Bar Chart
+      if (canvas2Ref.current) {
+        if (chart2Ref.current) chart2Ref.current.destroy();
+        chart2Ref.current = new Chart(canvas2Ref.current.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: ['Persons', 'Helmets', 'Vests', 'Cranes', 'Bulldozers', 'Mixers'],
+            datasets: [{
+              label: 'Detected Counts',
+              data: [totalPedsVal, totalHelmetsVal, totalVestsVal, totalCranesVal, totalBulldozersVal, totalConcreteMixersVal],
+              backgroundColor: 'rgba(56, 189, 248, 0.85)',
+              borderColor: '#0284c7',
+              borderWidth: 1.5,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#475569', font: { weight: 'bold' } } },
+              y: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#475569', font: { weight: 'bold' } } }
             }
           }
-        }
-      });
-    }
+        });
+      }
+
+      // 3. Chart 3: Hourly Detection Frequency
+      if (canvas3Ref.current) {
+        if (chart3Ref.current) chart3Ref.current.destroy();
+        chart3Ref.current = new Chart(canvas3Ref.current.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
+            datasets: [{
+              label: 'AI Inference Event Rate',
+              data: [
+                Math.round(totalPedsVal * 0.2 + 5),
+                Math.round(totalHelmetsVal * 0.3 + 12),
+                Math.round(totalVestsVal * 0.4 + 22),
+                Math.round(totalCranesVal * 1.5 + 32),
+                Math.round(totalBulldozersVal * 1.2 + 18),
+                Math.round(totalConcreteMixersVal * 1.8 + 10)
+              ],
+              borderColor: '#0284c7',
+              backgroundColor: 'rgba(56, 189, 248, 0.15)',
+              fill: true,
+              tension: 0.4,
+              borderWidth: 3,
+              pointRadius: 5,
+              pointBackgroundColor: '#0284c7'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#334155', font: { weight: 'bold' } } } },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#475569', font: { weight: 'bold' } } },
+              y: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#475569', font: { weight: 'bold' } } }
+            }
+          }
+        });
+      }
+
+      // 4. Chart 4: Radar Zone Metric Comparison
+      if (canvas4Ref.current) {
+        if (chart4Ref.current) chart4Ref.current.destroy();
+        chart4Ref.current = new Chart(canvas4Ref.current.getContext('2d'), {
+          type: 'radar',
+          data: {
+            labels: ['Propulsion', 'Optical Performance', 'Link Signal', 'Sensory Hub', 'Structural Frame'],
+            datasets: [
+              {
+                label: 'Sector Alpha',
+                data: [98, 92, 95, 88, 94],
+                borderColor: '#0284c7',
+                backgroundColor: 'rgba(2, 132, 199, 0.2)',
+                borderWidth: 2.5
+              },
+              {
+                label: 'Sector Beta',
+                data: [92, 85, 78, 80, 88],
+                borderColor: '#60a5fa',
+                backgroundColor: 'rgba(96, 165, 250, 0.15)',
+                borderWidth: 2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#334155', font: { weight: 'bold' } } } },
+            scales: {
+              r: {
+                grid: { color: 'rgba(0,0,0,0.08)' },
+                angleLines: { color: 'rgba(0,0,0,0.08)' },
+                pointLabels: { color: '#334155', font: { size: 10, weight: 'bold' } },
+                ticks: { display: false }
+              }
+            }
+          }
+        });
+      }
+    };
+
+    renderCharts();
+
+    // Set up a 1-second interval to pull active counts while playing a stream
+    const intervalId = setInterval(renderCharts, 1000);
 
     return () => {
+      clearInterval(intervalId);
       if (chart1Ref.current) chart1Ref.current.destroy();
       if (chart2Ref.current) chart2Ref.current.destroy();
       if (chart3Ref.current) chart3Ref.current.destroy();
@@ -606,8 +630,8 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
           {/* GIS Legend / HUD layer */}
           <div className="absolute bottom-6 left-6 z-20 bg-sky-950/95 border border-sky-400/60 rounded-xl p-3.5 text-xs text-left shadow-2xl space-y-2">
-            <p className="font-bold border-b border-sky-400/40 pb-1.5 text-slate-800">GIS Layer Legend</p>
-            <div className="space-y-1 text-sky-150">
+            <p className="font-bold border-b border-sky-400/40 pb-1.5 text-white">GIS Layer Legend</p>
+            <div className="space-y-1 text-white font-medium">
               <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>Vehicles</div>
               <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>Pedestrians</div>
               <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>Fire Hazard</div>
