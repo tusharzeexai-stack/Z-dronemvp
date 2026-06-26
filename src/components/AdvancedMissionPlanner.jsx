@@ -1548,14 +1548,41 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
 
       {/* --- ADD MISSION MODAL --- */}
       {addModalOpen && createPortal(
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-sky-850 to-sky-950 border border-sky-500/40 p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4 text-left">
-            <div className="flex justify-between items-center border-b border-sky-500/30 pb-3">
-              <h3 className="font-extrabold text-sm text-white flex items-center gap-2">
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          width: '100vw', 
+          height: '100vh', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 99999,
+          backgroundColor: 'rgba(2, 6, 23, 0.85)',
+          backdropFilter: 'blur(8px)',
+          boxSizing: 'border-box',
+          padding: '20px'
+        }}>
+          <div style={{ 
+            width: '100%', 
+            maxWidth: '460px', 
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            padding: '24px',
+            borderRadius: '16px',
+            background: 'linear-gradient(to bottom right, #075985, #0f172a)',
+            border: '1px solid rgba(56, 189, 248, 0.4)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            textAlign: 'left'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(56, 189, 248, 0.2)', paddingBottom: '12px' }}>
+              <h3 style={{ margin: 0, fontWeight: '800', fontSize: '14px', color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Plus className="w-4 h-4 text-sky-400" />
                 Create Flight Plan
               </h3>
-              <button onClick={() => setAddModalOpen(false)} className="text-sky-300 hover:text-white transition-colors">
+              <button onClick={() => setAddModalOpen(false)} style={{ background: 'none', border: 'none', color: '#bae6fd', cursor: 'pointer' }} className="hover:text-white transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1579,38 +1606,38 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               }
               setAddModalOpen(false);
               setNewMissionName('');
-            }} className="space-y-4 text-white">
-              <div>
-                <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Mission Name</label>
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
+              <div style={{ width: '100%' }}>
+                <label style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: '#bae6fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Mission Name</label>
                 <input 
                   type="text" 
                   required
                   value={newMissionName}
                   onChange={(e) => setNewMissionName(e.target.value)}
                   placeholder="Perimeter Thermal Grid Sweep..."
-                  className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white placeholder-sky-400/50 focus:outline-none focus:border-sky-400"
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: 'rgba(15, 23, 42, 0.6)', color: 'white', outline: 'none' }}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Target Drone</label>
+              <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: '#bae6fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Target Drone</label>
                   <select
                     value={newMissionDrone}
                     onChange={(e) => setNewMissionDrone(e.target.value)}
-                    className="w-full text-xs px-2 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: '#0f172a', color: 'white', outline: 'none' }}
                   >
                     {(appState.drones || []).map(d => (
                       <option key={d.id} value={d.id} className="bg-sky-900 text-white">{d.id} - {d.model}</option>
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Mission Type</label>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: '#bae6fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Mission Type</label>
                   <select
                     value={newMissionType}
                     onChange={(e) => setNewMissionType(e.target.value)}
-                    className="w-full text-xs px-2 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: '#0f172a', color: 'white', outline: 'none' }}
                   >
                     {MISSION_TYPES.map(t => (
                       <option key={t} value={t} className="bg-sky-900 text-white">{t}</option>
@@ -1619,42 +1646,42 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Cruise Speed (m/s)</label>
+              <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: '#bae6fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Cruise Speed (m/s)</label>
                   <input 
                     type="number" 
                     min="2"
                     max="25"
                     value={newMissionSpeed}
                     onChange={(e) => setNewMissionSpeed(Number(e.target.value))}
-                    className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: 'rgba(15, 23, 42, 0.6)', color: 'white', outline: 'none' }}
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Cruise Altitude (m)</label>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: '#bae6fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Cruise Altitude (m)</label>
                   <input 
                     type="number" 
                     min="10"
                     max="120"
                     value={newMissionAlt}
                     onChange={(e) => setNewMissionAlt(Number(e.target.value))}
-                    className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: 'rgba(15, 23, 42, 0.6)', color: 'white', outline: 'none' }}
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-3">
+              <div style={{ display: 'flex', gap: '12px', marginTop: '12px', width: '100%' }}>
                 <button 
                   type="button"
                   onClick={() => setAddModalOpen(false)}
-                  className="flex-1 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white font-bold text-xs hover:bg-sky-800/40 transition-colors"
+                  style={{ flex: 1, padding: '10px 0', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: 'rgba(15, 23, 42, 0.6)', color: 'white', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs transition-colors"
+                  style={{ flex: 1, padding: '10px 0', borderRadius: '8px', border: 'none', backgroundColor: '#0ea5e9', color: 'white', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
                 >
                   Create Plan
                 </button>
@@ -1667,14 +1694,41 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
 
       {/* --- EDIT MISSION MODAL --- */}
       {editModalOpen && createPortal(
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-sky-850 to-sky-950 border border-sky-550/40 p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4 text-left">
-            <div className="flex justify-between items-center border-b border-sky-500/30 pb-3">
-              <h3 className="font-extrabold text-sm text-white flex items-center gap-2">
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          width: '100vw', 
+          height: '100vh', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 99999,
+          backgroundColor: 'rgba(2, 6, 23, 0.85)',
+          backdropFilter: 'blur(8px)',
+          boxSizing: 'border-box',
+          padding: '20px'
+        }}>
+          <div style={{ 
+            width: '100%', 
+            maxWidth: '460px', 
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            padding: '24px',
+            borderRadius: '16px',
+            background: 'linear-gradient(to bottom right, #075985, #0f172a)',
+            border: '1px solid rgba(56, 189, 248, 0.4)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            textAlign: 'left'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(56, 189, 248, 0.2)', paddingBottom: '12px' }}>
+              <h3 style={{ margin: 0, fontWeight: '800', fontSize: '14px', color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Edit className="w-4 h-4 text-sky-450" />
                 Edit Mission: {editMissionId}
               </h3>
-              <button onClick={() => setEditModalOpen(false)} className="text-sky-300 hover:text-white transition-colors">
+              <button onClick={() => setEditModalOpen(false)} style={{ background: 'none', border: 'none', color: '#bae6fd', cursor: 'pointer' }} className="hover:text-white transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1692,37 +1746,37 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               });
               logEvent('SUCCESS', `Updated mission details for ${editMissionId}`);
               setEditModalOpen(false);
-            }} className="space-y-4 text-white">
-              <div>
-                <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Mission Name</label>
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
+              <div style={{ width: '100%' }}>
+                <label style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: '#bae6fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Mission Name</label>
                 <input 
                   type="text" 
                   required
                   value={editMissionName}
                   onChange={(e) => setEditMissionName(e.target.value)}
-                  className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: 'rgba(15, 23, 42, 0.6)', color: 'white', outline: 'none' }}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Target Drone</label>
+              <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: '#bae6fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Target Drone</label>
                   <select
                     value={editMissionDrone}
                     onChange={(e) => setEditMissionDrone(e.target.value)}
-                    className="w-full text-xs px-2 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: '#0f172a', color: 'white', outline: 'none' }}
                   >
                     {(appState.drones || []).map(d => (
                       <option key={d.id} value={d.id} className="bg-sky-900 text-white">{d.id} - {d.model}</option>
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Mission Type</label>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: '#bae6fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Mission Type</label>
                   <select
                     value={editMissionType}
                     onChange={(e) => setEditMissionType(e.target.value)}
-                    className="w-full text-xs px-2 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: '#0f172a', color: 'white', outline: 'none' }}
                   >
                     {MISSION_TYPES.map(t => (
                       <option key={t} value={t} className="bg-sky-900 text-white">{t}</option>
@@ -1731,37 +1785,37 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Cruise Speed (m/s)</label>
+              <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: '#bae6fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Cruise Speed (m/s)</label>
                   <input 
                     type="number" 
                     min="2"
                     max="25"
                     value={editMissionSpeed}
                     onChange={(e) => setEditMissionSpeed(Number(e.target.value))}
-                    className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: 'rgba(15, 23, 42, 0.6)', color: 'white', outline: 'none' }}
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Cruise Altitude (m)</label>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: '#bae6fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Cruise Altitude (m)</label>
                   <input 
                     type="number" 
                     min="10"
                     max="120"
                     value={editMissionAlt}
                     onChange={(e) => setEditMissionAlt(Number(e.target.value))}
-                    className="w-full text-xs px-3 py-2 rounded-lg border border-sky-550/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: 'rgba(15, 23, 42, 0.6)', color: 'white', outline: 'none' }}
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Status</label>
+              <div style={{ width: '100%' }}>
+                <label style={{ display: 'block', fontSize: '10px', fontWeight: 'bold', color: '#bae6fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Status</label>
                 <select
                   value={editMissionStatus}
                   onChange={(e) => setEditMissionStatus(e.target.value)}
-                  className="w-full text-xs px-2 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: '#0f172a', color: 'white', outline: 'none' }}
                 >
                   <option value="Scheduled" className="bg-sky-900 text-white">Scheduled</option>
                   <option value="Active" className="bg-sky-900 text-white">Active</option>
@@ -1771,17 +1825,17 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 </select>
               </div>
 
-              <div className="flex gap-3 pt-3">
+              <div style={{ display: 'flex', gap: '12px', marginTop: '12px', width: '100%' }}>
                 <button 
                   type="button"
                   onClick={() => setEditModalOpen(false)}
-                  className="flex-1 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white font-bold text-xs hover:bg-sky-800/40 transition-colors"
+                  style={{ flex: 1, padding: '10px 0', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: 'rgba(15, 23, 42, 0.6)', color: 'white', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs transition-colors"
+                  style={{ flex: 1, padding: '10px 0', borderRadius: '8px', border: 'none', backgroundColor: '#0ea5e9', color: 'white', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
                 >
                   Save Changes
                 </button>
