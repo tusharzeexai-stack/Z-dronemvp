@@ -11,10 +11,94 @@ import {
 
 // --- MOCK MISSION DATABASE ---
 const MOCK_MISSIONS = [
-  { id: 'MSN-AR-101', name: 'Downtown Survey Perimeter Alpha', drone: 'ZD-109', type: 'Grid Survey', status: 'Draft', time: '18m 40s', distance: '5.2 km', battery: '42%', coverage: '92%', waypoints: 8, speed: '10 m/s', cruiseAlt: '45m', createdDate: '2026-06-25', lastModified: '2026-06-26' },
-  { id: 'MSN-AR-102', name: 'Pipeline Inspection Vector Bravo', drone: 'ZD-088', type: 'Pipeline Inspection', status: 'Scheduled', time: '35m 12s', distance: '10.8 km', battery: '78%', coverage: '98%', waypoints: 14, speed: '12 m/s', cruiseAlt: '30m', createdDate: '2026-06-25', lastModified: '2026-06-26' },
-  { id: 'MSN-AR-103', name: 'Emergency Search Rescue Corridor', drone: 'ZD-112', type: 'Search and Rescue', status: 'Active', time: '24m 50s', distance: '7.4 km', battery: '60%', coverage: '95%', waypoints: 10, speed: '8 m/s', cruiseAlt: '15m', createdDate: '2026-06-24', lastModified: '2026-06-26' },
-  { id: 'MSN-AR-104', name: 'Thermal Hangar Infrastructure Audit', drone: 'ZD-055', type: 'Infrastructure Inspection', status: 'Completed', time: '40m 15s', distance: '12.6 km', battery: '85%', coverage: '88%', waypoints: 18, speed: '14 m/s', cruiseAlt: '50m', createdDate: '2026-06-23', lastModified: '2026-06-25' }
+  { 
+    id: 'MSN-AR-101', 
+    name: 'Downtown Survey Perimeter Alpha', 
+    drone: 'ZD-109', 
+    type: 'Grid Survey', 
+    status: 'Draft', 
+    time: '18m 40s', 
+    distance: '5.2 km', 
+    battery: '42%', 
+    coverage: '92%', 
+    waypoints: 4, 
+    speed: '10 m/s', 
+    cruiseAlt: '45m', 
+    createdDate: '2026-06-25', 
+    lastModified: '2026-06-26',
+    waypointsList: [
+      { id: 1, lat: 34.0522, lng: -118.2437, altitude: 45, speed: 10, hoverTime: 2, action: 'Photo Interval', heading: 90, gimbalPitch: -45, delay: 0 },
+      { id: 2, lat: 34.0535, lng: -118.2415, altitude: 45, speed: 10, hoverTime: 0, action: 'Video Start', heading: 120, gimbalPitch: -90, delay: 0 },
+      { id: 3, lat: 34.0550, lng: -118.2400, altitude: 50, speed: 8, hoverTime: 5, action: 'Hover', heading: 180, gimbalPitch: -30, delay: 2 },
+      { id: 4, lat: 34.0572, lng: -118.2388, altitude: 50, speed: 12, hoverTime: 0, action: 'None', heading: 240, gimbalPitch: 0, delay: 0 }
+    ]
+  },
+  { 
+    id: 'MSN-AR-102', 
+    name: 'Pipeline Inspection Vector Bravo', 
+    drone: 'ZD-088', 
+    type: 'Pipeline Inspection', 
+    status: 'Scheduled', 
+    time: '35m 12s', 
+    distance: '10.8 km', 
+    battery: '78%', 
+    coverage: '98%', 
+    waypoints: 4, 
+    speed: '12 m/s', 
+    cruiseAlt: '30m', 
+    createdDate: '2026-06-25', 
+    lastModified: '2026-06-26',
+    waypointsList: [
+      { id: 1, lat: 34.0540, lng: -118.2450, altitude: 30, speed: 12, hoverTime: 0, action: 'Video Start', heading: 45, gimbalPitch: -45, delay: 0 },
+      { id: 2, lat: 34.0565, lng: -118.2430, altitude: 30, speed: 12, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 },
+      { id: 3, lat: 34.0590, lng: -118.2410, altitude: 35, speed: 12, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 },
+      { id: 4, lat: 34.0610, lng: -118.2390, altitude: 35, speed: 10, hoverTime: 2, action: 'Video Stop', heading: 90, gimbalPitch: 0, delay: 1 }
+    ]
+  },
+  { 
+    id: 'MSN-AR-103', 
+    name: 'Emergency Search Rescue Corridor', 
+    drone: 'ZD-112', 
+    type: 'Search and Rescue', 
+    status: 'Active', 
+    time: '24m 50s', 
+    distance: '7.4 km', 
+    battery: '60%', 
+    coverage: '95%', 
+    waypoints: 4, 
+    speed: '8 m/s', 
+    cruiseAlt: '15m', 
+    createdDate: '2026-06-24', 
+    lastModified: '2026-06-26',
+    waypointsList: [
+      { id: 1, lat: 34.0520, lng: -118.2480, altitude: 15, speed: 8, hoverTime: 3, action: 'Hover', heading: 180, gimbalPitch: -30, delay: 2 },
+      { id: 2, lat: 34.0545, lng: -118.2470, altitude: 15, speed: 8, hoverTime: 1, action: 'Photo Interval', heading: 180, gimbalPitch: -45, delay: 0 },
+      { id: 3, lat: 34.0570, lng: -118.2460, altitude: 15, speed: 8, hoverTime: 1, action: 'Photo Interval', heading: 180, gimbalPitch: -45, delay: 0 },
+      { id: 4, lat: 34.0595, lng: -118.2450, altitude: 20, speed: 10, hoverTime: 0, action: 'None', heading: 90, gimbalPitch: 0, delay: 0 }
+    ]
+  },
+  { 
+    id: 'MSN-AR-104', 
+    name: 'Thermal Hangar Infrastructure Audit', 
+    drone: 'ZD-055', 
+    type: 'Infrastructure Inspection', 
+    status: 'Completed', 
+    time: '40m 15s', 
+    distance: '12.6 km', 
+    battery: '85%', 
+    coverage: '88%', 
+    waypoints: 4, 
+    speed: '14 m/s', 
+    cruiseAlt: '50m', 
+    createdDate: '2026-06-23', 
+    lastModified: '2026-06-25',
+    waypointsList: [
+      { id: 1, lat: 34.0600, lng: -118.2490, altitude: 50, speed: 14, hoverTime: 1, action: 'Photo Interval', heading: 270, gimbalPitch: -90, delay: 0 },
+      { id: 2, lat: 34.0580, lng: -118.2470, altitude: 50, speed: 14, hoverTime: 1, action: 'Photo Interval', heading: 270, gimbalPitch: -90, delay: 0 },
+      { id: 3, lat: 34.0560, lng: -118.2450, altitude: 50, speed: 14, hoverTime: 2, action: 'Hover', heading: 180, gimbalPitch: -45, delay: 2 },
+      { id: 4, lat: 34.0540, lng: -118.2430, altitude: 45, speed: 12, hoverTime: 0, action: 'None', heading: 90, gimbalPitch: 0, delay: 0 }
+    ]
+  }
 ];
 
 const MISSION_TYPES = [
@@ -252,6 +336,18 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
     return MOCK_MISSIONS.find(m => m.id === selectedMissionId) || MOCK_MISSIONS[0];
   }, [selectedMissionId]);
 
+  useEffect(() => {
+    const selected = MOCK_MISSIONS.find(m => m.id === selectedMissionId);
+    if (selected && selected.waypointsList) {
+      setWaypoints(selected.waypointsList);
+      setActiveWaypointIndex(0);
+      if (mapInstanceRef.current && selected.waypointsList.length > 0) {
+        mapInstanceRef.current.setView([selected.waypointsList[0].lat, selected.waypointsList[0].lng], 15);
+      }
+      logEvent('INFO', `Loaded mission: ${selected.name}`);
+    }
+  }, [selectedMissionId]);
+
   // --- CONNECTED/DISCONNECTED STATE ACTIONS ---
   const handleConnect = async () => {
     setConnectionStatus('CONNECTING');
@@ -382,26 +478,83 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
     map.on('click', (e) => {
       if (simulating) return;
       const { lat, lng } = e.latlng;
-      setWaypoints(prev => {
-        const nextId = prev.length ? Math.max(...prev.map(w => w.id)) + 1 : 1;
-        const newWp = {
-          id: nextId,
-          lat,
-          lng,
-          altitude: 45,
-          speed: 10,
-          hoverTime: 2,
-          action: 'Photo Interval',
-          heading: 90,
-          gimbalPitch: -45,
-          delay: 0
-        };
-        const updated = [...prev, newWp];
-        setActiveWaypointIndex(updated.length - 1);
+      
+      if (drawingMode === 'waypoint') {
+        setWaypoints(prev => {
+          const nextId = prev.length ? Math.max(...prev.map(w => w.id)) + 1 : 1;
+          const newWp = {
+            id: nextId,
+            lat,
+            lng,
+            altitude: 45,
+            speed: 10,
+            hoverTime: 2,
+            action: 'Photo Interval',
+            heading: 90,
+            gimbalPitch: -45,
+            delay: 0
+          };
+          const updated = [...prev, newWp];
+          setActiveWaypointIndex(updated.length - 1);
+          setActiveRightTab('waypoint');
+          logEvent('INFO', `Waypoint #${updated.length} dropped at ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+          return updated;
+        });
+      } else if (drawingMode === 'polygon') {
+        const polyPoints = [
+          { id: 1, lat: lat - 0.001, lng: lng - 0.001, altitude: 40, speed: 10, hoverTime: 0, action: 'None', heading: 0, gimbalPitch: -45, delay: 0 },
+          { id: 2, lat: lat - 0.001, lng: lng + 0.001, altitude: 40, speed: 10, hoverTime: 0, action: 'None', heading: 90, gimbalPitch: -45, delay: 0 },
+          { id: 3, lat: lat + 0.001, lng: lng + 0.001, altitude: 40, speed: 10, hoverTime: 0, action: 'None', heading: 180, gimbalPitch: -45, delay: 0 },
+          { id: 4, lat: lat + 0.001, lng: lng - 0.001, altitude: 40, speed: 10, hoverTime: 0, action: 'None', heading: 270, gimbalPitch: -45, delay: 0 }
+        ];
+        setWaypoints(polyPoints);
+        setActiveWaypointIndex(0);
         setActiveRightTab('waypoint');
-        logEvent('INFO', `Waypoint #${updated.length} dropped at ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
-        return updated;
-      });
+        logEvent('SUCCESS', `AI Co-pilot: Polygon boundary survey loaded around ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+      } else if (drawingMode === 'grid') {
+        const gridPoints = [
+          { id: 1, lat: lat - 0.0015, lng: lng - 0.0015, altitude: 45, speed: 12, hoverTime: 1, action: 'Photo Interval', heading: 0, gimbalPitch: -45, delay: 0 },
+          { id: 2, lat: lat - 0.0015, lng: lng + 0.0015, altitude: 45, speed: 12, hoverTime: 0, action: 'Video Start', heading: 90, gimbalPitch: -90, delay: 0 },
+          { id: 3, lat: lat, lng: lng + 0.0015, altitude: 45, speed: 10, hoverTime: 2, action: 'Photo Interval', heading: 180, gimbalPitch: -45, delay: 1 },
+          { id: 4, lat: lat, lng: lng - 0.0015, altitude: 45, speed: 10, hoverTime: 0, action: 'Video Stop', heading: 270, gimbalPitch: 0, delay: 0 }
+        ];
+        setWaypoints(gridPoints);
+        setActiveWaypointIndex(0);
+        setActiveRightTab('waypoint');
+        logEvent('SUCCESS', `AI Co-pilot: Grid survey flight lines generated around ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+      } else if (drawingMode === 'orbit') {
+        const radius = 0.0012;
+        const orbitPoints = Array.from({ length: 6 }).map((_, idx) => {
+          const angle = (idx * Math.PI * 2) / 6;
+          return {
+            id: idx + 1,
+            lat: lat + Math.sin(angle) * radius * 0.7,
+            lng: lng + Math.cos(angle) * radius,
+            altitude: 50,
+            speed: 8,
+            hoverTime: 1,
+            action: 'Photo Interval',
+            heading: Math.floor((angle * 180) / Math.PI),
+            gimbalPitch: -60,
+            delay: 0
+          };
+        });
+        setWaypoints(orbitPoints);
+        setActiveWaypointIndex(0);
+        setActiveRightTab('waypoint');
+        logEvent('SUCCESS', `AI Co-pilot: 6-Node Orbit pattern loaded around target center.`);
+      } else if (drawingMode === 'corridor') {
+        const corridorPoints = [
+          { id: 1, lat: lat - 0.002, lng: lng - 0.0005, altitude: 35, speed: 10, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 },
+          { id: 2, lat: lat - 0.001, lng: lng + 0.0005, altitude: 35, speed: 10, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 },
+          { id: 3, lat: lat + 0.001, lng: lng - 0.0005, altitude: 35, speed: 10, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 },
+          { id: 4, lat: lat + 0.002, lng: lng + 0.0005, altitude: 35, speed: 10, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 }
+        ];
+        setWaypoints(corridorPoints);
+        setActiveWaypointIndex(0);
+        setActiveRightTab('waypoint');
+        logEvent('SUCCESS', `AI Co-pilot: Corridor inspection grid aligned.`);
+      }
     });
 
     return () => {
@@ -410,7 +563,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
         mapInstanceRef.current = null;
       }
     };
-  }, [satelliteView, simulating]);
+  }, [satelliteView, simulating, drawingMode]);
 
   // Sync Geofences & No-Fly Zones
   useEffect(() => {
