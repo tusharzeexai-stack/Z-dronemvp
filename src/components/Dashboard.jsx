@@ -2281,13 +2281,28 @@ function Dashboard({ onLogout }) {
                       <div>MEDIUM HEIGHT FPV</div>
                     </div>
                   </div>
-                  
                   {/* Bounding box mock scan HUD */}
-                  <div className="absolute inset-1/4 border border-dashed border-red-500/60 pointer-events-none flex items-center justify-center">
-                    <span className="bg-red-600 text-white text-[8px] px-1.5 py-0.5 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-wider shadow">
-                      {selectedAlert.type?.toUpperCase() || "DETECTION"}
-                    </span>
-                  </div>
+                  {selectedAlert.boundingBox ? (
+                    <div 
+                      className={`absolute border border-dashed pointer-events-none flex items-center justify-center ${selectedAlert.boundingBox.color || 'border-red-500/80 bg-red-500/5'}`}
+                      style={{
+                        top: selectedAlert.boundingBox.top,
+                        left: selectedAlert.boundingBox.left,
+                        width: selectedAlert.boundingBox.width,
+                        height: selectedAlert.boundingBox.height
+                      }}
+                    >
+                      <span className={`text-[8px] px-1.5 py-0.5 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-wider shadow ${selectedAlert.boundingBox.color ? 'bg-emerald-600 text-white' : 'bg-red-655 text-white'}`}>
+                        {selectedAlert.boundingBox.label}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="absolute inset-1/4 border border-dashed border-red-500/40 pointer-events-none flex items-center justify-center">
+                      <span className="bg-red-600 text-white text-[8px] px-1.5 py-0.5 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-wider shadow">
+                        {selectedAlert.type?.toUpperCase() || "DETECTION"}
+                      </span>
+                    </div>
+                  )}
 
                   <div className="flex justify-between items-end">
                     <div>WATERMARK: {selectedAlert.id}</div>

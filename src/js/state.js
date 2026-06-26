@@ -87,7 +87,8 @@ const DEFAULT_ALERTS = [
         description: "Battery level dropped below 15% during transit. Automated return-to-base initiated.",
         severity: "error", // error, warning, success
         resolved: false,
-        imageUrl: "/alert_battery.png"
+        imageUrl: "/alert_battery.png",
+        boundingBox: null
     },
     {
         id: "ALT-002",
@@ -98,7 +99,8 @@ const DEFAULT_ALERTS = [
         description: "Wind speeds exceeding 35km/h. All lightweight units grounded until further notice.",
         severity: "warning",
         resolved: false,
-        imageUrl: "/alert_gps.png" // fallback/ambient drone FPV view
+        imageUrl: "/alert_gps.png", // fallback/ambient drone FPV view
+        boundingBox: null
     },
     {
         id: "ALT-004",
@@ -110,7 +112,8 @@ const DEFAULT_ALERTS = [
         severity: "error",
         resolved: false,
         videoUrl: "/cam2.mp4#t=15,20",
-        imageUrl: "/alert_intrusion.png"
+        imageUrl: "/alert_intrusion.png",
+        boundingBox: { top: '35%', left: '45%', width: '15%', height: '35%', label: 'INTRUDER DETECTED' }
     },
     {
         id: "ALT-005",
@@ -122,7 +125,8 @@ const DEFAULT_ALERTS = [
         severity: "error",
         resolved: false,
         videoUrl: "/cam1.mp4#t=25,30",
-        imageUrl: "/alert_thermal.png"
+        imageUrl: "/alert_thermal.png",
+        boundingBox: { top: '28%', left: '32%', width: '22%', height: '22%', label: 'THERMAL HOTSPOT (92°C)' }
     },
     {
         id: "ALT-006",
@@ -134,7 +138,8 @@ const DEFAULT_ALERTS = [
         severity: "warning",
         resolved: false,
         videoUrl: "/cam1.mp4#t=45,50",
-        imageUrl: "/alert_collision.png"
+        imageUrl: "/alert_collision.png",
+        boundingBox: { top: '15%', left: '42%', width: '25%', height: '35%', label: 'CRANE PROXIMITY CRITICAL' }
     },
     {
         id: "ALT-007",
@@ -146,7 +151,8 @@ const DEFAULT_ALERTS = [
         severity: "warning",
         resolved: true,
         videoUrl: "/cam2.mp4#t=8,13",
-        imageUrl: "/alert_smoke.png"
+        imageUrl: "/alert_smoke.png",
+        boundingBox: { top: '22%', left: '48%', width: '15%', height: '25%', label: 'SMOKE PLUME DETECTED' }
     },
     {
         id: "ALT-008",
@@ -158,7 +164,8 @@ const DEFAULT_ALERTS = [
         severity: "warning",
         resolved: false,
         videoUrl: "/cam1.mp4#t=5,10",
-        imageUrl: "/alert_gps.png"
+        imageUrl: "/alert_gps.png",
+        boundingBox: null
     },
     {
         id: "ALT-009",
@@ -170,7 +177,8 @@ const DEFAULT_ALERTS = [
         severity: "warning",
         resolved: false,
         videoUrl: "/cam2.mp4#t=5,10",
-        imageUrl: "/alert_no_helmet.png"
+        imageUrl: "/alert_no_helmet.png",
+        boundingBox: { top: '42%', left: '48%', width: '10%', height: '12%', label: 'NO HELMET DETECTED' }
     },
     {
         id: "ALT-010",
@@ -182,7 +190,8 @@ const DEFAULT_ALERTS = [
         severity: "warning",
         resolved: false,
         videoUrl: "/cam2.mp4#t=10,15",
-        imageUrl: "/alert_no_vest.png"
+        imageUrl: "/alert_no_vest.png",
+        boundingBox: { top: '48%', left: '45%', width: '12%', height: '25%', label: 'MISSING SAFETY VEST' }
     },
     {
         id: "ALT-011",
@@ -194,7 +203,8 @@ const DEFAULT_ALERTS = [
         severity: "error",
         resolved: false,
         videoUrl: "/cam1.mp4#t=12,17",
-        imageUrl: "/alert_man_down.png"
+        imageUrl: "/alert_man_down.png",
+        boundingBox: { top: '55%', left: '38%', width: '24%', height: '20%', label: 'PERSON DOWN DETECTED' }
     },
     {
         id: "ALT-012",
@@ -206,7 +216,8 @@ const DEFAULT_ALERTS = [
         severity: "error",
         resolved: false,
         videoUrl: "/cam1.mp4#t=20,25",
-        imageUrl: "/alert_fire.png"
+        imageUrl: "/alert_fire.png",
+        boundingBox: { top: '48%', left: '30%', width: '22%', height: '22%', label: 'FLAME DETECTION ACTIVE' }
     },
     {
         id: "ALT-013",
@@ -218,7 +229,8 @@ const DEFAULT_ALERTS = [
         severity: "success",
         resolved: false,
         videoUrl: "/cam1.mp4#t=30,35",
-        imageUrl: "/alert_progress.png"
+        imageUrl: "/alert_progress.png",
+        boundingBox: { top: '15%', left: '15%', width: '70%', height: '70%', label: 'VOLUMETRIC SURVEY AREA', color: 'border-emerald-500 text-emerald-400 bg-emerald-500/10' }
     },
     {
         id: "ALT-003",
@@ -229,7 +241,8 @@ const DEFAULT_ALERTS = [
         description: "Routine sensor calibration and propeller replacement successful. Unit cleared for service.",
         severity: "success",
         resolved: true,
-        imageUrl: "/alert_progress.png"
+        imageUrl: "/alert_progress.png",
+        boundingBox: null
     }
 ];
 
