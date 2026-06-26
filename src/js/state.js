@@ -178,7 +178,7 @@ const DEFAULT_ALERTS = [
         resolved: false,
         videoUrl: "/cam2.mp4#t=5,10",
         imageUrl: "/alert_no_helmet.png",
-        boundingBox: { top: '42%', left: '48%', width: '10%', height: '12%', label: 'NO HELMET DETECTED' }
+        boundingBox: { top: '12%', left: '4%', width: '6%', height: '18%', label: 'NO HELMET DETECTED' }
     },
     {
         id: "ALT-010",
@@ -274,14 +274,23 @@ export class AppState {
         
         let loadedAlerts = JSON.parse(localStorage.getItem('z_drone_alerts'));
         if (loadedAlerts) {
+            loadedAlerts = loadedAlerts.map(loadedAlert => {
+                const defaultAlert = DEFAULT_ALERTS.find(d => d.id === loadedAlert.id);
+                if (defaultAlert) {
+                    return {
+                        ...loadedAlert,
+                        imageUrl: defaultAlert.imageUrl || loadedAlert.imageUrl,
+                        videoUrl: defaultAlert.videoUrl || loadedAlert.videoUrl,
+                        boundingBox: defaultAlert.boundingBox !== undefined ? defaultAlert.boundingBox : loadedAlert.boundingBox
+                    };
+                }
+                return loadedAlert;
+            });
+
             const loadedIds = new Set(loadedAlerts.map(a => a.id));
             const newDefaults = DEFAULT_ALERTS.filter(a => !loadedIds.has(a.id));
-            if (newDefaults.length > 0) {
-                this.alerts = [...newDefaults, ...loadedAlerts];
-                localStorage.setItem('z_drone_alerts', JSON.stringify(this.alerts));
-            } else {
-                this.alerts = loadedAlerts;
-            }
+            this.alerts = [...newDefaults, ...loadedAlerts];
+            localStorage.setItem('z_drone_alerts', JSON.stringify(this.alerts));
         } else {
             this.alerts = DEFAULT_ALERTS;
         }

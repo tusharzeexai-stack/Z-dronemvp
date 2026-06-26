@@ -337,12 +337,14 @@ function Dashboard({ onLogout }) {
             id: alertId,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             unit: 'ZD-109',
-            type: 'battery_alert',
+            type: 'intrusion',
             title: 'Security Intrusion',
             description: `Warning: ${d.ped_count} unauthorized human presence detected by drone ZD-109 in Sector Alpha!`,
             severity: 'error',
             resolved: false,
-            videoUrl: `/cam2.mp4#t=${startSec},${endSec}`
+            videoUrl: `/cam2.mp4#t=${startSec},${endSec}`,
+            imageUrl: '/alert_intrusion.png',
+            boundingBox: { top: '35%', left: '42%', width: '18%', height: '32%', label: 'INTRUDER DETECTED' }
           };
           appState.alerts.unshift(newAlert);
           localStorage.setItem('z_drone_alerts', JSON.stringify(appState.alerts));
@@ -2284,7 +2286,7 @@ function Dashboard({ onLogout }) {
                   {/* Bounding box mock scan HUD */}
                   {selectedAlert.boundingBox ? (
                     <div 
-                      className={`absolute border border-dashed pointer-events-none flex items-center justify-center ${selectedAlert.boundingBox.color || 'border-red-500/80 bg-red-500/5'}`}
+                      className={`absolute border-2 border-dashed pointer-events-none flex items-center justify-center ${selectedAlert.boundingBox.color || 'border-red-500 bg-red-500/10'}`}
                       style={{
                         top: selectedAlert.boundingBox.top,
                         left: selectedAlert.boundingBox.left,
@@ -2292,12 +2294,12 @@ function Dashboard({ onLogout }) {
                         height: selectedAlert.boundingBox.height
                       }}
                     >
-                      <span className={`text-[8px] px-1.5 py-0.5 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-wider shadow ${selectedAlert.boundingBox.color ? 'bg-emerald-600 text-white' : 'bg-red-655 text-white'}`}>
+                      <span className={`text-[8px] px-1.5 py-0.5 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-wider shadow ${selectedAlert.boundingBox.color ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}>
                         {selectedAlert.boundingBox.label}
                       </span>
                     </div>
                   ) : (
-                    <div className="absolute inset-1/4 border border-dashed border-red-500/40 pointer-events-none flex items-center justify-center">
+                    <div className="absolute inset-1/4 border-2 border-dashed border-red-500/60 pointer-events-none flex items-center justify-center">
                       <span className="bg-red-600 text-white text-[8px] px-1.5 py-0.5 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-wider shadow">
                         {selectedAlert.type?.toUpperCase() || "DETECTION"}
                       </span>
