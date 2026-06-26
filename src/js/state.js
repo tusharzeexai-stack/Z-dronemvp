@@ -191,7 +191,7 @@ const DEFAULT_ALERTS = [
         resolved: false,
         videoUrl: "/cam2.mp4#t=10,15",
         imageUrl: "/alert_no_vest.png",
-        boundingBox: { top: '48%', left: '45%', width: '12%', height: '25%', label: 'MISSING SAFETY VEST' }
+        boundingBox: { top: '4%', left: '6%', width: '10%', height: '14%', label: 'MISSING SAFETY VEST' }
     },
     {
         id: "ALT-011",
