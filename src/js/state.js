@@ -246,6 +246,97 @@ const DEFAULT_ALERTS = [
     }
 ];
 
+const DEFAULT_MISSIONS = [
+  { 
+    id: 'MSN-AR-101', 
+    name: 'IMT Kharkhoda Perimeter Survey Alpha', 
+    drone: 'ZD-109', 
+    type: 'Grid Survey', 
+    status: 'Scheduled', 
+    time: '18m 40s', 
+    distance: '5.2 km', 
+    battery: '42%', 
+    coverage: '92%', 
+    waypoints: 4, 
+    speed: 10, 
+    cruiseAlt: 45, 
+    createdDate: '2026-06-25', 
+    lastModified: '2026-06-26',
+    waypointsList: [
+      { id: 1, lat: 28.8308, lng: 76.9311, altitude: 45, speed: 10, hoverTime: 2, action: 'Photo Interval', heading: 90, gimbalPitch: -45, delay: 0 },
+      { id: 2, lat: 28.8325, lng: 76.9335, altitude: 45, speed: 10, hoverTime: 0, action: 'Video Start', heading: 120, gimbalPitch: -90, delay: 0 },
+      { id: 3, lat: 28.8340, lng: 76.9358, altitude: 50, speed: 8, hoverTime: 5, action: 'Hover', heading: 180, gimbalPitch: -30, delay: 2 },
+      { id: 4, lat: 28.8355, lng: 76.9380, altitude: 50, speed: 12, hoverTime: 0, action: 'None', heading: 240, gimbalPitch: 0, delay: 0 }
+    ]
+  },
+  { 
+    id: 'MSN-AR-102', 
+    name: 'Plant Boundary Inspection Vector Bravo', 
+    drone: 'ZD-088', 
+    type: 'Pipeline Inspection', 
+    status: 'Scheduled', 
+    time: '35m 12s', 
+    distance: '10.8 km', 
+    battery: '78%', 
+    coverage: '98%', 
+    waypoints: 4, 
+    speed: 12, 
+    cruiseAlt: 30, 
+    createdDate: '2026-06-25', 
+    lastModified: '2026-06-26',
+    waypointsList: [
+      { id: 1, lat: 28.8295, lng: 76.9295, altitude: 30, speed: 12, hoverTime: 0, action: 'Video Start', heading: 45, gimbalPitch: -45, delay: 0 },
+      { id: 2, lat: 28.8315, lng: 76.9315, altitude: 30, speed: 12, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 },
+      { id: 3, lat: 28.8335, lng: 76.9340, altitude: 35, speed: 12, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 },
+      { id: 4, lat: 28.8360, lng: 76.9365, altitude: 35, speed: 10, hoverTime: 2, action: 'Video Stop', heading: 90, gimbalPitch: 0, delay: 1 }
+    ]
+  },
+  { 
+    id: 'MSN-AR-103', 
+    name: 'Emergency Evacuation Route Corridor', 
+    drone: 'ZD-112', 
+    type: 'Search and Rescue', 
+    status: 'Active', 
+    time: '24m 50s', 
+    distance: '7.4 km', 
+    battery: '60%', 
+    coverage: '95%', 
+    waypoints: 4, 
+    speed: 8, 
+    cruiseAlt: 15, 
+    createdDate: '2026-06-24', 
+    lastModified: '2026-06-26',
+    waypointsList: [
+      { id: 1, lat: 28.8280, lng: 76.9290, altitude: 15, speed: 8, hoverTime: 3, action: 'Hover', heading: 180, gimbalPitch: -30, delay: 2 },
+      { id: 2, lat: 28.8300, lng: 76.9310, altitude: 15, speed: 8, hoverTime: 1, action: 'Photo Interval', heading: 180, gimbalPitch: -45, delay: 0 },
+      { id: 3, lat: 28.8320, lng: 76.9330, altitude: 15, speed: 8, hoverTime: 1, action: 'Photo Interval', heading: 180, gimbalPitch: -45, delay: 0 },
+      { id: 4, lat: 28.8345, lng: 76.9350, altitude: 20, speed: 10, hoverTime: 0, action: 'None', heading: 90, gimbalPitch: 0, delay: 0 }
+    ]
+  },
+  { 
+    id: 'MSN-AR-104', 
+    name: 'Factory Thermal Infrastructure Audit', 
+    drone: 'ZD-055', 
+    type: 'Infrastructure Inspection', 
+    status: 'Completed', 
+    time: '40m 15s', 
+    distance: '12.6 km', 
+    battery: '85%', 
+    coverage: '88%', 
+    waypoints: 4, 
+    speed: 14, 
+    cruiseAlt: 50, 
+    createdDate: '2026-06-23', 
+    lastModified: '2026-06-25',
+    waypointsList: [
+      { id: 1, lat: 28.8370, lng: 76.9390, altitude: 50, speed: 14, hoverTime: 1, action: 'Photo Interval', heading: 270, gimbalPitch: -90, delay: 0 },
+      { id: 2, lat: 28.8350, lng: 76.9370, altitude: 50, speed: 14, hoverTime: 1, action: 'Photo Interval', heading: 270, gimbalPitch: -90, delay: 0 },
+      { id: 3, lat: 28.8330, lng: 76.9345, altitude: 50, speed: 14, hoverTime: 2, action: 'Hover', heading: 180, gimbalPitch: -45, delay: 2 },
+      { id: 4, lat: 28.8310, lng: 76.9320, altitude: 45, speed: 10, hoverTime: 0, action: 'None', heading: 90, gimbalPitch: 0, delay: 0 }
+    ]
+  }
+];
+
 const DEFAULT_USERS = [
     { name: "Alex Rivera", role: "Fleet Manager", email: "alex.rivera@z-drone.com", status: "Active", flights: 142 },
     { name: "C. Nolan", role: "Flight Supervisor", email: "c.nolan@z-drone.com", status: "Active", flights: 98 },
@@ -297,6 +388,7 @@ export class AppState {
 
         this.users = JSON.parse(localStorage.getItem('z_drone_users')) || DEFAULT_USERS;
         this.settings = JSON.parse(localStorage.getItem('z_drone_settings')) || DEFAULT_SETTINGS;
+        this.missions = JSON.parse(localStorage.getItem('z_drone_missions')) || DEFAULT_MISSIONS;
     }
 
     saveState() {
@@ -305,6 +397,7 @@ export class AppState {
         localStorage.setItem('z_drone_alerts', JSON.stringify(this.alerts));
         localStorage.setItem('z_drone_users', JSON.stringify(this.users));
         localStorage.setItem('z_drone_settings', JSON.stringify(this.settings));
+        localStorage.setItem('z_drone_missions', JSON.stringify(this.missions));
         this.triggerUpdate();
     }
 
@@ -419,6 +512,63 @@ export class AppState {
     toggleTheme() {
         this.settings.theme = this.settings.theme === "light" ? "dark" : "light";
         this.saveState();
+    }
+
+    // Mission Operations
+    addMission(mission) {
+        const id = `MSN-AR-${Math.floor(105 + Math.random() * 895)}`;
+        const newM = {
+            id,
+            status: "Scheduled",
+            createdDate: new Date().toISOString().split('T')[0],
+            lastModified: new Date().toISOString().split('T')[0],
+            waypointsList: [
+                { id: 1, lat: 28.8308, lng: 76.9311, altitude: 45, speed: 10, hoverTime: 2, action: 'Hover', heading: 90, gimbalPitch: -45, delay: 0 }
+            ],
+            waypoints: 1,
+            distance: "1.5 km",
+            time: "6m 12s",
+            battery: "45%",
+            coverage: "12%",
+            ...mission
+        };
+        this.missions.unshift(newM);
+        this.saveState();
+        return newM;
+    }
+
+    updateMission(id, updatedFields) {
+        const index = this.missions.findIndex(m => m.id === id);
+        if (index !== -1) {
+            this.missions[index] = {
+                ...this.missions[index],
+                ...updatedFields,
+                lastModified: new Date().toISOString().split('T')[0]
+            };
+            this.saveState();
+        }
+    }
+
+    updateMissionWaypoints(id, waypointsList) {
+        const index = this.missions.findIndex(m => m.id === id);
+        if (index !== -1) {
+            const count = waypointsList.length;
+            const estDist = parseFloat((count * 1.35).toFixed(1));
+            const estMinutes = Math.floor(count * 4.5);
+            const estSeconds = Math.floor((count * 4.5 % 1) * 60);
+            const batteryUsed = Math.min(100, Math.round(count * 10 + 15));
+
+            this.missions[index] = {
+                ...this.missions[index],
+                waypointsList: waypointsList,
+                waypoints: count,
+                distance: `${estDist} km`,
+                time: `${estMinutes}m ${estSeconds}s`,
+                battery: `${batteryUsed}%`,
+                lastModified: new Date().toISOString().split('T')[0]
+            };
+            this.saveState();
+        }
     }
 }
 

@@ -7,7 +7,8 @@ export function useAppState() {
     flights: [...state.flights],
     alerts: [...state.alerts],
     users: [...state.users],
-    settings: { ...state.settings }
+    settings: { ...state.settings },
+    missions: [...state.missions]
   });
 
   useEffect(() => {
@@ -17,7 +18,8 @@ export function useAppState() {
         flights: [...s.flights],
         alerts: [...s.alerts],
         users: [...s.users],
-        settings: { ...s.settings }
+        settings: { ...s.settings },
+        missions: [...s.missions]
       });
     };
     state.subscribe(listener);
@@ -48,7 +50,10 @@ export function useAppState() {
       setLowBatteryThreshold: (val) => {
         state.settings.lowBatteryThreshold = val;
         state.saveState();
-      }
+      },
+      addMission: (m) => state.addMission(m),
+      updateMission: (id, updatedFields) => state.updateMission(id, updatedFields),
+      updateMissionWaypoints: (id, waypointsList) => state.updateMissionWaypoints(id, waypointsList)
     }
   };
 }

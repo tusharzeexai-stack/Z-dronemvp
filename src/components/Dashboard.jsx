@@ -157,11 +157,9 @@ function Dashboard({ onLogout }) {
     { center: [34.052, -118.243], radius: 150, name: "Tall Building Sector A" },
     { center: [34.059, -118.248], radius: 200, name: "Helipad Airspace Delta" }
   ]);
-  const [upcomingMissions, setUpcomingMissions] = useState([
-    { name: 'Sector Delta Thermal Scan', drone: 'ZD-109', time: '04:30 PM Today', status: 'Scheduled' },
-    { name: 'Westside Delivery Cycle', drone: 'ZD-109', time: '06:15 PM Today', status: 'Pending Approval' },
-    { name: 'Grid Area Mapping Alpha', drone: 'ZD-088', time: '09:00 AM Tomorrow', status: 'Scheduled' }
-  ]);
+  const upcomingMissions = (appState.missions || []).filter(m => 
+    m.status === 'Scheduled' || m.status === 'Active' || m.status === 'Pending Approval'
+  );
   const [satelliteMode, setSatelliteMode] = useState(false);
 
   // SSE telemetry state

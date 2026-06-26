@@ -6,7 +6,7 @@ import {
   Wind, Trash2, Layers, Settings, Activity, Cpu, ShieldAlert, 
   Sparkles, Battery, Maximize2, ChevronRight, Info, Navigation, 
   Eye, Bot, CheckCircle, MapPin, AlertCircle, RefreshCw, X, Sliders, Check,
-  Link, Link2Off, Radio, RefreshCcw, ShieldCheck, Thermometer, ShieldX, HelpCircle
+  Link, Link2Off, Radio, RefreshCcw, ShieldCheck, Thermometer, ShieldX, HelpCircle, Edit
 } from 'lucide-react';
 
 // --- MOCK MISSION DATABASE ---
@@ -265,6 +265,23 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
   const [searchQuery, setSearchQuery] = useState('');
   const [activeRightTab, setActiveRightTab] = useState('autopilot'); // autopilot, telemetry, waypoint, ai_co_pilot
 
+  // Add/Edit Mission Modal States
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [newMissionName, setNewMissionName] = useState('');
+  const [newMissionDrone, setNewMissionDrone] = useState('');
+  const [newMissionType, setNewMissionType] = useState('Waypoint Mission');
+  const [newMissionAlt, setNewMissionAlt] = useState(45);
+  const [newMissionSpeed, setNewMissionSpeed] = useState(10);
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editMissionId, setEditMissionId] = useState('');
+  const [editMissionName, setEditMissionName] = useState('');
+  const [editMissionDrone, setEditMissionDrone] = useState('');
+  const [editMissionType, setEditMissionType] = useState('Waypoint Mission');
+  const [editMissionAlt, setEditMissionAlt] = useState(45);
+  const [editMissionSpeed, setEditMissionSpeed] = useState(10);
+  const [editMissionStatus, setEditMissionStatus] = useState('Scheduled');
+
   // Autopilot connection details
   const [connectionString, setConnectionString] = useState('udp://:14540');
   const [connectionStatus, setConnectionStatus] = useState('DISCONNECTED'); // CONNECTED, DISCONNECTED, CONNECTING
@@ -338,10 +355,16 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
   // API Service abstraction
   const apiService = useMemo(() => new ArduPilotService(getApiUrl), [getApiUrl]);
 
+  // Auto initialize default drone for new missions
+  useEffect(() => {
+    if (appState.drones && appState.drones.length > 0 && !newMissionDrone) {
+      setNewMissionDrone(appState.drones[0].id);
+    }
+  }, [appState.drones, newMissionDrone]);
 
   const activeMission = useMemo(() => {
-    return MOCK_MISSIONS.find(m => m.id === selectedMissionId) || MOCK_MISSIONS[0];
-  }, [selectedMissionId]);
+    return (appState.missions || []).find(m => m.id === selectedMissionId) || (appState.missions || [])[0] || {};
+  }, [selectedMissionId, appState.missions]);
 
   // --- LIVE BACKEND WEBSOCKET TELEMETRY ---
   // Opens ws/telemetry when connected, feeds real data into all GCS indicators
@@ -458,7 +481,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
   }, [connectionStatus]);
 
   useEffect(() => {
-    const selected = MOCK_MISSIONS.find(m => m.id === selectedMissionId);
+    const selected = (appState.missions || []).find(m => m.id === selectedMissionId);
     if (selected && selected.waypointsList) {
       setWaypoints(selected.waypointsList);
       setActiveWaypointIndex(0);
@@ -467,7 +490,19 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
       }
       logEvent('INFO', `Loaded mission: ${selected.name}`);
     }
-  }, [selectedMissionId]);
+  }, [selectedMissionId, appState.missions]);
+
+  // Auto-sync waypoints to global state
+  useEffect(() => {
+    if (!selectedMissionId) return;
+    const selected = (appState.missions || []).find(m => m.id === selectedMissionId);
+    if (selected && selected.waypointsList) {
+      const isDifferent = JSON.stringify(waypoints) !== JSON.stringify(selected.waypointsList);
+      if (isDifferent) {
+        actions.updateMissionWaypoints(selectedMissionId, waypoints);
+      }
+    }
+  }, [waypoints, selectedMissionId, appState.missions, actions]);
 
   // --- CONNECTED/DISCONNECTED STATE ACTIONS ---
   const handleConnect = async () => {
@@ -959,7 +994,15 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
         <div className="space-y-4">
           <header className="flex justify-between items-center">
             <h3 className="font-extrabold text-sm text-white drop-shadow">Mission Library</h3>
-            <button className="p-1.5 bg-white hover:bg-sky-100 text-sky-900 rounded-xl transition-all shadow">
+            <button 
+              onClick={() => {
+                if (appState.drones && appState.drones.length > 0) {
+                  setNewMissionDrone(appState.drones[0].id);
+                }
+                setAddModalOpen(true);
+              }}
+              className="p-1.5 bg-white hover:bg-sky-100 text-sky-900 rounded-xl transition-all shadow"
+            >
               <Plus className="w-4 h-4" />
             </button>
           </header>
@@ -977,7 +1020,9 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
 
           {/* Mission Card list */}
           <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
-            {MOCK_MISSIONS.map((m) => (
+            {(appState.missions || [])
+              .filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()) || m.id.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map((m) => (
               <div 
                 key={m.id} 
                 onClick={() => setSelectedMissionId(m.id)}
@@ -989,9 +1034,30 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               >
                 <div className="flex justify-between items-start">
                   <span className={`text-[9px] uppercase tracking-widest font-black ${selectedMissionId === m.id ? 'text-sky-750' : 'text-sky-200'}`}>{m.id}</span>
-                  <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-white/20 text-white border border-white/25">
-                    {m.status}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {selectedMissionId === m.id && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditMissionId(m.id);
+                          setEditMissionName(m.name);
+                          setEditMissionDrone(m.drone);
+                          setEditMissionType(m.type);
+                          setEditMissionSpeed(typeof m.speed === 'string' ? parseInt(m.speed) : (m.speed || 10));
+                          setEditMissionAlt(typeof m.cruiseAlt === 'string' ? parseInt(m.cruiseAlt) : (m.cruiseAlt || 45));
+                          setEditMissionStatus(m.status);
+                          setEditModalOpen(true);
+                        }}
+                        className="p-1 hover:bg-sky-200 rounded text-sky-900 transition-colors"
+                        title="Edit Mission Details"
+                      >
+                        <Edit className="w-3 h-3 text-sky-700" />
+                      </button>
+                    )}
+                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-white/20 text-white border border-white/25">
+                      {m.status}
+                    </span>
+                  </div>
                 </div>
                 <h4 className={`font-black text-xs mt-1.5 truncate ${selectedMissionId === m.id ? 'text-sky-900' : 'text-white'}`}>{m.name}</h4>
                 <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 mt-3 text-[10px]">
@@ -1470,13 +1536,256 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               });
               logEvent('INFO', `MAVLink: Flight details dispatched to system registers.`);
             }}
-            className="w-full bg-sky-900/40 border border-sky-400/60 hover:bg-sky-500/40 text-white py-2.5 rounded-xl text-xs font-bold transition-all text-center block"
+            className="w-full bg-sky-900/40 border border-sky-400/60 hover:bg-sky-550/40 text-white py-2.5 rounded-xl text-xs font-bold transition-all text-center block"
           >
             Dispatch Flight Log
           </button>
         </div>
       </div>
 
+      {/* --- ADD MISSION MODAL --- */}
+      {addModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-sky-850 to-sky-950 border border-sky-500/40 p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4 text-left">
+            <div className="flex justify-between items-center border-b border-sky-500/30 pb-3">
+              <h3 className="font-extrabold text-sm text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-sky-400" />
+                Create Flight Plan
+              </h3>
+              <button onClick={() => setAddModalOpen(false)} className="text-sky-300 hover:text-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!newMissionName.trim()) return;
+              const newM = actions.addMission({
+                name: newMissionName,
+                drone: newMissionDrone,
+                type: newMissionType,
+                speed: newMissionSpeed,
+                cruiseAlt: newMissionAlt,
+                waypointsList: [
+                  { id: 1, lat: 28.8308, lng: 76.9311, altitude: newMissionAlt, speed: newMissionSpeed, hoverTime: 2, action: 'Hover', heading: 90, gimbalPitch: -45, delay: 0 }
+                ]
+              });
+              if (newM) {
+                setSelectedMissionId(newM.id);
+                logEvent('SUCCESS', `Created mission: ${newMissionName}`);
+              }
+              setAddModalOpen(false);
+              setNewMissionName('');
+            }} className="space-y-4 text-white">
+              <div>
+                <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Mission Name</label>
+                <input 
+                  type="text" 
+                  required
+                  value={newMissionName}
+                  onChange={(e) => setNewMissionName(e.target.value)}
+                  placeholder="Perimeter Thermal Grid Sweep..."
+                  className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white placeholder-sky-400/50 focus:outline-none focus:border-sky-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Target Drone</label>
+                  <select
+                    value={newMissionDrone}
+                    onChange={(e) => setNewMissionDrone(e.target.value)}
+                    className="w-full text-xs px-2 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                  >
+                    {(appState.drones || []).map(d => (
+                      <option key={d.id} value={d.id} className="bg-sky-900 text-white">{d.id} - {d.model}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Mission Type</label>
+                  <select
+                    value={newMissionType}
+                    onChange={(e) => setNewMissionType(e.target.value)}
+                    className="w-full text-xs px-2 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                  >
+                    {MISSION_TYPES.map(t => (
+                      <option key={t} value={t} className="bg-sky-900 text-white">{t}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Cruise Speed (m/s)</label>
+                  <input 
+                    type="number" 
+                    min="2"
+                    max="25"
+                    value={newMissionSpeed}
+                    onChange={(e) => setNewMissionSpeed(Number(e.target.value))}
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Cruise Altitude (m)</label>
+                  <input 
+                    type="number" 
+                    min="10"
+                    max="120"
+                    value={newMissionAlt}
+                    onChange={(e) => setNewMissionAlt(Number(e.target.value))}
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-3">
+                <button 
+                  type="button"
+                  onClick={() => setAddModalOpen(false)}
+                  className="flex-1 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white font-bold text-xs hover:bg-sky-800/40 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs transition-colors"
+                >
+                  Create Plan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- EDIT MISSION MODAL --- */}
+      {editModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-sky-850 to-sky-950 border border-sky-550/40 p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4 text-left">
+            <div className="flex justify-between items-center border-b border-sky-500/30 pb-3">
+              <h3 className="font-extrabold text-sm text-white flex items-center gap-2">
+                <Edit className="w-4 h-4 text-sky-450" />
+                Edit Mission: {editMissionId}
+              </h3>
+              <button onClick={() => setEditModalOpen(false)} className="text-sky-300 hover:text-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!editMissionName.trim()) return;
+              actions.updateMission(editMissionId, {
+                name: editMissionName,
+                drone: editMissionDrone,
+                type: editMissionType,
+                speed: editMissionSpeed,
+                cruiseAlt: editMissionAlt,
+                status: editMissionStatus
+              });
+              logEvent('SUCCESS', `Updated mission details for ${editMissionId}`);
+              setEditModalOpen(false);
+            }} className="space-y-4 text-white">
+              <div>
+                <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Mission Name</label>
+                <input 
+                  type="text" 
+                  required
+                  value={editMissionName}
+                  onChange={(e) => setEditMissionName(e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Target Drone</label>
+                  <select
+                    value={editMissionDrone}
+                    onChange={(e) => setEditMissionDrone(e.target.value)}
+                    className="w-full text-xs px-2 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                  >
+                    {(appState.drones || []).map(d => (
+                      <option key={d.id} value={d.id} className="bg-sky-900 text-white">{d.id} - {d.model}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Mission Type</label>
+                  <select
+                    value={editMissionType}
+                    onChange={(e) => setEditMissionType(e.target.value)}
+                    className="w-full text-xs px-2 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                  >
+                    {MISSION_TYPES.map(t => (
+                      <option key={t} value={t} className="bg-sky-900 text-white">{t}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Cruise Speed (m/s)</label>
+                  <input 
+                    type="number" 
+                    min="2"
+                    max="25"
+                    value={editMissionSpeed}
+                    onChange={(e) => setEditMissionSpeed(Number(e.target.value))}
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Cruise Altitude (m)</label>
+                  <input 
+                    type="number" 
+                    min="10"
+                    max="120"
+                    value={editMissionAlt}
+                    onChange={(e) => setEditMissionAlt(Number(e.target.value))}
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-sky-200 uppercase tracking-wider mb-1">Status</label>
+                <select
+                  value={editMissionStatus}
+                  onChange={(e) => setEditMissionStatus(e.target.value)}
+                  className="w-full text-xs px-2 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                >
+                  <option value="Scheduled" className="bg-sky-900 text-white">Scheduled</option>
+                  <option value="Active" className="bg-sky-900 text-white">Active</option>
+                  <option value="Pending Approval" className="bg-sky-900 text-white">Pending Approval</option>
+                  <option value="Draft" className="bg-sky-900 text-white">Draft</option>
+                  <option value="Completed" className="bg-sky-900 text-white">Completed</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-3">
+                <button 
+                  type="button"
+                  onClick={() => setEditModalOpen(false)}
+                  className="flex-1 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white font-bold text-xs hover:bg-sky-800/40 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
