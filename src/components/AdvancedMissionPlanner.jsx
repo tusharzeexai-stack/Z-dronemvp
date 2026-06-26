@@ -987,6 +987,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
   };
 
   return (
+    <>
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)] text-white font-sans pb-4">
       
       {/* ── LEFT PANEL: MISSION LIBRARY (3 cols) ── */}
@@ -1542,6 +1543,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
           </button>
         </div>
       </div>
+    </div>
 
       {/* --- ADD MISSION MODAL --- */}
       {addModalOpen && (
@@ -1786,6 +1788,6 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
