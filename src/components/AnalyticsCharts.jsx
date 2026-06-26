@@ -108,3 +108,6 @@ export function BatteryHealthChart({ theme }) {
   return <canvas ref={canvasRef} className="w-full h-full" />;
 }
 
+
+
+

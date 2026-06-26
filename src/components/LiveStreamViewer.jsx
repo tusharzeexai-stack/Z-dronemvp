@@ -159,7 +159,7 @@ export default function LiveStreamViewer({ droneId, droneName, className = '' })
               <p className="text-slate-500 text-xs max-w-48">{errorMsg}</p>
               <button
                 onClick={startStream}
-                className="mt-2 px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs rounded-lg transition-colors"
+                className="mt-2 px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-slate-800 text-xs rounded-lg transition-colors"
               >
                 Retry Connection
               </button>
@@ -170,7 +170,7 @@ export default function LiveStreamViewer({ droneId, droneName, className = '' })
 
       {/* Live badge */}
       {status === 'live' && (
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-600/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-600/90 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
           <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
           LIVE
         </div>
@@ -178,7 +178,7 @@ export default function LiveStreamViewer({ droneId, droneName, className = '' })
 
       {/* Drone label */}
       {droneId && status === 'live' && (
-        <div className="absolute bottom-3 left-3 bg-slate-900/70 backdrop-blur-sm text-white text-xs font-semibold px-2 py-1 rounded-lg">
+        <div className="absolute bottom-3 left-3 bg-slate-900/70 backdrop-blur-sm text-slate-800 text-xs font-semibold px-2 py-1 rounded-lg">
           📡 {droneName || droneId} — AWS Kinesis WebRTC
         </div>
       )}
@@ -188,14 +188,14 @@ export default function LiveStreamViewer({ droneId, droneName, className = '' })
         <div className="absolute top-3 right-3 flex gap-2">
           <button
             onClick={cleanup}
-            className="bg-slate-800/80 hover:bg-slate-700 text-white p-1.5 rounded-lg transition-colors"
+            className="bg-slate-800/80 hover:bg-slate-700 text-slate-800 p-1.5 rounded-lg transition-colors"
             title="Stop stream"
           >
             <span className="material-symbols-outlined text-sm">stop</span>
           </button>
           <button
             onClick={startStream}
-            className="bg-slate-800/80 hover:bg-slate-700 text-white p-1.5 rounded-lg transition-colors"
+            className="bg-slate-800/80 hover:bg-slate-700 text-slate-800 p-1.5 rounded-lg transition-colors"
             title="Reconnect"
           >
             <span className="material-symbols-outlined text-sm">refresh</span>
@@ -205,4 +205,7 @@ export default function LiveStreamViewer({ droneId, droneName, className = '' })
     </div>
   );
 }
+
+
+
 

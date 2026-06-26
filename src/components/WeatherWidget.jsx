@@ -21,8 +21,8 @@ function WeatherWidget() {
         </div>
         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
           isSafe 
-            ? 'bg-emerald-500 text-white border-emerald-400' 
-            : 'bg-red-500 text-white border-red-400'
+            ? 'bg-emerald-500 text-slate-800 border-emerald-400' 
+            : 'bg-red-500 text-slate-800 border-red-400'
         }`}>
           {isSafe ? 'Clear to Fly' : 'Flight Restricted'}
         </span>
@@ -35,7 +35,7 @@ function WeatherWidget() {
           { label: 'Humidity', val: weather.humidity, icon: 'humidity_mid' },
           { label: 'Visibility', val: weather.visibility, icon: 'visibility' }
         ].map((item, idx) => (
-          <div key={idx} className="bg-sky-900/40 p-2.5 rounded-xl border border-sky-400/40 flex items-center gap-2.5">
+          <div key={idx} className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center gap-2.5">
             <span className="material-symbols-outlined text-slate-500 text-lg">{item.icon}</span>
             <div>
               <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{item.label}</p>
@@ -45,7 +45,7 @@ function WeatherWidget() {
         ))}
       </div>
 
-      <div className="bg-sky-900/40 p-3 rounded-xl border border-sky-400/40 flex items-center justify-between">
+      <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
         <div>
           <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Flight Suitability Score</span>
           <p className="text-sm font-bold text-slate-800 mt-1 flex items-center gap-1.5">
@@ -76,4 +76,7 @@ function WeatherWidget() {
 }
 
 export default WeatherWidget;
+
+
+
 

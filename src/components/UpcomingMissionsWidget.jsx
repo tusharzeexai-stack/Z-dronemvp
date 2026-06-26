@@ -4,12 +4,12 @@ function UpcomingMissionsWidget({ missions = [] }) {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'In Progress':
-        return 'bg-sky-500 text-white border-sky-400';
+        return 'bg-sky-500 text-slate-800 border-sky-400';
       case 'Pending Approval':
-        return 'bg-amber-500 text-white border-amber-400';
+        return 'bg-amber-500 text-slate-800 border-amber-400';
       case 'Scheduled':
       default:
-        return 'bg-emerald-500 text-white border-emerald-400';
+        return 'bg-emerald-500 text-slate-800 border-emerald-400';
     }
   };
 
@@ -28,7 +28,7 @@ function UpcomingMissionsWidget({ missions = [] }) {
           </div>
         ) : (
           missions.map((mission, idx) => (
-            <div key={idx} className="flex justify-between items-center p-2.5 rounded-lg border border-sky-400/40 bg-sky-900/40 hover:shadow-xs transition-all">
+            <div key={idx} className="flex justify-between items-center p-2.5 rounded-lg border border-sky-400/40 bg-white/40 hover:shadow-xs transition-all">
               <div className="text-left space-y-1">
                 <p className="text-xs font-bold text-slate-800">{mission.name}</p>
                 <div className="flex gap-2 text-[10px] text-slate-500 font-medium">
@@ -52,4 +52,7 @@ function UpcomingMissionsWidget({ missions = [] }) {
 }
 
 export default UpcomingMissionsWidget;
+
+
+
 

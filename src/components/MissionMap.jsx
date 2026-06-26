@@ -190,7 +190,7 @@ function MissionMap({
         html: `
           <div class="relative flex items-center justify-center w-8 h-8">
             <div class="absolute inset-0 ${markerColor}/20 rounded-full animate-ping opacity-75"></div>
-            <div class="w-6 h-6 ${markerColor} border-2 border-white rounded-full flex items-center justify-center shadow-lg text-white text-[11px] font-extrabold z-10">
+            <div class="w-6 h-6 ${markerColor} border-2 border-white rounded-full flex items-center justify-center shadow-lg text-slate-800 text-[11px] font-extrabold z-10">
               ${isStart || isEnd 
                 ? `<span class="material-symbols-outlined text-[12px]">${iconSymbol}</span>` 
                 : iconSymbol
@@ -218,7 +218,7 @@ function MissionMap({
       // Add popup with options
       const popupContent = L.DomUtil.create('div', 'p-2 space-y-2 text-left');
       popupContent.innerHTML = `
-        <div class="text-xs font-bold text-slate-800 dark:text-white mb-1">
+        <div class="text-xs font-bold text-slate-800 dark:text-slate-800 mb-1">
           ${isStart ? 'Launch Point (Start)' : isEnd ? 'Final Return Point' : `Waypoint #${idx + 1}`}
         </div>
         <div class="text-[10px] text-slate-500 space-y-0.5 font-mono">
@@ -262,17 +262,17 @@ function MissionMap({
         <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 p-3 rounded-xl shadow-lg flex items-center gap-4 text-left pointer-events-auto">
           <div>
             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Path Distance</span>
-            <span className="text-base font-extrabold text-slate-800 dark:text-white">{routeDistance} km</span>
+            <span className="text-base font-extrabold text-slate-800 dark:text-slate-800">{routeDistance} km</span>
           </div>
           <div className="w-px h-6 bg-slate-200 dark:bg-slate-800" />
           <div>
             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Est. Duration</span>
-            <span className="text-base font-extrabold text-slate-800 dark:text-white">{estimatedFlightTime} min</span>
+            <span className="text-base font-extrabold text-slate-800 dark:text-slate-800">{estimatedFlightTime} min</span>
           </div>
           <div className="w-px h-6 bg-slate-200 dark:bg-slate-800" />
           <div>
             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Waypoints</span>
-            <span className="text-base font-extrabold text-slate-800 dark:text-white">{waypoints.length}</span>
+            <span className="text-base font-extrabold text-slate-800 dark:text-slate-800">{waypoints.length}</span>
           </div>
         </div>
       </div>
@@ -284,7 +284,7 @@ function MissionMap({
           onClick={() => setAddMode(!addMode)}
           className={`p-2.5 rounded-xl border shadow-md flex items-center justify-center gap-1.5 transition-all text-xs font-bold ${
             addMode 
-              ? 'bg-sky-500 text-white border-sky-600' 
+              ? 'bg-sky-500 text-slate-800 border-sky-600' 
               : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50'
           }`}
           title={addMode ? "Clicking map places waypoints (Active)" : "Enable waypoint placement mode"}
@@ -346,7 +346,7 @@ function MissionMap({
           onClick={() => setSatelliteMode(!satelliteMode)}
           className={`p-2.5 rounded-xl border shadow-md flex items-center justify-center gap-1.5 transition-all text-xs font-bold ${
             satelliteMode 
-              ? 'bg-sky-500 text-white border-sky-600 shadow-sky-200' 
+              ? 'bg-sky-500 text-slate-800 border-sky-600 shadow-sky-200' 
               : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50'
           }`}
         >
@@ -375,4 +375,7 @@ function MissionMap({
 }
 
 export default MissionMap;
+
+
+
 

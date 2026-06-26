@@ -170,7 +170,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
         html: `
           <div class="relative flex items-center justify-center w-8 h-8">
               <div class="absolute inset-0 ${markerColor}/30 rounded-full animate-ping"></div>
-              <div class="w-6 h-6 ${markerColor} rounded-full flex items-center justify-center shadow-lg text-white border border-white/20 z-10">
+              <div class="w-6 h-6 ${markerColor} rounded-full flex items-center justify-center shadow-lg text-slate-800 border border-white/20 z-10">
                   <span class="material-symbols-outlined text-[14px]">${markerIcon}</span>
               </div>
           </div>
@@ -335,22 +335,22 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
     const numA = parseFloat(valA);
     const numB = parseFloat(valB);
     const diff = numA - numB;
-    if (isNaN(diff)) return <span className="text-white/60">N/A</span>;
-    if (diff === 0) return <span className="text-white">Stable</span>;
+    if (isNaN(diff)) return <span className="text-slate-500">N/A</span>;
+    if (diff === 0) return <span className="text-slate-800">Stable</span>;
     
     const formattedDiff = Math.abs(diff).toFixed(1);
     return diff > 0 ? (
-      <span className="text-white font-black bg-white/20 px-2 py-0.5 rounded border border-white/25">+{formattedDiff}{unit}</span>
+      <span className="text-slate-800 font-black bg-white/20 px-2 py-0.5 rounded border border-white/25">+{formattedDiff}{unit}</span>
     ) : (
-      <span className="text-white/80 font-semibold bg-white/10 px-2 py-0.5 rounded border border-white/10">-{formattedDiff}{unit}</span>
+      <span className="text-slate-600 font-semibold bg-white/10 px-2 py-0.5 rounded border border-white/10">-{formattedDiff}{unit}</span>
     );
   };
 
   return (
-    <div className="space-y-6 text-white font-sans pb-12">
+    <div className="space-y-6 text-slate-800 font-sans pb-12">
       
       {/* ── STICKY CONTROL & FILTER PANEL ── */}
-      <div className="sticky top-0 z-30 bg-gradient-to-r from-sky-600 to-sky-700 border border-sky-500 rounded-2xl p-4 shadow-2xl flex flex-wrap items-center justify-between gap-4">
+      <div className="sticky top-0 z-30 bg-white border border-slate-200 text-slate-800 rounded-2xl p-4 shadow-2xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
@@ -359,34 +359,34 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
               placeholder="Search intelligence logs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-sky-900/40 border border-sky-400/50 rounded-xl pl-9 pr-4 py-2 text-xs w-48 focus:outline-none text-white placeholder-sky-200/70"
+              className="bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs w-48 focus:outline-none text-slate-800 placeholder-slate-400"
             />
           </div>
 
-          <div className="flex items-center gap-2 bg-sky-900/40 border border-sky-400/50 rounded-xl px-3 py-1.5">
-            <Filter className="w-3.5 h-3.5 text-white" />
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+            <Filter className="w-3.5 h-3.5 text-slate-800" />
             <select 
               value={selectedMissionId} 
               onChange={(e) => setSelectedMissionId(e.target.value)}
-              className="bg-transparent border-none text-xs focus:ring-0 text-white focus:outline-none font-bold"
+              className="bg-transparent border-none text-xs focus:ring-0 text-slate-800 focus:outline-none font-bold"
             >
               {MOCK_MISSIONS.map(m => (
-                <option key={m.id} value={m.id} className="bg-sky-900 text-white">{m.name}</option>
+                <option key={m.id} value={m.id} className="bg-white text-slate-800">{m.name}</option>
               ))}
             </select>
           </div>
 
-          <div className="flex items-center gap-2 bg-sky-900/40 border border-sky-400/50 rounded-xl px-3 py-1.5">
-            <Cpu className="w-3.5 h-3.5 text-white" />
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+            <Cpu className="w-3.5 h-3.5 text-slate-800" />
             <select 
               value={filterDrone} 
               onChange={(e) => setFilterDrone(e.target.value)}
-              className="bg-transparent border-none text-xs focus:ring-0 text-white focus:outline-none font-bold"
+              className="bg-transparent border-none text-xs focus:ring-0 text-slate-800 focus:outline-none font-bold"
             >
-              <option value="all" className="bg-sky-900 text-white">All Drones</option>
-              <option value="ZD-109" className="bg-sky-900 text-white">ZD-109</option>
-              <option value="ZD-088" className="bg-sky-900 text-white">ZD-088</option>
-              <option value="ZD-112" className="bg-sky-900 text-white">ZD-112</option>
+              <option value="all" className="bg-white text-slate-800">All Drones</option>
+              <option value="ZD-109" className="bg-white text-slate-800">ZD-109</option>
+              <option value="ZD-088" className="bg-white text-slate-800">ZD-088</option>
+              <option value="ZD-112" className="bg-white text-slate-800">ZD-112</option>
             </select>
           </div>
         </div>
@@ -395,14 +395,14 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
         <div className="flex items-center gap-2">
           <button 
             onClick={() => handleExport('pdf')}
-            className="flex items-center gap-1.5 bg-sky-900/40 border border-sky-400/60 hover:bg-sky-500/40 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow"
+            className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 hover:bg-sky-500/40 text-slate-800 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow"
           >
             <FileDown className="w-3.5 h-3.5" />
             PDF
           </button>
           <button 
             onClick={() => handleExport('csv')}
-            className="flex items-center gap-1.5 bg-sky-900/40 border border-sky-400/60 hover:bg-sky-500/40 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow"
+            className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 hover:bg-sky-500/40 text-slate-800 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow"
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
             CSV
@@ -431,17 +431,17 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
         ].map((kpi, idx) => (
           <div 
             key={idx} 
-            className="bg-sky-600 border border-sky-500 hover:border-white/50 rounded-2xl p-5 flex items-center justify-between transition-all duration-300 transform hover:-translate-y-1 shadow-xl"
+            className="bg-white border border-slate-200 text-slate-800 hover:border-white/50 rounded-2xl p-5 flex items-center justify-between transition-all duration-300 transform hover:-translate-y-1 shadow-xl"
           >
             <div className="space-y-1 text-left">
               <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500">{kpi.label}</span>
-              <h3 className="text-2xl font-black text-white">{kpi.value}</h3>
+              <h3 className="text-2xl font-black text-slate-800">{kpi.value}</h3>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-white font-bold bg-white/20 border border-white/25 px-1.5 py-0.5 rounded">{kpi.trend}</span>
+                <span className="text-[10px] text-slate-800 font-bold bg-white/20 border border-white/25 px-1.5 py-0.5 rounded">{kpi.trend}</span>
                 <span className="text-[9px] text-sky-250">Updated 2m ago</span>
               </div>
             </div>
-            <div className={`p-3 bg-sky-900/40 border border-sky-400/40 rounded-xl ${kpi.color}`}>
+            <div className={`p-3 bg-slate-50 border border-slate-200 rounded-xl ${kpi.color}`}>
               <kpi.icon className="w-6 h-6" />
             </div>
           </div>
@@ -451,14 +451,14 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       {/* ── 2. AI MISSION SUMMARY & COCKPIT ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Mission Details Spec Sheet */}
-        <div className="lg:col-span-2 bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
+        <div className="lg:col-span-2 bg-white border border-slate-200 text-slate-800 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
           <div>
             <div className="flex justify-between items-start mb-6">
               <div>
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{activeMission.id}</span>
-                <h3 className="text-lg font-black text-white mt-1">{activeMission.name}</h3>
+                <h3 className="text-lg font-black text-slate-800 mt-1">{activeMission.name}</h3>
               </div>
-              <span className="px-3 py-1 bg-white/20 text-white border border-white/30 text-xs font-bold rounded-full">
+              <span className="px-3 py-1 bg-white/20 text-slate-800 border border-white/30 text-xs font-bold rounded-full">
                 {activeMission.status}
               </span>
             </div>
@@ -474,17 +474,17 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                 { label: 'Objects Identified', val: activeMission.objects },
                 { label: 'Thermal Incidents', val: activeMission.incidents }
               ].map((item, idx) => (
-                <div key={idx} className="bg-sky-900/40 border border-sky-400/60 p-3.5 rounded-xl">
+                <div key={idx} className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl">
                   <span className="text-[10px] text-slate-500 font-semibold block">{item.label}</span>
-                  <span className="text-sm font-black text-white mt-1 block">{item.val}</span>
+                  <span className="text-sm font-black text-slate-800 mt-1 block">{item.val}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* AI assistant insight response block */}
-          <div className="mt-6 bg-sky-950/45 border border-sky-400/50 rounded-xl p-4 flex items-start gap-3">
-            <div className="p-2 bg-white/20 text-white rounded-lg">
+          <div className="mt-6 bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-start gap-3">
+            <div className="p-2 bg-white/20 text-slate-800 rounded-lg">
               <Bot className="w-5 h-5" />
             </div>
             <div className="space-y-1">
@@ -498,10 +498,10 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
         </div>
 
         {/* AI Insight Chat & Prompt Card */}
-        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
+        <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3">
-              <Bot className="w-5 h-5 text-white" />
+              <Bot className="w-5 h-5 text-slate-800" />
               <h3 className="font-bold text-sm text-slate-800">AI Intelligence Recommendations</h3>
             </div>
             
@@ -511,7 +511,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                 { title: 'Potential obstruction on Hospital Pad', desc: 'Deploying optical verification sequence.', level: 'high' },
                 { title: 'Anomalous heat index near East corridor', desc: 'Triggering incident logger Z-Notify.', level: 'high' }
               ].map((rec, idx) => (
-                <div key={idx} className="bg-sky-900/40 border border-sky-400/50 p-3 rounded-xl flex items-start gap-2.5">
+                <div key={idx} className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-start gap-2.5">
                   <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
                     rec.level === 'high' ? 'bg-rose-400 animate-pulse' : 'bg-amber-400'
                   }`}></span>
@@ -556,11 +556,11 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
             { name: 'Road Damage', count: 1, confidence: 82, trend: 'Logged' },
             { name: 'Construction Sites', count: 3, confidence: 94, trend: '+2%' }
           ].map((item, idx) => (
-            <div key={idx} className="bg-sky-600 border border-sky-500 rounded-2xl p-4 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
+            <div key={idx} className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-4 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
               <span className="text-[10px] text-slate-500 font-bold uppercase">{item.name}</span>
               <div className="my-3 flex items-baseline justify-between">
-                <span className="text-xl font-black text-white">{item.count}</span>
-                <span className="text-[10px] text-white bg-white/20 border border-white/20 px-1.5 py-0.5 rounded">{item.trend}</span>
+                <span className="text-xl font-black text-slate-800">{item.count}</span>
+                <span className="text-[10px] text-slate-800 bg-white/20 border border-white/20 px-1.5 py-0.5 rounded">{item.trend}</span>
               </div>
               <div className="flex justify-between items-center text-[10px] border-t border-sky-400/40 pt-2 text-sky-150">
                 <span>Confidence:</span>
@@ -574,18 +574,18 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       {/* ── 4. GIS ANALYTICS COMMAND CENTER ── */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Leaflet map frame */}
-        <div className="lg:col-span-3 bg-sky-600 border border-sky-500 rounded-2xl p-4 flex flex-col h-[550px] relative overflow-hidden shadow-xl">
+        <div className="lg:col-span-3 bg-white border border-slate-200 text-slate-800 rounded-2xl p-4 flex flex-col h-[550px] relative overflow-hidden shadow-xl">
           <header className="flex justify-between items-center mb-3">
             <h3 className="font-bold text-sm text-slate-800 text-left flex items-center gap-1.5">
-              <Layers3 className="w-4 h-4 text-white" />
+              <Layers3 className="w-4 h-4 text-slate-800" />
               GIS Tactical Operations Map
             </h3>
             
-            <div className="flex items-center gap-2 bg-sky-900/40 p-1 rounded-xl border border-sky-400/40">
+            <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
               <button 
                 onClick={() => setSatelliteView(false)}
                 className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${
-                  !satelliteView ? 'bg-white text-sky-900 shadow' : 'text-slate-500 hover:text-white'
+                  !satelliteView ? 'bg-white text-sky-900 shadow' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 Vector Dark
@@ -593,7 +593,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
               <button 
                 onClick={() => setSatelliteView(true)}
                 className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${
-                  satelliteView ? 'bg-white text-sky-900 shadow' : 'text-slate-500 hover:text-white'
+                  satelliteView ? 'bg-white text-sky-900 shadow' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 Satellite Imagery
@@ -606,7 +606,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
           {/* GIS Legend / HUD layer */}
           <div className="absolute bottom-6 left-6 z-20 bg-sky-950/95 border border-sky-400/60 rounded-xl p-3.5 text-xs text-left shadow-2xl space-y-2">
-            <p className="font-bold border-b border-sky-400/40 pb-1.5 text-white">GIS Layer Legend</p>
+            <p className="font-bold border-b border-sky-400/40 pb-1.5 text-slate-800">GIS Layer Legend</p>
             <div className="space-y-1 text-sky-150">
               <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>Vehicles</div>
               <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>Pedestrians</div>
@@ -617,7 +617,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
         </div>
 
         {/* Heatmap Control Sidebar */}
-        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
+        <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
           <div className="space-y-6">
             <div>
               <h4 className="font-bold text-sm text-slate-800 mb-2">GIS Density Heatmap</h4>
@@ -636,10 +636,10 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                   className={`w-full text-left p-3.5 rounded-xl border transition-all ${
                     heatmapType === layer.id 
                       ? 'bg-white border-white text-sky-900 shadow-xl' 
-                      : 'bg-sky-900/40 border-sky-500 hover:bg-sky-800/45'
+                      : 'bg-white/40 border-sky-500 hover:bg-sky-800/45'
                   } ${layer.color}`}
                 >
-                  <p className={`font-bold text-xs ${heatmapType === layer.id ? 'text-sky-900' : 'text-white'}`}>{layer.label}</p>
+                  <p className={`font-bold text-xs ${heatmapType === layer.id ? 'text-sky-900' : 'text-slate-800'}`}>{layer.label}</p>
                   <p className={`text-[10px] mt-0.5 ${heatmapType === layer.id ? 'text-sky-700' : 'text-slate-500'}`}>{layer.desc}</p>
                 </button>
               ))}
@@ -647,7 +647,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
           </div>
 
           <div className="border-t border-sky-400/40 pt-4 mt-6 text-xs text-slate-500 space-y-2">
-            <div className="flex justify-between"><span>Coordinate Center:</span><span className="font-mono text-white">28.8308, 76.9311</span></div>
+            <div className="flex justify-between"><span>Coordinate Center:</span><span className="font-mono text-slate-800">28.8308, 76.9311</span></div>
             <div className="flex justify-between"><span>Tracking Nodes:</span><span className="font-bold text-slate-800">12 Waypoints</span></div>
             <div className="flex justify-between"><span>Mission Perimeter:</span><span className="font-bold text-slate-800">1.4 km²</span></div>
           </div>
@@ -657,9 +657,9 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
       {/* ── 5. DETAILED ANALYTICS CHARTJS GRAPHS ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
+        <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-6 text-left shadow-xl">
           <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3 mb-4">
-            <BarChart3 className="w-4 h-4 text-white" />
+            <BarChart3 className="w-4 h-4 text-slate-800" />
             <h4 className="font-bold text-sm text-slate-800">Object Detections Category Distribution</h4>
           </div>
           <div className="h-64">
@@ -667,9 +667,9 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
           </div>
         </div>
 
-        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
+        <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-6 text-left shadow-xl">
           <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3 mb-4">
-            <TrendingUp className="w-4 h-4 text-white" />
+            <TrendingUp className="w-4 h-4 text-slate-800" />
             <h4 className="font-bold text-sm text-slate-800">Hourly AI Inference Detection Rates</h4>
           </div>
           <div className="h-64">
@@ -677,9 +677,9 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
           </div>
         </div>
 
-        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
+        <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-6 text-left shadow-xl">
           <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3 mb-4">
-            <Database className="w-4 h-4 text-white" />
+            <Database className="w-4 h-4 text-slate-800" />
             <h4 className="font-bold text-sm text-slate-800">Vehicle Class Ratio Breakdown</h4>
           </div>
           <div className="h-64">
@@ -687,9 +687,9 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
           </div>
         </div>
 
-        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
+        <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-6 text-left shadow-xl">
           <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3 mb-4">
-            <Compass className="w-4 h-4 text-white" />
+            <Compass className="w-4 h-4 text-slate-800" />
             <h4 className="font-bold text-sm text-slate-800">Performance Metrics by Sector Zone</h4>
           </div>
           <div className="h-64">
@@ -701,9 +701,9 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       {/* ── 6. TIMELINE & 7. FLIGHT PERFORMANCE ANALYTICS ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Timeline Log */}
-        <div className="lg:col-span-2 bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
+        <div className="lg:col-span-2 bg-white border border-slate-200 text-slate-800 rounded-2xl p-6 text-left shadow-xl">
           <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3 mb-4">
-            <Activity className="w-4 h-4 text-white" />
+            <Activity className="w-4 h-4 text-slate-800" />
             <h4 className="font-bold text-sm text-slate-800">Chronological Detection Timeline</h4>
           </div>
 
@@ -727,7 +727,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                     </span>
                     <button 
                       onClick={() => setActiveModalDetection(det)}
-                      className="bg-sky-900/40 border border-sky-400 hover:bg-sky-500/40 text-white text-[10px] px-2.5 py-1 rounded-lg font-bold transition-all shadow"
+                      className="bg-white/40 border border-sky-400 hover:bg-sky-500/40 text-slate-800 text-[10px] px-2.5 py-1 rounded-lg font-bold transition-all shadow"
                     >
                       Inspect
                     </button>
@@ -739,10 +739,10 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
         </div>
 
         {/* Flight Performance health stats */}
-        <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
+        <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-6 text-left flex flex-col justify-between shadow-xl">
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b border-sky-400/40 pb-3">
-              <Activity className="w-5 h-5 text-white" />
+              <Activity className="w-5 h-5 text-slate-800" />
               <h3 className="font-bold text-sm text-slate-800">Hardware Telemetry Health</h3>
             </div>
 
@@ -753,14 +753,14 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                 { label: 'Signal strength link', val: 95, icon: Radio, color: 'text-slate-800' },
                 { label: 'Wind Resistance Factor', val: 14, icon: Wind, color: 'text-slate-800', unit: ' km/h' }
               ].map((stat, idx) => (
-                <div key={idx} className="bg-sky-900/40 border border-sky-450 p-3.5 rounded-xl flex items-center justify-between">
+                <div key={idx} className="bg-white/40 border border-sky-450 p-3.5 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`p-2 bg-sky-950/40 border border-sky-400/40 rounded-lg ${stat.color}`}>
                       <stat.icon className="w-4 h-4" />
                     </div>
                     <div>
                       <p className="text-[10px] text-slate-500 font-semibold">{stat.label}</p>
-                      <p className="text-xs font-black text-white mt-0.5">{stat.val}{stat.unit || '%'}</p>
+                      <p className="text-xs font-black text-slate-800 mt-0.5">{stat.val}{stat.unit || '%'}</p>
                     </div>
                   </div>
                   <div className="w-16 bg-sky-950/50 rounded-full h-1.5 overflow-hidden">
@@ -778,7 +778,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
           <div className="border-t border-sky-400/40 pt-4 mt-6 flex justify-between items-center text-xs">
             <span className="text-slate-500">Autonomous Calibration Check:</span>
-            <span className="font-black text-white flex items-center gap-1">
+            <span className="font-black text-slate-800 flex items-center gap-1">
               <CheckCircle className="w-3.5 h-3.5" /> Passed
             </span>
           </div>
@@ -786,36 +786,36 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       </div>
 
       {/* ── 9. MISSION COMPARISON ── */}
-      <div className="bg-sky-600 border border-sky-500 rounded-2xl p-6 text-left shadow-xl">
+      <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-6 text-left shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-sky-400/40 pb-3 mb-6">
           <div className="flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-white" />
+            <Sliders className="w-4 h-4 text-slate-800" />
             <h4 className="font-bold text-sm text-slate-800">Mission Performance Comparison</h4>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-sky-900/40 px-3 py-1.5 rounded-xl border border-sky-400">
+            <div className="flex items-center gap-2 bg-white/40 px-3 py-1.5 rounded-xl border border-sky-400">
               <span className="text-[10px] text-slate-500 uppercase font-bold">Mission A</span>
               <select 
                 value={comparisonMissionA}
                 onChange={(e) => setComparisonMissionA(e.target.value)}
-                className="bg-transparent border-none text-xs text-white font-black focus:outline-none"
+                className="bg-transparent border-none text-xs text-slate-800 font-black focus:outline-none"
               >
                 {MOCK_MISSIONS.map(m => (
-                  <option key={m.id} value={m.id} className="bg-sky-800 text-white">{m.id} - {m.name}</option>
+                  <option key={m.id} value={m.id} className="bg-sky-800 text-slate-800">{m.id} - {m.name}</option>
                 ))}
               </select>
             </div>
 
-            <div className="flex items-center gap-2 bg-sky-900/40 px-3 py-1.5 rounded-xl border border-sky-400">
+            <div className="flex items-center gap-2 bg-white/40 px-3 py-1.5 rounded-xl border border-sky-400">
               <span className="text-[10px] text-slate-500 uppercase font-bold">Mission B</span>
               <select 
                 value={comparisonMissionB}
                 onChange={(e) => setComparisonMissionB(e.target.value)}
-                className="bg-transparent border-none text-xs text-white font-black focus:outline-none"
+                className="bg-transparent border-none text-xs text-slate-800 font-black focus:outline-none"
               >
                 {MOCK_MISSIONS.map(m => (
-                  <option key={m.id} value={m.id} className="bg-sky-800 text-white">{m.id} - {m.name}</option>
+                  <option key={m.id} value={m.id} className="bg-sky-800 text-slate-800">{m.id} - {m.name}</option>
                 ))}
               </select>
             </div>
@@ -872,14 +872,14 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {appState.drones.map((drone, idx) => (
-            <div key={idx} className="bg-sky-600 border border-sky-500 rounded-2xl p-5 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
+            <div key={idx} className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-5 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b border-sky-400/40 pb-2.5">
                   <div>
                     <span className="text-[10px] text-slate-500 uppercase font-bold">{drone.type}</span>
                     <h4 className="font-extrabold text-sm text-slate-800 mt-0.5">{drone.id}</h4>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded text-[9px] font-bold bg-white/20 text-white border border-white/25">
+                  <span className="px-2.5 py-0.5 rounded text-[9px] font-bold bg-white/20 text-slate-800 border border-white/25">
                     {drone.status}
                   </span>
                 </div>
@@ -897,7 +897,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                   <Heart className="w-3.5 h-3.5 text-rose-350" />
                   Health Score
                 </div>
-                <span className="text-xs font-black text-white">98% Optimum</span>
+                <span className="text-xs font-black text-slate-800">98% Optimum</span>
               </div>
             </div>
           ))}
@@ -915,7 +915,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
             <div 
               key={idx} 
               onClick={() => setActiveModalDetection(det)}
-              className="break-inside-avoid bg-sky-600 border border-sky-500 rounded-2xl overflow-hidden text-left cursor-pointer hover:border-white/50 transition-all shadow-xl group"
+              className="break-inside-avoid bg-white border border-slate-200 text-slate-800 rounded-2xl overflow-hidden text-left cursor-pointer hover:border-white/50 transition-all shadow-xl group"
             >
               <div className="relative">
                 <img 
@@ -923,7 +923,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                   alt={det.object} 
                   className="w-full object-cover max-h-60 group-hover:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute inset-4 border-2 border-dashed border-sky-400 pointer-events-none flex items-start justify-start p-1 bg-sky-900/5">
+                <div className="absolute inset-4 border-2 border-dashed border-sky-400 pointer-events-none flex items-start justify-start p-1 bg-white/5">
                   <span className="bg-white text-sky-900 text-[8px] font-bold px-1 rounded uppercase tracking-wider shadow">
                     {det.object} {det.confidence}%
                   </span>
@@ -932,16 +932,16 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
               <div className="p-4 space-y-2">
                 <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-xs text-white">{det.object} Identified</h4>
+                  <h4 className="font-bold text-xs text-slate-800">{det.object} Identified</h4>
                   <span className="text-[10px] text-slate-500">{det.time}</span>
                 </div>
                 <p className="text-[10px] text-sky-100 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-white" />
+                  <MapPin className="w-3 h-3 text-slate-800" />
                   {det.location}
                 </p>
                 <div className="flex justify-between items-center text-[9px] text-slate-500 border-t border-sky-400/40 pt-2 font-mono">
                   <span>GPS: {det.coords}</span>
-                  <span className="text-white font-sans font-bold">Inspect details →</span>
+                  <span className="text-slate-800 font-sans font-bold">Inspect details →</span>
                 </div>
               </div>
             </div>
@@ -961,18 +961,18 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
             { title: 'Elevated High Wind Risk Alert', desc: 'Weather modeling forecasts crosswinds exceeding 32km/h between 14:00 - 15:30. Recommend grounding lightweight drones.', level: 92, color: 'text-slate-800' },
             { title: 'Crowd Accumulation Indicator', desc: 'Socio-spatial analysis indicates a high probability (81%) of crowd gathers near Central Warehouse Sector during shifts.', level: 81, color: 'text-slate-800' }
           ].map((pred, idx) => (
-            <div key={idx} className="bg-sky-600 border border-sky-500 rounded-2xl p-5 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
+            <div key={idx} className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-5 text-left flex flex-col justify-between hover:border-white/50 transition-all shadow-xl">
               <div className="space-y-3">
                 <div className="flex items-center gap-2 border-b border-sky-400/40 pb-2">
                   <Bot className={`w-4 h-4 ${pred.color}`} />
-                  <h4 className="font-bold text-xs text-white">{pred.title}</h4>
+                  <h4 className="font-bold text-xs text-slate-800">{pred.title}</h4>
                 </div>
                 <p className="text-xs text-sky-100 leading-relaxed">{pred.desc}</p>
               </div>
 
               <div className="mt-4 pt-3 border-t border-sky-400/40 flex items-center justify-between">
                 <span className="text-[10px] text-slate-500 uppercase font-bold">Prediction Confidence</span>
-                <span className="text-xs font-black text-white">{pred.level}% Probability</span>
+                <span className="text-xs font-black text-slate-800">{pred.level}% Probability</span>
               </div>
             </div>
           ))}
@@ -982,7 +982,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       {/* ── DETAIL MODAL DETECTIONS INSPECTION ── */}
       {activeModalDetection && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-sky-700 to-sky-900 border border-sky-500 rounded-2xl w-full max-w-2xl min-w-[280px] sm:min-w-[500px] md:min-w-[650px] shrink-0 shadow-2xl overflow-hidden text-left flex flex-col md:flex-row">
+          <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl w-full max-w-2xl min-w-[280px] sm:min-w-[500px] md:min-w-[650px] shrink-0 shadow-2xl overflow-hidden text-left flex flex-col md:flex-row">
             
             {/* Modal Image Block */}
             <div className="w-full md:w-1/2 relative bg-sky-950 flex items-center justify-center border-b md:border-b-0 md:border-r border-sky-500/50 min-h-[220px]">
@@ -1004,29 +1004,29 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
                 <header className="flex justify-between items-start border-b border-sky-400/40 pb-3">
                   <div>
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{activeModalDetection.id}</span>
-                    <h3 className="text-base font-extrabold text-white mt-0.5">{activeModalDetection.object} Identified</h3>
+                    <h3 className="text-base font-extrabold text-slate-800 mt-0.5">{activeModalDetection.object} Identified</h3>
                   </div>
                   <button 
                     onClick={() => setActiveModalDetection(null)}
-                    className="text-white/80 hover:text-white"
+                    className="text-slate-600 hover:text-slate-800"
                   >
                     <span className="material-symbols-outlined text-lg">close</span>
                   </button>
                 </header>
 
                 <div className="space-y-2.5 text-xs text-sky-100">
-                  <div className="flex justify-between"><span className="text-slate-500">Sensor Class:</span><span className="font-semibold text-white">{activeModalDetection.object}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Sensor Class:</span><span className="font-semibold text-slate-800">{activeModalDetection.object}</span></div>
                   <div className="flex justify-between"><span className="text-slate-500">Confidence Match:</span><span className="font-bold text-slate-800">{activeModalDetection.confidence}%</span></div>
-                  <div className="flex justify-between"><span className="text-slate-500">Detection Coords:</span><span className="font-mono text-white">{activeModalDetection.coords}</span></div>
-                  <div className="flex justify-between"><span className="text-slate-500">Capture Time:</span><span className="font-semibold text-white">{activeModalDetection.time}</span></div>
-                  <div className="flex justify-between"><span className="text-slate-500">Sector Region:</span><span className="font-semibold text-white">{activeModalDetection.location}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Detection Coords:</span><span className="font-mono text-slate-800">{activeModalDetection.coords}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Capture Time:</span><span className="font-semibold text-slate-800">{activeModalDetection.time}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Sector Region:</span><span className="font-semibold text-slate-800">{activeModalDetection.location}</span></div>
                 </div>
               </div>
 
               <div className="border-t border-sky-400/40 pt-4 mt-6 flex gap-2">
                 <button 
                   onClick={() => setActiveModalDetection(null)}
-                  className="flex-1 bg-sky-900/40 border border-sky-400/60 hover:bg-sky-500/40 text-white py-2.5 rounded-xl text-xs font-bold transition-all text-center"
+                  className="flex-1 bg-slate-50 border border-slate-200 hover:bg-sky-500/40 text-slate-800 py-2.5 rounded-xl text-xs font-bold transition-all text-center"
                 >
                   Close Detail
                 </button>
@@ -1048,4 +1048,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
     </div>
   );
 }
+
+
+
 

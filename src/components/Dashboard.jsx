@@ -777,7 +777,7 @@ function Dashboard({ onLogout }) {
                 placeholder="Search drones, flights, or alerts..."
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
-                className="bg-transparent border-none text-xs focus:ring-0 focus:outline-none w-full text-sky-900 dark:text-white placeholder:text-sky-400 pl-1"
+                className="bg-transparent border-none text-xs focus:ring-0 focus:outline-none w-full text-sky-900 dark:text-slate-800 placeholder:text-sky-400 pl-1"
               />
               <span className="px-1 py-0.5 rounded bg-sky-100 dark:bg-slate-700 text-[10px] text-sky-600 dark:text-sky-300 border border-sky-200 dark:border-slate-600 font-semibold">⌘K</span>
             </div>
@@ -792,7 +792,7 @@ function Dashboard({ onLogout }) {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all text-left ${isActive
-                      ? 'bg-sky-500 text-white font-bold border-l-4 border-sky-600 shadow-sm shadow-sky-100 dark:shadow-none'
+                      ? 'bg-sky-500 text-slate-800 font-bold border-l-4 border-sky-600 shadow-sm shadow-sky-100 dark:shadow-none'
                       : 'hover:bg-sky-50/80 dark:hover:bg-slate-800 hover:text-sky-600 dark:hover:text-sky-300 text-sky-800 dark:text-slate-300'
                     }`}
                 >
@@ -801,10 +801,10 @@ function Dashboard({ onLogout }) {
                     <span className="text-xs font-semibold">{item.label}</span>
                   </div>
                   {item.badgeText && (
-                    <span className="px-1.5 py-0.5 bg-sky-400 text-white text-[8px] font-extrabold rounded uppercase tracking-wider">{item.badgeText}</span>
+                    <span className="px-1.5 py-0.5 bg-sky-400 text-slate-800 text-[8px] font-extrabold rounded uppercase tracking-wider">{item.badgeText}</span>
                   )}
                   {item.badge !== undefined && item.badge > 0 && (
-                    <span className="px-2 py-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full">{item.badge}</span>
+                    <span className="px-2 py-0.5 bg-red-500 text-slate-800 text-[9px] font-bold rounded-full">{item.badge}</span>
                   )}
                 </button>
               );
@@ -816,7 +816,7 @@ function Dashboard({ onLogout }) {
             <button
               onClick={() => setActiveTab('employee')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${activeTab === 'employee'
-                  ? 'bg-sky-500 text-white font-bold border-l-4 border-sky-600 shadow-sm shadow-sky-100 dark:shadow-none'
+                  ? 'bg-sky-500 text-slate-800 font-bold border-l-4 border-sky-600 shadow-sm shadow-sky-100 dark:shadow-none'
                   : 'hover:bg-sky-50/80 dark:hover:bg-slate-800 hover:text-sky-600 dark:hover:text-sky-300 text-sky-800 dark:text-slate-300'
                 }`}
             >
@@ -845,7 +845,7 @@ function Dashboard({ onLogout }) {
           {/* TOP NAVBAR */}
           <header className="h-16 border-b border-sky-100 dark:border-sky-900/40 bg-white/95 dark:bg-[#0c4a6e]/20 backdrop-blur-md flex items-center justify-between px-6 z-10">
             <div>
-              <h2 className="text-lg font-bold text-slate-800 dark:text-white capitalize">
+              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-800 capitalize">
                 {sidebarMenu.find(x => x.id === activeTab)?.label}
               </h2>
             </div>
@@ -855,7 +855,7 @@ function Dashboard({ onLogout }) {
               <div className="relative">
                 <button
                   onClick={() => { setBackendSettingsOpen(!backendSettingsOpen); setNotifOpen(false); setProfileOpen(false); }}
-                  className={`p-2 rounded-lg border hover:bg-sky-50 dark:hover:bg-sky-900/30 flex items-center justify-center relative ${liveStatus === 'OFFLINE'
+                  className={`p-2 rounded-lg border hover:bg-sky-50 dark:hover:bg-white/30 flex items-center justify-center relative ${liveStatus === 'OFFLINE'
                       ? 'border-red-200 text-red-500 bg-red-50/10'
                       : 'border-sky-100 dark:border-sky-900/50 text-sky-600 dark:text-sky-300'
                     }`}
@@ -867,7 +867,7 @@ function Dashboard({ onLogout }) {
                 </button>
 
                 {backendSettingsOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#0c4a6e] border border-sky-100 dark:border-sky-900/60 rounded-xl shadow-xl z-50 overflow-hidden text-slate-800 dark:text-white">
+                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#0c4a6e] border border-sky-100 dark:border-sky-900/60 rounded-xl shadow-xl z-50 overflow-hidden text-slate-800 dark:text-slate-800">
                     <div className="px-4 py-3 border-b border-sky-100 dark:border-sky-900/40 bg-sky-50/50 dark:bg-sky-950/20">
                       <span className="font-bold text-xs">Backend Connection Settings</span>
                     </div>
@@ -884,7 +884,7 @@ function Dashboard({ onLogout }) {
                             localStorage.setItem('z_drone_backend_url', e.target.value);
                           }}
                           placeholder="http://127.0.0.1:8000"
-                          className="w-full text-xs px-3 py-2 rounded-lg border border-sky-100 dark:border-sky-900/60 bg-sky-50/20 dark:bg-sky-950/30 text-slate-800 dark:text-white focus:outline-none focus:border-sky-400"
+                          className="w-full text-xs px-3 py-2 rounded-lg border border-sky-100 dark:border-sky-900/60 bg-sky-50/20 dark:bg-sky-950/30 text-slate-800 dark:text-slate-800 focus:outline-none focus:border-sky-400"
                         />
                       </div>
                       {showMixedContentWarning && (
@@ -926,7 +926,7 @@ function Dashboard({ onLogout }) {
               <div className="relative">
                 <button
                   onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}
-                  className="p-2 rounded-lg border border-sky-100 dark:border-sky-900/50 hover:bg-sky-50 dark:hover:bg-sky-900/30 text-sky-600 dark:text-sky-300 relative"
+                  className="p-2 rounded-lg border border-sky-100 dark:border-sky-900/50 hover:bg-sky-50 dark:hover:bg-white/30 text-sky-600 dark:text-sky-300 relative"
                 >
                   <span className="material-symbols-outlined text-lg">notifications</span>
                   {activeAlerts.length > 0 && (
@@ -937,7 +937,7 @@ function Dashboard({ onLogout }) {
                 {notifOpen && (
                   <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#0c4a6e] border border-sky-100 dark:border-sky-900/60 rounded-xl shadow-xl z-50 overflow-hidden">
                     <div className="px-4 py-3 border-b border-sky-100 dark:border-sky-900/40 flex justify-between items-center bg-sky-50/50 dark:bg-sky-950/20">
-                      <span className="font-bold text-xs text-slate-700 dark:text-white">Active Notifications</span>
+                      <span className="font-bold text-xs text-slate-700 dark:text-slate-800">Active Notifications</span>
                       <button
                         onClick={() => { actions.resolveAllAlerts(); setNotifOpen(false); }}
                         className="text-[10px] text-sky-600 dark:text-sky-300 hover:underline font-semibold"
@@ -952,7 +952,7 @@ function Dashboard({ onLogout }) {
                         activeAlerts.map(alert => (
                           <div key={alert.id} className="p-3 hover:bg-sky-50/50 dark:hover:bg-sky-950/30 flex justify-between gap-2">
                             <div className="text-left">
-                              <p className="text-xs font-bold text-slate-800 dark:text-white">{alert.title}</p>
+                              <p className="text-xs font-bold text-slate-800 dark:text-slate-800">{alert.title}</p>
                               <p className="text-[10px] text-slate-500 mt-1">{alert.description}</p>
                             </div>
                             <button
@@ -973,7 +973,7 @@ function Dashboard({ onLogout }) {
               <div className="relative">
                 <button
                   onClick={() => { setProfileOpen(!profileOpen); setNotifOpen(false); }}
-                  className="flex items-center gap-2 border border-sky-100 dark:border-sky-900/50 rounded-lg p-1.5 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-colors"
+                  className="flex items-center gap-2 border border-sky-100 dark:border-sky-900/50 rounded-lg p-1.5 hover:bg-sky-50 dark:hover:bg-white/30 transition-colors"
                 >
                   <img
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuBijJZddpbaAwXrMcKxkk4y5a8XK3TNesNW3AycY6mN2XMSPWhi-KOtgNnDLiV7jx7kJRTX8NreKaVxQeo6CFq-GUV4ewnI2U6Vb1rZ90U3HS2UdQ6RwMHkl8qlfM-aPxnBmFCzL8Jb2Coc0PUZEMekUHPT5KHuRTpRndBVSNGdP9wR1kvr-E2RJst4YVbbbMsSyh05z_ZwxxiBlxAZOdc_RkAy5OP3aU9gZF1k_fjuiztN5z-x2YDpQGWd0_coz4R7mUbce-uDKmA"
@@ -986,7 +986,7 @@ function Dashboard({ onLogout }) {
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#0c4a6e] border border-sky-100 dark:border-sky-900/60 rounded-xl shadow-xl z-50 py-2">
                     <div className="px-4 py-2 border-b border-sky-100 dark:border-sky-900/40 text-left">
-                      <p className="text-xs font-bold text-slate-800 dark:text-white">{currentUser.name || 'Admin'}</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-800">{currentUser.name || 'Admin'}</p>
                       <p className="text-[10px] text-slate-500">{currentUser.role || 'Fleet Manager'}</p>
                     </div>
                     <button
@@ -1057,9 +1057,9 @@ function Dashboard({ onLogout }) {
                           </h4>
                           <p className="text-[10px] text-slate-500">{activeDrone.model}</p>
                         </div>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${activeDrone.status === 'Online' ? 'bg-emerald-500 text-white border border-emerald-400' :
-                            activeDrone.status === 'Maintenance' ? 'bg-amber-500 text-white border border-amber-400' :
-                              'bg-sky-950 text-white border border-sky-400/40'
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${activeDrone.status === 'Online' ? 'bg-emerald-500 text-slate-800 border border-emerald-400' :
+                            activeDrone.status === 'Maintenance' ? 'bg-amber-500 text-slate-800 border border-amber-400' :
+                              'bg-sky-950 text-slate-800 border border-sky-400/40'
                           }`}>{activeDrone.status}</span>
                       </header>
 
@@ -1089,7 +1089,7 @@ function Dashboard({ onLogout }) {
                             {Math.round(activeDrone.battery)}%
                           </span>
                         </div>
-                        <div className="w-full bg-sky-900/40 rounded-full h-2 overflow-hidden border border-sky-400/30">
+                        <div className="w-full bg-slate-50 rounded-full h-2 overflow-hidden border border-slate-200">
                           <div
                             className={`h-full rounded-full transition-all duration-300 ${activeDrone.battery < 20 ? 'bg-red-500 animate-pulse' : 'bg-emerald-500'}`}
                             style={{ width: `${activeDrone.battery}%` }}
@@ -1100,7 +1100,7 @@ function Dashboard({ onLogout }) {
 
                     <div className="border-t border-sky-400/40 pt-4 mt-6">
                       <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block">Current Task Overlay</span>
-                      <p className="text-xs font-bold text-slate-800 mt-1 bg-sky-900/40 p-2.5 rounded-lg border border-sky-400/40">
+                      <p className="text-xs font-bold text-slate-800 mt-1 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                         {activeDrone.status === 'Online' ? `Dispatch Mission: ${activeDrone.payload} ➔ ${activeDrone.destination}` : 'Charging / Static Standby'}
                       </p>
                     </div>
@@ -1143,9 +1143,9 @@ function Dashboard({ onLogout }) {
                           activeAlerts.map((alert, idx) => (
                             <div key={`${alert.id}-${idx}`} className="flex gap-3 text-left">
                               <div className="flex flex-col items-center">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${alert.severity === 'error' ? 'bg-red-500 text-white' :
-                                    alert.severity === 'warning' ? 'bg-amber-500 text-white' :
-                                      'bg-emerald-500 text-white'
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${alert.severity === 'error' ? 'bg-red-500 text-slate-800' :
+                                    alert.severity === 'warning' ? 'bg-amber-500 text-slate-800' :
+                                      'bg-emerald-500 text-slate-800'
                                   }`}>
                                   <span className="material-symbols-outlined text-base">
                                     {getAlertIcon(alert)}
@@ -1155,18 +1155,18 @@ function Dashboard({ onLogout }) {
                               <div className="flex-1">
                                 <span className="text-[9px] text-slate-500 font-semibold">{alert.time} • Unit: {alert.unit}</span>
                                 <div className="flex justify-between items-start gap-1">
-                                  <h5 className="font-bold text-xs text-white">{alert.title}</h5>
+                                  <h5 className="font-bold text-xs text-slate-800">{alert.title}</h5>
                                   <div className="flex gap-2 shrink-0">
                                     <button
                                       onClick={() => setSelectedAlert(alert)}
-                                      className="text-[10px] text-slate-500 hover:text-white hover:underline font-semibold flex items-center gap-0.5"
+                                      className="text-[10px] text-slate-500 hover:text-slate-800 hover:underline font-semibold flex items-center gap-0.5"
                                     >
                                       <span className="material-symbols-outlined text-[10px]">visibility</span>
                                       <span>View</span>
                                     </button>
                                     <button
                                       onClick={() => actions.resolveAlert(alert.id)}
-                                      className="text-[10px] text-slate-500 hover:text-white font-semibold"
+                                      className="text-[10px] text-slate-500 hover:text-slate-800 font-semibold"
                                     >
                                       Ack
                                     </button>
@@ -1197,7 +1197,7 @@ function Dashboard({ onLogout }) {
                     </div>
                     <button
                       onClick={() => setActiveTab('reports')}
-                      className="text-xs text-slate-500 hover:text-white hover:underline font-bold"
+                      className="text-xs text-slate-500 hover:text-slate-800 hover:underline font-bold"
                     >
                       View All Logs
                     </button>
@@ -1223,16 +1223,16 @@ function Dashboard({ onLogout }) {
                             className="hover:bg-sky-500/30 cursor-pointer transition-colors"
                           >
                             <td className="px-4 py-3 font-bold text-slate-800">{flight.id}</td>
-                            <td className="px-4 py-3 text-white font-semibold">{flight.drone}</td>
+                            <td className="px-4 py-3 text-slate-800 font-semibold">{flight.drone}</td>
                             <td className="px-4 py-3 text-slate-500">{flight.date}</td>
                             <td className="px-4 py-3 text-slate-500">{flight.duration}</td>
                             <td className="px-4 py-3 text-slate-500">{flight.distance}</td>
                             <td className="px-4 py-3 text-slate-500">{flight.pilot}</td>
                             <td className="px-4 py-3">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${flight.status === 'Completed' ? 'bg-emerald-500 text-white border-emerald-400' :
-                                  flight.status === 'In Progress' ? 'bg-amber-500 text-white border-amber-400 animate-pulse' :
-                                    flight.status === 'Aborted' ? 'bg-red-500 text-white border-red-400' :
-                                      'bg-sky-950 text-white border border-sky-400/40'
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${flight.status === 'Completed' ? 'bg-emerald-500 text-slate-800 border-emerald-400' :
+                                  flight.status === 'In Progress' ? 'bg-amber-500 text-slate-800 border-amber-400 animate-pulse' :
+                                    flight.status === 'Aborted' ? 'bg-red-500 text-slate-800 border-red-400' :
+                                      'bg-sky-950 text-slate-800 border border-sky-400/40'
                                 }`}>{flight.status}</span>
                             </td>
                           </tr>
@@ -1264,10 +1264,10 @@ function Dashboard({ onLogout }) {
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs font-mono text-slate-500 font-bold bg-sky-900/40 border border-sky-400/40 rounded px-2 py-1">
+                      <span className="text-xs font-mono text-slate-500 font-bold bg-slate-50 border border-slate-200 rounded px-2 py-1">
                         Frame: {liveFrame}
                       </span>
-                      <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border ${liveStatus === 'LIVE' ? 'bg-emerald-500 text-white border-emerald-400' : liveStatus === 'PAUSED' ? 'bg-amber-500 text-white border-amber-400' : 'bg-red-500 text-white border-red-400 animate-pulse'
+                      <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border ${liveStatus === 'LIVE' ? 'bg-emerald-500 text-slate-800 border-emerald-400' : liveStatus === 'PAUSED' ? 'bg-amber-500 text-slate-800 border-amber-400' : 'bg-red-500 text-slate-800 border-red-400 animate-pulse'
                         }`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${liveStatus === 'LIVE' ? 'bg-emerald-400 animate-pulse' : liveStatus === 'PAUSED' ? 'bg-amber-400' : 'bg-red-400'}`}></span>
                         <span>{liveStatus}</span>
@@ -1323,7 +1323,7 @@ function Dashboard({ onLogout }) {
 
                           <button
                             onClick={handleReset}
-                            className="px-3 border border-sky-400/60 bg-sky-900/40 hover:bg-sky-700 text-white rounded-xl"
+                            className="px-3 border border-sky-400/60 bg-white/40 hover:bg-sky-700 text-slate-800 rounded-xl"
                             title="Reset feed"
                           >
                             <span className="material-symbols-outlined text-base mt-1">replay</span>
@@ -1336,10 +1336,10 @@ function Dashboard({ onLogout }) {
                           <select
                             value={videoPath}
                             onChange={(e) => handleSetVideo(e.target.value)}
-                            className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white py-2 px-2 focus:ring-2 focus:ring-sky-500 focus:outline-none cursor-pointer"
+                            className="w-full text-xs rounded-lg border border-sky-400/40 bg-white/50 text-slate-800 py-2 px-2 focus:ring-2 focus:ring-sky-500 focus:outline-none cursor-pointer"
                           >
                             {videoSources.map(vs => (
-                              <option key={vs.value} value={vs.value} className="bg-sky-900 text-white">{vs.label}</option>
+                              <option key={vs.value} value={vs.value} className="bg-white text-slate-800">{vs.label}</option>
                             ))}
                           </select>
                           <p className="text-[9px] text-slate-500 mt-0.5">Currently: <span className="font-bold text-slate-800">{videoPath}</span></p>
@@ -1382,7 +1382,7 @@ function Dashboard({ onLogout }) {
                               step="0.05"
                               value={confThreshold}
                               onChange={(e) => handleSetConf(e.target.value)}
-                              className="w-full accent-white h-1 bg-sky-900/50 rounded-lg appearance-none cursor-pointer"
+                              className="w-full accent-white h-1 bg-white/50 rounded-lg appearance-none cursor-pointer"
                             />
                           </div>
 
@@ -1394,18 +1394,18 @@ function Dashboard({ onLogout }) {
                             <select
                               value={frameSkip}
                               onChange={(e) => handleSetSpeed(e.target.value)}
-                              className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 py-1.5 focus:ring-sky-500 text-white"
+                              className="w-full text-xs rounded-lg border border-sky-400/40 bg-white/50 py-1.5 focus:ring-sky-500 text-slate-800"
                             >
-                              <option value={1} className="bg-sky-900 text-white">1 (Process all frames)</option>
-                              <option value={2} className="bg-sky-900 text-white">2 (Skip every second frame)</option>
-                              <option value={5} className="bg-sky-900 text-white">5 (Skip 4/5 frames - High Speed)</option>
+                              <option value={1} className="bg-white text-slate-800">1 (Process all frames)</option>
+                              <option value={2} className="bg-white text-slate-800">2 (Skip every second frame)</option>
+                              <option value={5} className="bg-white text-slate-800">5 (Skip 4/5 frames - High Speed)</option>
                             </select>
                           </div>
                         </div>
                       </div>
 
                       {/* Stats Panel */}
-                      <div className="bg-sky-900/40 rounded-xl p-4 border border-sky-400/40 text-left">
+                      <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 text-left">
                         <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-3">Model Telemetry</span>
                         <div className="grid grid-cols-3 gap-2">
                           {[
@@ -1482,8 +1482,8 @@ function Dashboard({ onLogout }) {
                               key={drone.id}
                               onClick={() => setSelectedLiveDroneId(drone.id)}
                               className={`p-4 rounded-xl border transition-all cursor-pointer text-left ${isSelected
-                                  ? 'bg-sky-900/70 border-white shadow-md'
-                                  : 'bg-sky-900/40 border-sky-400/45 hover:bg-sky-700/20'
+                                  ? 'bg-white/70 border-white shadow-md'
+                                  : 'bg-slate-50 border-slate-200 hover:bg-sky-700/20'
                                 }`}
                             >
                               <div className="flex justify-between items-start">
@@ -1495,7 +1495,7 @@ function Dashboard({ onLogout }) {
                                   </h4>
                                   <p className="text-[10px] text-slate-500 font-semibold font-mono mt-0.5">{drone.id}</p>
                                 </div>
-                                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase border ${drone.status === 'flying' || drone.status === 'Active' ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-sky-950 text-white border border-sky-400/40'}`}>
+                                <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase border ${drone.status === 'flying' || drone.status === 'Active' ? 'bg-emerald-500 text-slate-800 border-emerald-400' : 'bg-sky-950 text-slate-800 border border-sky-400/40'}`}>
                                   {drone.status}
                                 </span>
                               </div>
@@ -1503,11 +1503,11 @@ function Dashboard({ onLogout }) {
                               <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-sky-400/40 text-[11px]">
                                 <div className="flex items-center gap-1 text-slate-500">
                                   <span className="material-symbols-outlined text-xs">battery_charging_full</span>
-                                  <span className="font-semibold text-white">{drone.battery}%</span>
+                                  <span className="font-semibold text-slate-800">{drone.battery}%</span>
                                 </div>
                                 <div className="flex items-center gap-1 text-slate-500">
                                   <span className="material-symbols-outlined text-xs">signal_cellular_alt</span>
-                                  <span className="font-semibold text-white">{drone.signal || '92%'}</span>
+                                  <span className="font-semibold text-slate-800">{drone.signal || '92%'}</span>
                                 </div>
                               </div>
                             </div>
@@ -1529,7 +1529,7 @@ function Dashboard({ onLogout }) {
             {activeTab === 'models' && (
               <div className="space-y-6">
                 <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-white">Registered Inference Models</h3>
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-800">Registered Inference Models</h3>
                   <p className="text-xs text-slate-500 mt-1">Okutama Action recognition engine metrics and model definitions.</p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
@@ -1539,7 +1539,7 @@ function Dashboard({ onLogout }) {
                       { name: 'Pose Estimation ResNet50', size: '98.0 MB', precision: 'FP32', mAP: '78.1%', latency: '24.5 ms', backend: 'OpenCV DNN' }
                     ].map((model, idx) => (
                       <div key={idx} className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50">
-                        <h4 className="font-bold text-sm text-slate-800 dark:text-white">{model.name}</h4>
+                        <h4 className="font-bold text-sm text-slate-800 dark:text-slate-800">{model.name}</h4>
                         <div className="mt-4 space-y-2 text-xs">
                           <div className="flex justify-between"><span className="text-slate-400">Model Weight:</span><span className="font-semibold">{model.size}</span></div>
                           <div className="flex justify-between"><span className="text-slate-400">Precision Layer:</span><span className="font-semibold">{model.precision}</span></div>
@@ -1560,12 +1560,12 @@ function Dashboard({ onLogout }) {
                 <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left">
                   <header className="flex justify-between items-center mb-6">
                     <div>
-                      <h3 className="text-lg font-bold text-slate-800 dark:text-white">Active Safety Incidents Log</h3>
+                      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-800">Active Safety Incidents Log</h3>
                       <p className="text-xs text-slate-500 mt-1">Acknowledge or resolve alerts triggered by active drone sensors.</p>
                     </div>
                     <button
                       onClick={actions.resolveAllAlerts}
-                      className="bg-red-500 text-white text-xs font-bold py-2 px-4 rounded-xl hover:bg-red-600 transition-colors"
+                      className="bg-red-500 text-slate-800 text-xs font-bold py-2 px-4 rounded-xl hover:bg-red-600 transition-colors"
                     >
                       Resolve All Warnings
                     </button>
@@ -1575,7 +1575,7 @@ function Dashboard({ onLogout }) {
                     {activeAlerts.length === 0 ? (
                       <div className="text-center py-12 text-slate-500">
                         <span className="material-symbols-outlined text-4xl text-emerald-500 mb-2">task_alt</span>
-                        <p className="font-bold text-slate-800 dark:text-white">No Warnings Logged</p>
+                        <p className="font-bold text-slate-800 dark:text-slate-800">No Warnings Logged</p>
                         <p className="text-xs text-slate-400 mt-0.5">Excellent! All registered hardware clusters are cleared for duty cycles.</p>
                       </div>
                     ) : (
@@ -1596,7 +1596,7 @@ function Dashboard({ onLogout }) {
                               </span>
                               <span className="text-xs text-slate-400">{alert.time} • Unit: {alert.unit}</span>
                             </div>
-                            <h4 className="font-bold text-sm text-slate-800 dark:text-white">{alert.title}</h4>
+                            <h4 className="font-bold text-sm text-slate-800 dark:text-slate-800">{alert.title}</h4>
                             <p className="text-xs text-slate-500 dark:text-slate-400">{alert.description}</p>
                           </div>
                           <div className="flex gap-2 shrink-0">
@@ -1627,12 +1627,12 @@ function Dashboard({ onLogout }) {
               <div className="space-y-6">
                 <header className="flex justify-between items-center">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-white">Machines & Fleet Assets</h3>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-800">Machines & Fleet Assets</h3>
                     <p className="text-xs text-slate-500 mt-1">Manage, ground, and track hardware drone assets.</p>
                   </div>
                   <button
                     onClick={() => setAddDroneOpen(true)}
-                    className="bg-primary text-white text-xs font-bold py-2 px-4 rounded-xl hover:bg-primary/95 flex items-center gap-1 shadow-sm"
+                    className="bg-primary text-slate-800 text-xs font-bold py-2 px-4 rounded-xl hover:bg-primary/95 flex items-center gap-1 shadow-sm"
                   >
                     <span className="material-symbols-outlined text-sm">add</span>
                     <span>Register Drone Asset</span>
@@ -1665,7 +1665,7 @@ function Dashboard({ onLogout }) {
                         <div className="p-4 space-y-3">
                           <div>
                             <div className="flex justify-between items-start">
-                              <h4 className="font-bold text-sm text-slate-800 dark:text-white">{drone.id}</h4>
+                              <h4 className="font-bold text-sm text-slate-800 dark:text-slate-800">{drone.id}</h4>
                               <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-mono">{drone.type}</span>
                             </div>
                             <p className="text-[10px] text-slate-400">{drone.model}</p>
@@ -1674,7 +1674,7 @@ function Dashboard({ onLogout }) {
                           <div className="space-y-2 text-xs">
                             <div className="flex justify-between">
                               <span className="text-slate-400">Battery:</span>
-                              <span className={`font-bold ${drone.battery < 20 ? 'text-red-500 animate-pulse' : 'text-slate-800 dark:text-white'}`}>{Math.round(drone.battery)}%</span>
+                              <span className={`font-bold ${drone.battery < 20 ? 'text-red-500 animate-pulse' : 'text-slate-800 dark:text-slate-800'}`}>{Math.round(drone.battery)}%</span>
                             </div>
                             <div className="w-full bg-slate-100 dark:bg-slate-900 rounded-full h-1">
                               <div className={`h-1 rounded-full ${drone.battery < 20 ? 'bg-red-500' : 'bg-emerald-500'}`} style={{ width: `${drone.battery}%` }}></div>
@@ -1694,7 +1694,7 @@ function Dashboard({ onLogout }) {
                       <div className="p-4 border-t border-slate-100 dark:border-slate-800/80 flex gap-2 bg-slate-50/50 dark:bg-slate-900/10">
                         <button
                           onClick={() => handleTrackDrone(drone.id)}
-                          className="flex-1 bg-primary text-white text-[11px] font-bold py-1.5 rounded-lg hover:bg-primary/95 shadow-xs transition-colors"
+                          className="flex-1 bg-primary text-slate-800 text-[11px] font-bold py-1.5 rounded-lg hover:bg-primary/95 shadow-xs transition-colors"
                         >
                           Track
                         </button>
@@ -1724,7 +1724,7 @@ function Dashboard({ onLogout }) {
             {activeTab === 'employee' && (
               <div className="space-y-6">
                 <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-white">Employee Operators Grid</h3>
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-800">Employee Operators Grid</h3>
                   <p className="text-xs text-slate-500 mt-1">Duty state of certified drone pilots and tech handlers.</p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
@@ -1740,7 +1740,7 @@ function Dashboard({ onLogout }) {
                               user.status === 'Away' ? 'bg-amber-500' : 'bg-slate-400'
                             }`}></span>
                         </div>
-                        <h4 className="font-bold text-slate-800 dark:text-white text-sm">{user.name}</h4>
+                        <h4 className="font-bold text-slate-800 dark:text-slate-800 text-sm">{user.name}</h4>
                         <p className="text-xs text-slate-400 mt-1">{user.role}</p>
 
                         <div className="mt-6 pt-3 border-t border-slate-100 dark:border-slate-800 w-full flex justify-between items-center text-xs">
@@ -1760,7 +1760,7 @@ function Dashboard({ onLogout }) {
                 <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left">
                   <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
-                      <h3 className="text-lg font-bold text-slate-800 dark:text-white">Active Flight Plan Overview</h3>
+                      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-800">Active Flight Plan Overview</h3>
                       <p className="text-xs text-slate-500 mt-1">Full flight records list for drone surveillance operations.</p>
                     </div>
                     <div className="flex gap-2">
@@ -1773,7 +1773,7 @@ function Dashboard({ onLogout }) {
                       />
                       <button
                         onClick={() => setFlightPlannerOpen(true)}
-                        className="bg-primary text-white text-xs font-bold py-2 px-4 rounded-xl hover:bg-primary/95 flex items-center gap-1 shadow-sm"
+                        className="bg-primary text-slate-800 text-xs font-bold py-2 px-4 rounded-xl hover:bg-primary/95 flex items-center gap-1 shadow-sm"
                       >
                         <span className="material-symbols-outlined text-sm">flight_takeoff</span>
                         <span>Dispatch Flight Plan</span>
@@ -1807,7 +1807,7 @@ function Dashboard({ onLogout }) {
                               onClick={() => handleTrackDrone(flight.drone)}
                               className="hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer transition-colors"
                             >
-                              <td className="px-4 py-3 font-bold text-slate-800 dark:text-white">{flight.id}</td>
+                              <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-800">{flight.id}</td>
                               <td className="px-4 py-3 text-slate-600 dark:text-slate-300 font-semibold">{flight.drone}</td>
                               <td className="px-4 py-3 text-slate-500">{flight.date}</td>
                               <td className="px-4 py-3 text-slate-500">{flight.duration}</td>
@@ -1833,7 +1833,7 @@ function Dashboard({ onLogout }) {
             {activeTab === 'rules' && (
               <div className="space-y-6">
                 <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left max-w-2xl">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-white">Safety Intrusion & Alert Rules</h3>
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-800">Safety Intrusion & Alert Rules</h3>
                   <p className="text-xs text-slate-500 mt-1">Configure threshold variables for drone alarms and auto-resolutions.</p>
 
                   <div className="space-y-4 mt-6">
@@ -1872,7 +1872,7 @@ function Dashboard({ onLogout }) {
             {activeTab === 'compliance' && (
               <div className="space-y-6">
                 <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-white">Audit & Compliance Reports</h3>
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-800">Audit & Compliance Reports</h3>
                   <p className="text-xs text-slate-500 mt-1">Verify drone fleet certification and airspace rules logging.</p>
 
                   <div className="mt-6 space-y-4">
@@ -1883,7 +1883,7 @@ function Dashboard({ onLogout }) {
                     ].map((compliance, cIdx) => (
                       <div key={cIdx} className="p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center text-xs">
                         <div>
-                          <p className="font-bold text-slate-800 dark:text-white">{compliance.rule}</p>
+                          <p className="font-bold text-slate-800 dark:text-slate-800">{compliance.rule}</p>
                           <p className="text-slate-400 mt-1">Last audited: {compliance.date}</p>
                         </div>
                         <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 font-bold">{compliance.status}</span>
@@ -1915,7 +1915,7 @@ function Dashboard({ onLogout }) {
                                 }`}
                             >
                               <div>
-                                <p className="font-bold text-xs text-slate-800 dark:text-white">{d.id}</p>
+                                <p className="font-bold text-xs text-slate-800 dark:text-slate-800">{d.id}</p>
                                 <p className="text-[10px] text-slate-400">{d.model}</p>
                               </div>
                               <span className="text-[9px] bg-amber-100 text-amber-700 rounded-full px-2 py-0.5 font-bold uppercase tracking-wider shrink-0">Grounded</span>
@@ -1934,7 +1934,7 @@ function Dashboard({ onLogout }) {
                         return (
                           <div className="text-center py-12 text-slate-500">
                             <span className="material-symbols-outlined text-4xl text-emerald-500 mb-2">task_alt</span>
-                            <h4 className="font-bold text-slate-800 dark:text-white">Fleet Operating at Peak Health</h4>
+                            <h4 className="font-bold text-slate-800 dark:text-slate-800">Fleet Operating at Peak Health</h4>
                             <p className="text-xs text-slate-400 mt-1">Excellent! All registered hardware clusters are cleared for duty cycles.</p>
                           </div>
                         );
@@ -1950,7 +1950,7 @@ function Dashboard({ onLogout }) {
                       return (
                         <div className="space-y-4">
                           <header className="border-b border-slate-100 dark:border-slate-800 pb-3">
-                            <h4 className="font-bold text-sm text-slate-800 dark:text-white">Calibrate Unit: {mDrone.id}</h4>
+                            <h4 className="font-bold text-sm text-slate-800 dark:text-slate-800">Calibrate Unit: {mDrone.id}</h4>
                             <p className="text-xs text-slate-400 mt-1">Subsystem Health indices: Propulsion: {mDrone.health.propulsion}%, Optical: {mDrone.health.optical}%, Chassis: {mDrone.health.chassis}%</p>
                           </header>
 
@@ -1966,7 +1966,7 @@ function Dashboard({ onLogout }) {
                                     {task.icon}
                                   </span>
                                   <div>
-                                    <p className="font-bold text-xs text-slate-800 dark:text-white">{task.title}</p>
+                                    <p className="font-bold text-xs text-slate-800 dark:text-slate-800">{task.title}</p>
                                     <p className="text-[10px] text-slate-400 mt-0.5">{task.desc}</p>
                                   </div>
                                 </div>
@@ -1975,7 +1975,7 @@ function Dashboard({ onLogout }) {
                                 ) : (
                                   <button
                                     onClick={() => handleRunCalibration(mDrone.id, task.system)}
-                                    className="bg-primary text-white text-[11px] font-bold py-1.5 px-3 rounded-lg hover:bg-primary/95 shadow-xs transition-all shrink-0"
+                                    className="bg-primary text-slate-800 text-[11px] font-bold py-1.5 px-3 rounded-lg hover:bg-primary/95 shadow-xs transition-all shrink-0"
                                   >
                                     Run Calibration
                                   </button>
@@ -1995,14 +1995,14 @@ function Dashboard({ onLogout }) {
             {activeTab === 'settings' && (
               <div className="space-y-6">
                 <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left max-w-2xl">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-white">Settings & Admin Controls</h3>
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-800">Settings & Admin Controls</h3>
                   <p className="text-xs text-slate-500 mt-1">Configure theme preferences, simulation speed, and warning sounds.</p>
 
                   <div className="mt-6 space-y-6 divide-y divide-slate-100 dark:divide-slate-800">
                     {/* Theme toggle */}
                     <div className="flex justify-between items-center py-4">
                       <div>
-                        <h4 className="font-bold text-xs text-slate-800 dark:text-white">Dark Theme Interface</h4>
+                        <h4 className="font-bold text-xs text-slate-800 dark:text-slate-800">Dark Theme Interface</h4>
                         <p className="text-[10px] text-slate-500 mt-0.5">Toggle background palettes to suit operating cockpit environments.</p>
                       </div>
                       <button
@@ -2018,7 +2018,7 @@ function Dashboard({ onLogout }) {
                     {/* Sound warnings */}
                     <div className="flex justify-between items-center py-4">
                       <div>
-                        <h4 className="font-bold text-xs text-slate-800 dark:text-white">Sound Alerts Enabled</h4>
+                        <h4 className="font-bold text-xs text-slate-800 dark:text-slate-800">Sound Alerts Enabled</h4>
                         <p className="text-[10px] text-slate-500 mt-0.5">Play synthesizer warnings when critical events trigger.</p>
                       </div>
                       <button
@@ -2034,7 +2034,7 @@ function Dashboard({ onLogout }) {
                     {/* Simulation speed */}
                     <div className="flex justify-between items-center py-4">
                       <div>
-                        <h4 className="font-bold text-xs text-slate-800 dark:text-white">Simulation Core Speed</h4>
+                        <h4 className="font-bold text-xs text-slate-800 dark:text-slate-800">Simulation Core Speed</h4>
                         <p className="text-[10px] text-slate-500 mt-0.5">Clock speed coefficient for map and coordinates calculations.</p>
                       </div>
                       <select
@@ -2061,7 +2061,7 @@ function Dashboard({ onLogout }) {
           <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden text-left p-6 text-slate-800">
             <header className="flex justify-between items-center border-b border-sky-400/40 pb-3 mb-4">
               <h3 className="font-bold text-slate-800">Register Fleet Drone</h3>
-              <button onClick={() => setAddDroneOpen(false)} className="text-slate-500 hover:text-white">
+              <button onClick={() => setAddDroneOpen(false)} className="text-slate-500 hover:text-slate-800">
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
             </header>
@@ -2075,7 +2075,7 @@ function Dashboard({ onLogout }) {
                   placeholder="e.g. Inspector Pro V3"
                   value={newDroneModel}
                   onChange={(e) => setNewDroneModel(e.target.value)}
-                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-white/50 text-slate-800 placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 
@@ -2084,12 +2084,12 @@ function Dashboard({ onLogout }) {
                 <select
                   value={newDroneType}
                   onChange={(e) => setNewDroneType(e.target.value)}
-                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-white/50 text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 >
-                  <option value="Cargo Delivery" className="bg-sky-900 text-white">Cargo Delivery</option>
-                  <option value="Surveillance" className="bg-sky-900 text-white">Surveillance</option>
-                  <option value="Infrastructure Inspection" className="bg-sky-900 text-white">Infrastructure Inspection</option>
-                  <option value="Mapping" className="bg-sky-900 text-white">Mapping</option>
+                  <option value="Cargo Delivery" className="bg-white text-slate-800">Cargo Delivery</option>
+                  <option value="Surveillance" className="bg-white text-slate-800">Surveillance</option>
+                  <option value="Infrastructure Inspection" className="bg-white text-slate-800">Infrastructure Inspection</option>
+                  <option value="Mapping" className="bg-white text-slate-800">Mapping</option>
                 </select>
               </div>
 
@@ -2101,7 +2101,7 @@ function Dashboard({ onLogout }) {
                   placeholder="e.g. FLIR Sensor Pod"
                   value={newDronePayload}
                   onChange={(e) => setNewDronePayload(e.target.value)}
-                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-white/50 text-slate-800 placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 
@@ -2113,7 +2113,7 @@ function Dashboard({ onLogout }) {
                   placeholder="e.g. A. Rivera"
                   value={newDroneOperator}
                   onChange={(e) => setNewDroneOperator(e.target.value)}
-                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-white/50 text-slate-800 placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 
@@ -2134,7 +2134,7 @@ function Dashboard({ onLogout }) {
           <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden text-left p-6 text-slate-800">
             <header className="flex justify-between items-center border-b border-sky-400/40 pb-3 mb-4">
               <h3 className="font-bold text-slate-800">Dispatch Flight Plan</h3>
-              <button onClick={() => setFlightPlannerOpen(false)} className="text-slate-500 hover:text-white">
+              <button onClick={() => setFlightPlannerOpen(false)} className="text-slate-500 hover:text-slate-800">
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
             </header>
@@ -2146,11 +2146,11 @@ function Dashboard({ onLogout }) {
                   required
                   value={newFlightDrone}
                   onChange={(e) => setNewFlightDrone(e.target.value)}
-                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-white/50 text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 >
-                  <option value="" className="bg-sky-900 text-white">-- Choose Drone --</option>
+                  <option value="" className="bg-white text-slate-800">-- Choose Drone --</option>
                   {appState.drones.filter(d => d.status !== 'Maintenance').map(d => (
-                    <option key={d.id} value={d.id} className="bg-sky-900 text-white">{d.id} ({d.model}) - {Math.round(d.battery)}% batt</option>
+                    <option key={d.id} value={d.id} className="bg-white text-slate-800">{d.id} ({d.model}) - {Math.round(d.battery)}% batt</option>
                   ))}
                 </select>
               </div>
@@ -2163,7 +2163,7 @@ function Dashboard({ onLogout }) {
                   placeholder="Operator name"
                   value={newFlightPilot}
                   onChange={(e) => setNewFlightPilot(e.target.value)}
-                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-white/50 text-slate-800 placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 
@@ -2172,11 +2172,11 @@ function Dashboard({ onLogout }) {
                 <select
                   value={newFlightDest}
                   onChange={(e) => setNewFlightDest(e.target.value)}
-                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-white/50 text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 >
-                  <option value="Westside Hospital Pad" className="bg-sky-900 text-white">Westside Hospital Pad</option>
-                  <option value="Storage Rack B" className="bg-sky-900 text-white">Storage Hangar Sector Alpha</option>
-                  <option value="Charging Pad Alpha" className="bg-sky-900 text-white">Charging Pad Alpha</option>
+                  <option value="Westside Hospital Pad" className="bg-white text-slate-800">Westside Hospital Pad</option>
+                  <option value="Storage Rack B" className="bg-white text-slate-800">Storage Hangar Sector Alpha</option>
+                  <option value="Charging Pad Alpha" className="bg-white text-slate-800">Charging Pad Alpha</option>
                 </select>
               </div>
 
@@ -2188,7 +2188,7 @@ function Dashboard({ onLogout }) {
                   placeholder="e.g. Medical package"
                   value={newFlightPayload}
                   onChange={(e) => setNewFlightPayload(e.target.value)}
-                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-white/50 text-slate-800 placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 
@@ -2210,11 +2210,11 @@ function Dashboard({ onLogout }) {
             <header className="flex justify-between items-center border-b border-sky-400/40 pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-rose-300 animate-pulse">videocam</span>
-                <h3 className="font-extrabold text-white">Incident Capture Evidence</h3>
+                <h3 className="font-extrabold text-slate-800">Incident Capture Evidence</h3>
               </div>
               <button
                 onClick={() => setSelectedAlert(null)}
-                className="text-slate-500 hover:text-white"
+                className="text-slate-500 hover:text-slate-800"
               >
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
@@ -2222,7 +2222,7 @@ function Dashboard({ onLogout }) {
 
             <div className="space-y-4">
               {/* Telemetry info */}
-              <div className="grid grid-cols-2 gap-2 text-xs bg-sky-900/40 p-3 rounded-xl border border-sky-400/40">
+              <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <div>
                   <span className="text-sky-250 font-semibold uppercase text-[9px] block">Alert Event</span>
                   <span className="font-bold text-slate-800">{selectedAlert.title}</span>
@@ -2279,13 +2279,13 @@ function Dashboard({ onLogout }) {
                         height: selectedAlert.boundingBox.height
                       }}
                     >
-                      <span className={`text-[8px] px-1.5 py-0.5 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-wider shadow ${selectedAlert.boundingBox.color ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}>
+                      <span className={`text-[8px] px-1.5 py-0.5 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-wider shadow ${selectedAlert.boundingBox.color ? 'bg-emerald-600 text-slate-800' : 'bg-red-600 text-slate-800'}`}>
                         {selectedAlert.boundingBox.label}
                       </span>
                     </div>
                   ) : (
                     <div className="absolute inset-1/4 border-2 border-dashed border-red-500/60 pointer-events-none flex items-center justify-center">
-                      <span className="bg-red-600 text-white text-[8px] px-1.5 py-0.5 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-wider shadow">
+                      <span className="bg-red-600 text-slate-800 text-[8px] px-1.5 py-0.5 font-sans rounded-xs absolute top-0 left-0 uppercase font-bold tracking-wider shadow">
                         {selectedAlert.type?.toUpperCase() || "DETECTION"}
                       </span>
                     </div>
@@ -2309,7 +2309,7 @@ function Dashboard({ onLogout }) {
             <footer className="flex justify-end gap-2.5 mt-6 border-t border-sky-400/40 pt-4">
               <button
                 onClick={() => setSelectedAlert(null)}
-                className="bg-sky-900/40 border border-sky-400/60 hover:bg-sky-550 text-white text-xs font-bold py-2 px-4 rounded-xl shadow-xs"
+                className="bg-slate-50 border border-slate-200 hover:bg-sky-550 text-slate-800 text-xs font-bold py-2 px-4 rounded-xl shadow-xs"
               >
                 Close
               </button>
@@ -2333,4 +2333,7 @@ function Dashboard({ onLogout }) {
 }
 
 export default Dashboard;
+
+
+
 

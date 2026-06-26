@@ -33,7 +33,7 @@ function TrackingMap({ detailedPath }) {
       html: `
         <div class="relative flex items-center justify-center w-12 h-12">
             <div class="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
-            <div class="w-8 h-8 bg-primary border-2 border-white rounded-full flex items-center justify-center shadow-lg text-white z-10">
+            <div class="w-8 h-8 bg-primary border-2 border-white rounded-full flex items-center justify-center shadow-lg text-slate-800 z-10">
                 <span class="material-symbols-outlined text-[18px]">flight_takeoff</span>
             </div>
         </div>
@@ -125,4 +125,7 @@ function TrackingMap({ detailedPath }) {
 }
 
 export default TrackingMap;
+
+
+
 

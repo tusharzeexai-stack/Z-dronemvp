@@ -440,7 +440,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                       html: `
                         <div class="relative flex items-center justify-center w-10 h-10">
                             <div class="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
-                            <div class="w-8 h-8 bg-sky-900 border-2 border-white rounded-full flex items-center justify-center shadow-2xl text-white z-20">
+                            <div class="w-8 h-8 bg-white border-2 border-white rounded-full flex items-center justify-center shadow-2xl text-slate-800 z-20">
                                 <span class="material-symbols-outlined text-[16px]">flight_takeoff</span>
                             </div>
                         </div>
@@ -789,7 +789,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
     // Home Position Marker
     const homeIcon = L.divIcon({
       html: `
-        <div class="w-8 h-8 bg-sky-650 rounded-xl flex items-center justify-center border-2 border-white shadow-xl text-white">
+        <div class="w-8 h-8 bg-sky-650 rounded-xl flex items-center justify-center border-2 border-white shadow-xl text-slate-800">
             <span class="material-symbols-outlined text-[15px]">home</span>
         </div>
       `,
@@ -804,7 +804,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
       points.push([wp.lat, wp.lng]);
 
       const isSelected = idx === activeWaypointIndex;
-      const markerColor = isSelected ? 'bg-white text-sky-900 border-white' : 'bg-sky-900 border-sky-400 text-white';
+      const markerColor = isSelected ? 'bg-white text-sky-900 border-white' : 'bg-white border-sky-400 text-slate-800';
       
       const customHtmlIcon = L.divIcon({
         html: `
@@ -889,7 +889,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 html: `
                   <div class="relative flex items-center justify-center w-10 h-10">
                       <div class="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
-                      <div class="w-8 h-8 bg-sky-900 border-2 border-white rounded-full flex items-center justify-center shadow-2xl text-white z-20">
+                      <div class="w-8 h-8 bg-white border-2 border-white rounded-full flex items-center justify-center shadow-2xl text-slate-800 z-20">
                           <span class="material-symbols-outlined text-[16px] animate-spin">flight_takeoff</span>
                       </div>
                   </div>
@@ -989,10 +989,10 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
 
   return (
     <>
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)] text-white font-sans pb-4">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)] text-slate-800 font-sans pb-4">
       
       {/* ── LEFT PANEL: MISSION LIBRARY (3 cols) ── */}
-      <div className="lg:col-span-3 bg-sky-600 border border-sky-500 rounded-2xl p-4 flex flex-col justify-between h-full overflow-y-auto shadow-xl">
+      <div className="lg:col-span-3 bg-white border border-slate-200 text-slate-800 rounded-2xl p-4 flex flex-col justify-between h-full overflow-y-auto shadow-xl">
         <div className="space-y-4">
           <header className="flex justify-between items-center">
             <h3 className="font-extrabold text-sm text-slate-800 drop-shadow">Mission Library</h3>
@@ -1016,7 +1016,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               placeholder="Search missions..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-sky-900/40 border border-sky-400/50 rounded-xl pl-9 pr-4 py-2 text-xs w-full focus:outline-none text-white placeholder-sky-200/70 font-semibold"
+              className="bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs w-full focus:outline-none text-slate-800 placeholder-slate-400 font-semibold"
             />
           </div>
 
@@ -1031,7 +1031,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${
                   selectedMissionId === m.id 
                     ? 'bg-white text-sky-900 border-white shadow-xl font-bold' 
-                    : 'bg-sky-900/20 border-sky-500/30 text-sky-100 hover:bg-sky-900/40 hover:border-sky-400'
+                    : 'bg-white/20 border-sky-500/30 text-sky-100 hover:bg-white/40 hover:border-sky-400'
                 }`}
               >
                 <div className="flex justify-between items-start">
@@ -1056,12 +1056,12 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                         <Edit className="w-3 h-3 text-sky-700" />
                       </button>
                     )}
-                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-white/20 text-white border border-white/25">
+                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-white/20 text-slate-800 border border-white/25">
                       {m.status}
                     </span>
                   </div>
                 </div>
-                <h4 className={`font-black text-xs mt-1.5 truncate ${selectedMissionId === m.id ? 'text-sky-900' : 'text-white'}`}>{m.name}</h4>
+                <h4 className={`font-black text-xs mt-1.5 truncate ${selectedMissionId === m.id ? 'text-sky-900' : 'text-slate-800'}`}>{m.name}</h4>
                 <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 mt-3 text-[10px]">
                   <div><span className={selectedMissionId === m.id ? 'text-sky-700' : 'text-slate-500'}>Drone:</span> <span className="font-bold">{m.drone}</span></div>
                   <div><span className={selectedMissionId === m.id ? 'text-sky-700' : 'text-slate-500'}>Dist:</span> <span className="font-bold">{m.distance}</span></div>
@@ -1074,34 +1074,34 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
         </div>
 
         <div className="border-t border-sky-400/40 pt-3 mt-4 flex gap-2">
-          <button className="flex-1 bg-sky-900/40 border border-sky-400/50 hover:bg-sky-500/40 text-white py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1.5 shadow">
+          <button className="flex-1 bg-slate-50 border border-slate-200 hover:bg-sky-500/40 text-slate-800 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1.5 shadow">
             <Upload className="w-3.5 h-3.5" /> Import
           </button>
-          <button className="flex-1 bg-sky-900/40 border border-sky-400/50 hover:bg-sky-500/40 text-white py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1.5 shadow">
+          <button className="flex-1 bg-slate-50 border border-slate-200 hover:bg-sky-500/40 text-slate-800 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1.5 shadow">
             <Download className="w-3.5 h-3.5" /> Export
           </button>
         </div>
       </div>
 
       {/* ── CENTER PANEL: INTERACTIVE WORKSPACE MAP & SIMULATION (6 cols) ── */}
-      <div className="lg:col-span-6 bg-sky-600 border border-sky-500 rounded-2xl p-4 flex flex-col justify-between h-full relative overflow-hidden shadow-xl">
+      <div className="lg:col-span-6 bg-white border border-slate-200 text-slate-800 rounded-2xl p-4 flex flex-col justify-between h-full relative overflow-hidden shadow-xl">
         <header className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2 text-left">
-            <Compass className="w-4.5 h-4.5 text-white" />
+            <Compass className="w-4.5 h-4.5 text-slate-800" />
             <div>
-              <h3 className="font-bold text-xs text-white">Interactive Workspace Map</h3>
+              <h3 className="font-bold text-xs text-slate-800">Interactive Workspace Map</h3>
               <p className="text-[10px] text-sky-100">Click coordinates to structure mission waypoints.</p>
             </div>
           </div>
           
           {/* Mission Drawing Tools */}
-          <div className="flex items-center gap-2 bg-sky-900/40 p-1 rounded-xl border border-sky-400/40">
+          <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
             {DRAWING_MODES.map(mode => (
               <button
                 key={mode.id}
                 onClick={() => setDrawingMode(mode.id)}
                 className={`p-1.5 rounded-lg transition-all ${
-                  drawingMode === mode.id ? 'bg-white text-sky-900 shadow' : 'text-slate-500 hover:text-white'
+                  drawingMode === mode.id ? 'bg-white text-sky-900 shadow' : 'text-slate-500 hover:text-slate-800'
                 }`}
                 title={mode.label}
               >
@@ -1118,10 +1118,10 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
         {simulating && (
           <div className="absolute top-20 left-8 right-8 z-20 bg-sky-955/95 border border-sky-400 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-6 text-left">
             <div className="flex items-center gap-3">
-              <Activity className="w-6 h-6 text-white animate-pulse" />
+              <Activity className="w-6 h-6 text-slate-800 animate-pulse" />
               <div>
                 <span className="text-[9px] uppercase tracking-widest text-slate-500 font-bold block">Autopilot In Air</span>
-                <span className="text-xs font-black text-white">MAVLink Node #{Math.floor(simStep / 10) + 1}</span>
+                <span className="text-xs font-black text-slate-800">MAVLink Node #{Math.floor(simStep / 10) + 1}</span>
               </div>
             </div>
             <div className="grid grid-cols-4 gap-6 text-[11px] flex-1 max-w-md">
@@ -1138,7 +1138,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
           <button 
             onClick={() => setSatelliteView(!satelliteView)}
             className={`p-2.5 rounded-xl border shadow-md flex items-center justify-center gap-1.5 transition-all text-[10px] font-bold ${
-              satelliteView ? 'bg-white text-sky-900 border-white' : 'bg-sky-900 border-sky-400 text-white'
+              satelliteView ? 'bg-white text-sky-900 border-white' : 'bg-white border-sky-400 text-slate-800'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -1151,7 +1151,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
           {timelineEvents.map((log) => (
             <div key={log.id} className="flex gap-3 text-[10px] font-mono leading-relaxed">
               <span className="text-slate-500 shrink-0">[{log.time}]</span>
-              <span className="text-white font-semibold">[{log.type}]</span>
+              <span className="text-slate-800 font-semibold">[{log.type}]</span>
               <span className="text-sky-100">{log.message}</span>
             </div>
           ))}
@@ -1159,7 +1159,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
       </div>
 
       {/* ── RIGHT PANEL: GCS PILOT ENGINE (3 cols) ── */}
-      <div className="lg:col-span-3 bg-sky-600 border border-sky-500 rounded-2xl p-4 flex flex-col justify-between h-full overflow-y-auto shadow-xl">
+      <div className="lg:col-span-3 bg-white border border-slate-200 text-slate-800 rounded-2xl p-4 flex flex-col justify-between h-full overflow-y-auto shadow-xl">
         <div className="space-y-4 text-left">
           
           {/* Sub Tab Headers */}
@@ -1174,7 +1174,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 key={tab.id}
                 onClick={() => setActiveRightTab(tab.id)}
                 className={`flex-1 pb-2 border-b-2 transition-all ${
-                  activeRightTab === tab.id ? 'border-white text-white' : 'border-transparent text-slate-500 hover:text-white'
+                  activeRightTab === tab.id ? 'border-white text-slate-800' : 'border-transparent text-slate-500 hover:text-slate-800'
                 }`}
               >
                 {tab.label}
@@ -1187,7 +1187,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
             <div className="space-y-4">
               
               {/* Autopilot Connection String card */}
-              <div className="bg-sky-900/40 border border-sky-400/50 p-3 rounded-xl space-y-2">
+              <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-2">
                 <div className="flex justify-between items-center text-[10px] text-slate-500 font-bold uppercase">
                   <span>MAVLink Connection</span>
                   <span className={`w-2 h-2 rounded-full ${connectionStatus === 'CONNECTED' ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`}></span>
@@ -1196,7 +1196,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                   type="text" 
                   value={connectionString} 
                   onChange={(e) => setConnectionString(e.target.value)}
-                  className="bg-sky-950 border border-sky-400/50 rounded-lg p-2 text-xs w-full text-white font-mono focus:outline-none"
+                  className="bg-sky-950 border border-sky-400/50 rounded-lg p-2 text-xs w-full text-slate-800 font-mono focus:outline-none"
                   placeholder="udp://:14540"
                 />
                 
@@ -1211,7 +1211,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                   ) : (
                     <button 
                       onClick={handleDisconnect}
-                      className="flex-1 bg-red-500 hover:bg-red-650 text-white font-bold py-1.5 rounded-lg text-[10px] transition-all flex items-center justify-center gap-1 shadow"
+                      className="flex-1 bg-red-500 hover:bg-red-650 text-slate-800 font-bold py-1.5 rounded-lg text-[10px] transition-all flex items-center justify-center gap-1 shadow"
                     >
                       <Link2Off className="w-3.5 h-3.5" /> Disconnect
                     </button>
@@ -1220,7 +1220,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               </div>
 
               {/* Autopilot Telemetry Spec readouts */}
-              <div className="grid grid-cols-2 gap-2 text-[10px] bg-sky-900/40 p-2.5 rounded-xl border border-sky-400/40">
+              <div className="grid grid-cols-2 gap-2 text-[10px] bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                 <div className="border-r border-sky-400/20 pr-2">
                   <span className="text-slate-500 block">Firmware:</span>
                   <span className="font-bold text-slate-800">{firmware}</span>
@@ -1247,14 +1247,14 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                   {armedStatus !== 'ARMED' ? (
                     <button 
                       onClick={handleArm}
-                      className="py-2 rounded-xl text-[10px] font-black uppercase text-center transition-all bg-emerald-500 hover:bg-emerald-600 text-white border border-emerald-400/50 shadow"
+                      className="py-2 rounded-xl text-[10px] font-black uppercase text-center transition-all bg-emerald-500 hover:bg-emerald-600 text-slate-800 border border-emerald-400/50 shadow"
                     >
                       Arm Motors
                     </button>
                   ) : (
                     <button 
                       onClick={handleDisarm}
-                      className="py-2 rounded-xl text-[10px] font-black uppercase text-center transition-all bg-red-500 hover:bg-red-600 text-white border border-red-400/50 shadow"
+                      className="py-2 rounded-xl text-[10px] font-black uppercase text-center transition-all bg-red-500 hover:bg-red-600 text-slate-800 border border-red-400/50 shadow"
                     >
                       Disarm Motors
                     </button>
@@ -1262,7 +1262,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
 
                   <button 
                     onClick={handleTakeoff}
-                    className="bg-sky-900/40 border border-sky-400/60 hover:bg-sky-500/40 py-2 rounded-xl text-[10px] font-black uppercase text-center transition-all text-white"
+                    className="bg-slate-50 border border-slate-200 hover:bg-sky-500/40 py-2 rounded-xl text-[10px] font-black uppercase text-center transition-all text-slate-800"
                   >
                     Guided Takeoff
                   </button>
@@ -1271,19 +1271,19 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 <div className="grid grid-cols-3 gap-2">
                   <button 
                     onClick={handleRTL}
-                    className="bg-sky-900/40 border border-sky-400/60 hover:bg-sky-500/40 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all"
+                    className="bg-slate-50 border border-slate-200 hover:bg-sky-500/40 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all"
                   >
                     RTL
                   </button>
                   <button 
                     onClick={handleLand}
-                    className="bg-sky-900/40 border border-sky-400/60 hover:bg-sky-500/40 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all"
+                    className="bg-slate-50 border border-slate-200 hover:bg-sky-500/40 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all"
                   >
                     Land
                   </button>
                   <button 
                     onClick={handlePauseMission}
-                    className="bg-sky-900/40 border border-sky-400/60 hover:bg-sky-500/40 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all"
+                    className="bg-slate-50 border border-slate-200 hover:bg-sky-500/40 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all"
                   >
                     Loiter Hold
                   </button>
@@ -1293,7 +1293,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               {/* Pre-Flight Checklist */}
               <div className="space-y-2">
                 <span className="text-[10px] text-slate-500 font-black uppercase tracking-wider block">Pre-Flight Checklist Status</span>
-                <div className="bg-sky-900/40 border border-sky-400/40 rounded-xl p-2.5 space-y-1.5 text-[10px]">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 space-y-1.5 text-[10px]">
                   {validationStatus.checklist.map((c) => (
                     <div key={c.id} className="flex justify-between items-center">
                       <span className="text-sky-100 font-semibold">{c.name}</span>
@@ -1323,9 +1323,9 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                   { label: 'Home Distance', val: `${telemetry.homeDistance.toFixed(2)} km` },
                   { label: 'Dist. Traveled', val: `${telemetry.distanceTravelled} km` }
                 ].map((item, idx) => (
-                  <div key={idx} className="bg-sky-900/40 border border-sky-400/40 p-2.5 rounded-xl">
+                  <div key={idx} className="bg-slate-50 border border-slate-200 p-2.5 rounded-xl">
                     <span className="text-[9px] text-slate-500 font-semibold block">{item.label}</span>
-                    <span className="text-[11px] font-black text-white mt-0.5 block">{item.val}</span>
+                    <span className="text-[11px] font-black text-slate-800 mt-0.5 block">{item.val}</span>
                   </div>
                 ))}
               </div>
@@ -1341,7 +1341,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center bg-sky-900/40 p-2.5 rounded-xl border border-sky-400/40">
+                  <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                     <span className="text-xs font-bold text-slate-800">Waypoint Node #{activeWaypointIndex + 1}</span>
                     <button 
                       onClick={() => handleDeleteWaypoint(activeWaypointIndex)}
@@ -1359,7 +1359,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                           type="number" 
                           value={waypoints[activeWaypointIndex]?.lat.toFixed(6)}
                           disabled
-                          className="bg-sky-900/40 border border-sky-450/40 rounded-lg p-2 text-xs w-full text-slate-500"
+                          className="bg-white/40 border border-sky-450/40 rounded-lg p-2 text-xs w-full text-slate-500"
                         />
                       </div>
                       <div>
@@ -1368,7 +1368,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                           type="number" 
                           value={waypoints[activeWaypointIndex]?.lng.toFixed(6)}
                           disabled
-                          className="bg-sky-900/40 border border-sky-450/40 rounded-lg p-2 text-xs w-full text-slate-500"
+                          className="bg-white/40 border border-sky-450/40 rounded-lg p-2 text-xs w-full text-slate-500"
                         />
                       </div>
                     </div>
@@ -1391,7 +1391,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                           }}
                           className="flex-1 accent-white"
                         />
-                        <span className="font-mono text-xs w-10 text-right text-white">{waypoints[activeWaypointIndex]?.altitude}m</span>
+                        <span className="font-mono text-xs w-10 text-right text-slate-800">{waypoints[activeWaypointIndex]?.altitude}m</span>
                       </div>
                     </div>
 
@@ -1413,7 +1413,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                           }}
                           className="flex-1 accent-white"
                         />
-                        <span className="font-mono text-xs w-10 text-right text-white">{waypoints[activeWaypointIndex]?.speed}m/s</span>
+                        <span className="font-mono text-xs w-10 text-right text-slate-800">{waypoints[activeWaypointIndex]?.speed}m/s</span>
                       </div>
                     </div>
 
@@ -1430,7 +1430,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                               return updated;
                             });
                           }}
-                          className="bg-sky-900/60 border border-sky-400/50 rounded-lg p-2 text-[10px] w-full text-white focus:outline-none"
+                          className="bg-white/60 border border-sky-400/50 rounded-lg p-2 text-[10px] w-full text-slate-800 focus:outline-none"
                         >
                           <option value="None" className="text-sky-900">None</option>
                           <option value="Hover" className="text-sky-900">Hover</option>
@@ -1452,7 +1452,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                               return updated;
                             });
                           }}
-                          className="bg-sky-900/60 border border-sky-400/50 rounded-lg p-2 text-xs w-full text-white"
+                          className="bg-white/60 border border-sky-400/50 rounded-lg p-2 text-xs w-full text-slate-800"
                         />
                       </div>
                     </div>
@@ -1465,8 +1465,8 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
           {/* TAB 4: AI MISSION PLANNING ASSISTANT */}
           {activeRightTab === 'ai_co_pilot' && (
             <div className="space-y-4">
-              <div className="bg-sky-900/40 border border-sky-400/40 rounded-xl p-3.5 flex items-start gap-2.5 animate-pulse">
-                <Bot className="w-5 h-5 text-white shrink-0" />
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-start gap-2.5 animate-pulse">
+                <Bot className="w-5 h-5 text-slate-800 shrink-0" />
                 <div className="text-xs space-y-1">
                   <span className="font-bold text-slate-800 block">Zeex-AI Planning Assistant</span>
                   <p className="text-sky-100 leading-relaxed">
@@ -1478,9 +1478,9 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               <div className="space-y-2">
                 <button 
                   onClick={() => handleOptimizeAI('grid')}
-                  className="w-full bg-sky-900/40 border border-sky-400/50 hover:bg-sky-500/40 p-2.5 rounded-xl text-xs text-left transition-all flex items-center gap-2"
+                  className="w-full bg-slate-50 border border-slate-200 hover:bg-sky-500/40 p-2.5 rounded-xl text-xs text-left transition-all flex items-center gap-2"
                 >
-                  <Sparkles className="w-4 h-4 text-white" />
+                  <Sparkles className="w-4 h-4 text-slate-800" />
                   <div>
                     <span className="font-bold text-slate-800 block text-[11px]">Generate Autonomous Survey</span>
                     <span className="text-[9px] text-sky-100 block">Auto-creates optimal camera sweep lines.</span>
@@ -1488,9 +1488,9 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 </button>
                 <button 
                   onClick={() => handleOptimizeAI('battery')}
-                  className="w-full bg-sky-900/40 border border-sky-400/50 hover:bg-sky-500/40 p-2.5 rounded-xl text-xs text-left transition-all flex items-center gap-2"
+                  className="w-full bg-slate-50 border border-slate-200 hover:bg-sky-500/40 p-2.5 rounded-xl text-xs text-left transition-all flex items-center gap-2"
                 >
-                  <Cpu className="w-4 h-4 text-white" />
+                  <Cpu className="w-4 h-4 text-slate-800" />
                   <div>
                     <span className="font-bold text-slate-800 block text-[11px]">Optimize Battery Efficiency</span>
                     <span className="text-[9px] text-sky-100 block">Smoothes curves to reduce motor drag.</span>
@@ -1510,7 +1510,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               disabled={validationStatus.uploadBlocked}
               className={`w-full font-extrabold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors shadow ${
                 validationStatus.uploadBlocked 
-                  ? 'bg-sky-900/40 border border-sky-600 text-sky-300 cursor-not-allowed' 
+                  ? 'bg-white/40 border border-sky-600 text-sky-300 cursor-not-allowed' 
                   : 'bg-white hover:bg-sky-100 text-sky-900'
               }`}
             >
@@ -1520,7 +1520,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
           ) : (
             <button 
               onClick={handleAbortMission}
-              className="w-full bg-red-500 hover:bg-red-600 text-white font-extrabold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors shadow-md"
+              className="w-full bg-red-500 hover:bg-red-600 text-slate-800 font-extrabold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors shadow-md"
             >
               <Pause className="w-3.5 h-3.5 fill-current" />
               Abort Flight Mode
@@ -1538,7 +1538,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               });
               logEvent('INFO', `MAVLink: Flight details dispatched to system registers.`);
             }}
-            className="w-full bg-sky-900/40 border border-sky-400/60 hover:bg-sky-550/40 text-white py-2.5 rounded-xl text-xs font-bold transition-all text-center block"
+            className="w-full bg-slate-50 border border-slate-200 hover:bg-sky-550/40 text-slate-800 py-2.5 rounded-xl text-xs font-bold transition-all text-center block"
           >
             Dispatch Flight Log
           </button>
@@ -1582,7 +1582,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 <Plus className="w-4 h-4 text-sky-400" />
                 Create Flight Plan
               </h3>
-              <button onClick={() => setAddModalOpen(false)} style={{ background: 'none', border: 'none', color: '#bae6fd', cursor: 'pointer' }} className="hover:text-white transition-colors">
+              <button onClick={() => setAddModalOpen(false)} style={{ background: 'none', border: 'none', color: '#bae6fd', cursor: 'pointer' }} className="hover:text-slate-800 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1628,7 +1628,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                     style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: '#0f172a', color: 'white', outline: 'none' }}
                   >
                     {(appState.drones || []).map(d => (
-                      <option key={d.id} value={d.id} className="bg-sky-900 text-white">{d.id} - {d.model}</option>
+                      <option key={d.id} value={d.id} className="bg-white text-slate-800">{d.id} - {d.model}</option>
                     ))}
                   </select>
                 </div>
@@ -1640,7 +1640,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                     style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: '#0f172a', color: 'white', outline: 'none' }}
                   >
                     {MISSION_TYPES.map(t => (
-                      <option key={t} value={t} className="bg-sky-900 text-white">{t}</option>
+                      <option key={t} value={t} className="bg-white text-slate-800">{t}</option>
                     ))}
                   </select>
                 </div>
@@ -1728,7 +1728,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 <Edit className="w-4 h-4 text-sky-450" />
                 Edit Mission: {editMissionId}
               </h3>
-              <button onClick={() => setEditModalOpen(false)} style={{ background: 'none', border: 'none', color: '#bae6fd', cursor: 'pointer' }} className="hover:text-white transition-colors">
+              <button onClick={() => setEditModalOpen(false)} style={{ background: 'none', border: 'none', color: '#bae6fd', cursor: 'pointer' }} className="hover:text-slate-800 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1767,7 +1767,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                     style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: '#0f172a', color: 'white', outline: 'none' }}
                   >
                     {(appState.drones || []).map(d => (
-                      <option key={d.id} value={d.id} className="bg-sky-900 text-white">{d.id} - {d.model}</option>
+                      <option key={d.id} value={d.id} className="bg-white text-slate-800">{d.id} - {d.model}</option>
                     ))}
                   </select>
                 </div>
@@ -1779,7 +1779,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                     style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: '#0f172a', color: 'white', outline: 'none' }}
                   >
                     {MISSION_TYPES.map(t => (
-                      <option key={t} value={t} className="bg-sky-900 text-white">{t}</option>
+                      <option key={t} value={t} className="bg-white text-slate-800">{t}</option>
                     ))}
                   </select>
                 </div>
@@ -1817,11 +1817,11 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                   onChange={(e) => setEditMissionStatus(e.target.value)}
                   style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '12px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', backgroundColor: '#0f172a', color: 'white', outline: 'none' }}
                 >
-                  <option value="Scheduled" className="bg-sky-900 text-white">Scheduled</option>
-                  <option value="Active" className="bg-sky-900 text-white">Active</option>
-                  <option value="Pending Approval" className="bg-sky-900 text-white">Pending Approval</option>
-                  <option value="Draft" className="bg-sky-900 text-white">Draft</option>
-                  <option value="Completed" className="bg-sky-900 text-white">Completed</option>
+                  <option value="Scheduled" className="bg-white text-slate-800">Scheduled</option>
+                  <option value="Active" className="bg-white text-slate-800">Active</option>
+                  <option value="Pending Approval" className="bg-white text-slate-800">Pending Approval</option>
+                  <option value="Draft" className="bg-white text-slate-800">Draft</option>
+                  <option value="Completed" className="bg-white text-slate-800">Completed</option>
                 </select>
               </div>
 
@@ -1848,4 +1848,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
     </>
   );
 }
+
+
+
 

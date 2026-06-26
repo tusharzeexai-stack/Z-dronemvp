@@ -170,7 +170,7 @@ function MissionPlannerCard({
       {/* Header */}
       <header className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/30">
         <div>
-          <h3 className="font-extrabold text-slate-800 dark:text-white text-sm uppercase tracking-wide">Mission Planner Workspace</h3>
+          <h3 className="font-extrabold text-slate-800 dark:text-slate-800 text-sm uppercase tracking-wide">Mission Planner Workspace</h3>
           <p className="text-[10px] text-slate-400 font-medium">Create and validate flight routing profiles</p>
         </div>
         <button 
@@ -405,7 +405,7 @@ function MissionPlannerCard({
                           
                           <div className="flex justify-between items-start">
                             <div>
-                              <span className="font-bold text-slate-800 dark:text-white block">{stepName}</span>
+                              <span className="font-bold text-slate-800 dark:text-slate-800 block">{stepName}</span>
                               <span className="text-[10px] text-slate-400 font-mono">
                                 Lat: {wp.lat.toFixed(5)} · Lng: {wp.lng.toFixed(5)}
                               </span>
@@ -509,7 +509,7 @@ function MissionPlannerCard({
             ].slice(0, 5).map((kpi, idx) => (
               <div key={idx} className="bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 p-2 rounded-lg text-center">
                 <span className="text-[9px] text-slate-400 font-semibold block">{kpi.label}</span>
-                <span className={`text-[11px] font-extrabold mt-0.5 block ${kpi.color || 'text-slate-800 dark:text-white'}`}>{kpi.val}</span>
+                <span className={`text-[11px] font-extrabold mt-0.5 block ${kpi.color || 'text-slate-800 dark:text-slate-800'}`}>{kpi.val}</span>
               </div>
             ))}
           </div>
@@ -545,4 +545,7 @@ function MissionPlannerCard({
 }
 
 export default MissionPlannerCard;
+
+
+
 

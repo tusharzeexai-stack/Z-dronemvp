@@ -40,3 +40,5 @@ env/
 .env.production
 backend/.env
 drone-client/.env
+
+public/*.mp4
