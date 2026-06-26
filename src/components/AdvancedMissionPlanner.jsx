@@ -10,10 +10,12 @@ import {
 } from 'lucide-react';
 
 // --- MOCK MISSION DATABASE ---
+// Location: Maruti Suzuki India Ltd., IMT Kharkhoda, Haryana, India
+// Coordinates: 28.8308566°N, 76.931122°E
 const MOCK_MISSIONS = [
   { 
     id: 'MSN-AR-101', 
-    name: 'Downtown Survey Perimeter Alpha', 
+    name: 'IMT Kharkhoda Perimeter Survey Alpha', 
     drone: 'ZD-109', 
     type: 'Grid Survey', 
     status: 'Draft', 
@@ -27,15 +29,15 @@ const MOCK_MISSIONS = [
     createdDate: '2026-06-25', 
     lastModified: '2026-06-26',
     waypointsList: [
-      { id: 1, lat: 34.0522, lng: -118.2437, altitude: 45, speed: 10, hoverTime: 2, action: 'Photo Interval', heading: 90, gimbalPitch: -45, delay: 0 },
-      { id: 2, lat: 34.0535, lng: -118.2415, altitude: 45, speed: 10, hoverTime: 0, action: 'Video Start', heading: 120, gimbalPitch: -90, delay: 0 },
-      { id: 3, lat: 34.0550, lng: -118.2400, altitude: 50, speed: 8, hoverTime: 5, action: 'Hover', heading: 180, gimbalPitch: -30, delay: 2 },
-      { id: 4, lat: 34.0572, lng: -118.2388, altitude: 50, speed: 12, hoverTime: 0, action: 'None', heading: 240, gimbalPitch: 0, delay: 0 }
+      { id: 1, lat: 28.8308, lng: 76.9311, altitude: 45, speed: 10, hoverTime: 2, action: 'Photo Interval', heading: 90, gimbalPitch: -45, delay: 0 },
+      { id: 2, lat: 28.8325, lng: 76.9335, altitude: 45, speed: 10, hoverTime: 0, action: 'Video Start', heading: 120, gimbalPitch: -90, delay: 0 },
+      { id: 3, lat: 28.8340, lng: 76.9358, altitude: 50, speed: 8, hoverTime: 5, action: 'Hover', heading: 180, gimbalPitch: -30, delay: 2 },
+      { id: 4, lat: 28.8355, lng: 76.9380, altitude: 50, speed: 12, hoverTime: 0, action: 'None', heading: 240, gimbalPitch: 0, delay: 0 }
     ]
   },
   { 
     id: 'MSN-AR-102', 
-    name: 'Pipeline Inspection Vector Bravo', 
+    name: 'Plant Boundary Inspection Vector Bravo', 
     drone: 'ZD-088', 
     type: 'Pipeline Inspection', 
     status: 'Scheduled', 
@@ -49,15 +51,15 @@ const MOCK_MISSIONS = [
     createdDate: '2026-06-25', 
     lastModified: '2026-06-26',
     waypointsList: [
-      { id: 1, lat: 34.0540, lng: -118.2450, altitude: 30, speed: 12, hoverTime: 0, action: 'Video Start', heading: 45, gimbalPitch: -45, delay: 0 },
-      { id: 2, lat: 34.0565, lng: -118.2430, altitude: 30, speed: 12, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 },
-      { id: 3, lat: 34.0590, lng: -118.2410, altitude: 35, speed: 12, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 },
-      { id: 4, lat: 34.0610, lng: -118.2390, altitude: 35, speed: 10, hoverTime: 2, action: 'Video Stop', heading: 90, gimbalPitch: 0, delay: 1 }
+      { id: 1, lat: 28.8295, lng: 76.9295, altitude: 30, speed: 12, hoverTime: 0, action: 'Video Start', heading: 45, gimbalPitch: -45, delay: 0 },
+      { id: 2, lat: 28.8315, lng: 76.9315, altitude: 30, speed: 12, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 },
+      { id: 3, lat: 28.8335, lng: 76.9340, altitude: 35, speed: 12, hoverTime: 0, action: 'None', heading: 45, gimbalPitch: -45, delay: 0 },
+      { id: 4, lat: 28.8360, lng: 76.9365, altitude: 35, speed: 10, hoverTime: 2, action: 'Video Stop', heading: 90, gimbalPitch: 0, delay: 1 }
     ]
   },
   { 
     id: 'MSN-AR-103', 
-    name: 'Emergency Search Rescue Corridor', 
+    name: 'Emergency Evacuation Route Corridor', 
     drone: 'ZD-112', 
     type: 'Search and Rescue', 
     status: 'Active', 
@@ -71,15 +73,15 @@ const MOCK_MISSIONS = [
     createdDate: '2026-06-24', 
     lastModified: '2026-06-26',
     waypointsList: [
-      { id: 1, lat: 34.0520, lng: -118.2480, altitude: 15, speed: 8, hoverTime: 3, action: 'Hover', heading: 180, gimbalPitch: -30, delay: 2 },
-      { id: 2, lat: 34.0545, lng: -118.2470, altitude: 15, speed: 8, hoverTime: 1, action: 'Photo Interval', heading: 180, gimbalPitch: -45, delay: 0 },
-      { id: 3, lat: 34.0570, lng: -118.2460, altitude: 15, speed: 8, hoverTime: 1, action: 'Photo Interval', heading: 180, gimbalPitch: -45, delay: 0 },
-      { id: 4, lat: 34.0595, lng: -118.2450, altitude: 20, speed: 10, hoverTime: 0, action: 'None', heading: 90, gimbalPitch: 0, delay: 0 }
+      { id: 1, lat: 28.8280, lng: 76.9290, altitude: 15, speed: 8, hoverTime: 3, action: 'Hover', heading: 180, gimbalPitch: -30, delay: 2 },
+      { id: 2, lat: 28.8300, lng: 76.9310, altitude: 15, speed: 8, hoverTime: 1, action: 'Photo Interval', heading: 180, gimbalPitch: -45, delay: 0 },
+      { id: 3, lat: 28.8320, lng: 76.9330, altitude: 15, speed: 8, hoverTime: 1, action: 'Photo Interval', heading: 180, gimbalPitch: -45, delay: 0 },
+      { id: 4, lat: 28.8345, lng: 76.9350, altitude: 20, speed: 10, hoverTime: 0, action: 'None', heading: 90, gimbalPitch: 0, delay: 0 }
     ]
   },
   { 
     id: 'MSN-AR-104', 
-    name: 'Thermal Hangar Infrastructure Audit', 
+    name: 'Factory Thermal Infrastructure Audit', 
     drone: 'ZD-055', 
     type: 'Infrastructure Inspection', 
     status: 'Completed', 
@@ -93,10 +95,10 @@ const MOCK_MISSIONS = [
     createdDate: '2026-06-23', 
     lastModified: '2026-06-25',
     waypointsList: [
-      { id: 1, lat: 34.0600, lng: -118.2490, altitude: 50, speed: 14, hoverTime: 1, action: 'Photo Interval', heading: 270, gimbalPitch: -90, delay: 0 },
-      { id: 2, lat: 34.0580, lng: -118.2470, altitude: 50, speed: 14, hoverTime: 1, action: 'Photo Interval', heading: 270, gimbalPitch: -90, delay: 0 },
-      { id: 3, lat: 34.0560, lng: -118.2450, altitude: 50, speed: 14, hoverTime: 2, action: 'Hover', heading: 180, gimbalPitch: -45, delay: 2 },
-      { id: 4, lat: 34.0540, lng: -118.2430, altitude: 45, speed: 12, hoverTime: 0, action: 'None', heading: 90, gimbalPitch: 0, delay: 0 }
+      { id: 1, lat: 28.8370, lng: 76.9390, altitude: 50, speed: 14, hoverTime: 1, action: 'Photo Interval', heading: 270, gimbalPitch: -90, delay: 0 },
+      { id: 2, lat: 28.8350, lng: 76.9370, altitude: 50, speed: 14, hoverTime: 1, action: 'Photo Interval', heading: 270, gimbalPitch: -90, delay: 0 },
+      { id: 3, lat: 28.8330, lng: 76.9345, altitude: 50, speed: 14, hoverTime: 2, action: 'Hover', heading: 180, gimbalPitch: -45, delay: 2 },
+      { id: 4, lat: 28.8310, lng: 76.9320, altitude: 45, speed: 12, hoverTime: 0, action: 'None', heading: 90, gimbalPitch: 0, delay: 0 }
     ]
   }
 ];
@@ -279,10 +281,11 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
   const [compassCalibrated, setCompassCalibrated] = useState(true);
   const [batteryVoltage, setBatteryVoltage] = useState(14.8);
 
+
   // Dynamic Telemetry State (Updated via Simulation Loop)
   const [telemetry, setTelemetry] = useState({
-    lat: 34.0522,
-    lng: -118.2437,
+    lat: 28.8308,
+    lng: 76.9311,
     altitude: 0,
     relativeAlt: 0,
     groundSpeed: 0,
@@ -300,10 +303,10 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
 
   // Waypoints state
   const [waypoints, setWaypoints] = useState([
-    { id: 1, lat: 34.0522, lng: -118.2437, altitude: 45, speed: 10, hoverTime: 2, action: 'Photo Interval', heading: 90, gimbalPitch: -45, delay: 0 },
-    { id: 2, lat: 34.0535, lng: -118.2415, altitude: 45, speed: 10, hoverTime: 0, action: 'Video Start', heading: 120, gimbalPitch: -90, delay: 0 },
-    { id: 3, lat: 34.0550, lng: -118.2400, altitude: 50, speed: 8, hoverTime: 5, action: 'Hover', heading: 180, gimbalPitch: -30, delay: 2 },
-    { id: 4, lat: 34.0572, lng: -118.2388, altitude: 50, speed: 12, hoverTime: 0, action: 'None', heading: 240, gimbalPitch: 0, delay: 0 }
+    { id: 1, lat: 28.8308, lng: 76.9311, altitude: 45, speed: 10, hoverTime: 2, action: 'Photo Interval', heading: 90, gimbalPitch: -45, delay: 0 },
+    { id: 2, lat: 28.8325, lng: 76.9335, altitude: 45, speed: 10, hoverTime: 0, action: 'Video Start', heading: 120, gimbalPitch: -90, delay: 0 },
+    { id: 3, lat: 28.8340, lng: 76.9358, altitude: 50, speed: 8, hoverTime: 5, action: 'Hover', heading: 180, gimbalPitch: -30, delay: 2 },
+    { id: 4, lat: 28.8355, lng: 76.9380, altitude: 50, speed: 12, hoverTime: 0, action: 'None', heading: 240, gimbalPitch: 0, delay: 0 }
   ]);
   const [activeWaypointIndex, setActiveWaypointIndex] = useState(0);
   const [drawingMode, setDrawingMode] = useState('waypoint');
@@ -577,7 +580,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
     }
 
     const map = L.map(mapContainerRef.current, {
-      center: [34.055, -118.242],
+      center: [28.8308, 76.9311],   // IMT Kharkhoda, Haryana, India
       zoom: 15,
       zoomControl: false,
       attributionControl: false
@@ -717,7 +720,9 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
     if (noFlyGroup) {
       noFlyGroup.clearLayers();
       if (showNoFlyZones) {
-        [[34.0585, -118.2480, 150], [34.0535, -118.2415, 100]].forEach(([lat, lng, radius]) => {
+        // No-fly zones near IMT Kharkhoda plant perimeter
+        [[28.8370, 76.9400, 150], [28.8280, 76.9270, 100]].forEach(([lat, lng, radius]) => {
+
           L.circle([lat, lng], {
             radius,
             color: '#ef4444',
@@ -756,7 +761,8 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
       iconSize: [32, 32],
       iconAnchor: [16, 16]
     });
-    L.marker([34.0522, -118.2437], { icon: homeIcon }).addTo(group).bindPopup("UAV Ground Station Home Point");
+    L.marker([28.8308, 76.9311], { icon: homeIcon }).addTo(group).bindPopup("UAV Ground Station — IMT Kharkhoda, Haryana");
+
 
     waypoints.forEach((wp, idx) => {
       points.push([wp.lat, wp.lng]);

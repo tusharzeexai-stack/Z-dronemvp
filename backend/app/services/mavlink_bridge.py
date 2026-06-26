@@ -60,7 +60,7 @@ class MockSimulationEngine:
         self._running = False
         self._task: Optional[asyncio.Task] = None
 
-        # Flight state
+        # Flight state — IMT Kharkhoda, Haryana, India (28.8308566°N, 76.931122°E)
         self._waypoints: List[Dict] = []
         self._step = 0
         self._flying = False
@@ -68,8 +68,8 @@ class MockSimulationEngine:
         self._mode = "STABILIZE"
 
         # Vehicle state
-        self._lat = 34.0522
-        self._lng = -118.2437
+        self._lat = 28.8308566
+        self._lng = 76.931122
         self._altitude = 0.0
         self._speed = 0.0
         self._heading = 90.0
@@ -415,7 +415,7 @@ class MAVLinkBridge:
         self._real: Optional[RealMAVSDKBridge] = None
         self._mode = "disconnected"   # connected_real | connected_mock | disconnected
         self._last_telemetry: Dict = {
-            "lat": 34.0522, "lng": -118.2437,
+            "lat": 28.8308566, "lng": 76.931122,
             "altitude": 0.0, "relative_alt": 0.0,
             "ground_speed": 0.0, "air_speed": 0.0, "vertical_speed": 0.0,
             "heading": 90.0, "yaw": 90.0, "pitch": 0.0, "roll": 0.0,
