@@ -215,6 +215,74 @@ function Dashboard({ onLogout }) {
     { value: 'v3_AvatarG0008_test.mp4', label: '📹 Sector Alpha — v3_AvatarG0008_test.mp4 (Field Footage)' }
   ]);
 
+  // Real-Time Worker Tracking & Zone Safety Log data
+  const [trackingLogs, setTrackingLogs] = useState([
+    { timestamp: '14:53:10', workerId: 'W-109', zone: 'Zone B - Scaffold Area', zoneType: 'RESTRICTED', duration: '12m', ppe: 'Helmet: NO, Harness: NO', risk: 'HIGH', notified: true },
+    { timestamp: '14:51:24', workerId: 'W-055', zone: 'Zone B - Scaffold Area', zoneType: 'RESTRICTED', duration: '18m', ppe: 'Gloves: NO, Boots: NO', risk: 'HIGH', notified: true },
+    { timestamp: '14:48:15', workerId: 'W-088', zone: 'Zone C - Brickwork Warehouse', zoneType: 'SAFE', duration: '45m', ppe: 'Vest: NO', risk: 'MEDIUM', notified: false },
+    { timestamp: '14:45:02', workerId: 'W-221', zone: 'Zone B - Scaffold Area', zoneType: 'RESTRICTED', duration: '5m', ppe: 'Helmet: NO', risk: 'MEDIUM', notified: true },
+    { timestamp: '14:40:12', workerId: 'W-204', zone: 'Zone A - Steel Framing', zoneType: 'SAFE', duration: '1h 10m', ppe: 'All Compliant', risk: 'LOW', notified: false },
+    { timestamp: '14:35:45', workerId: 'W-112', zone: 'Zone A - Steel Framing', zoneType: 'SAFE', duration: '2h 15m', ppe: 'All Compliant', risk: 'LOW', notified: false },
+    { timestamp: '14:28:11', workerId: 'W-144', zone: 'Zone D - Loading Dock', zoneType: 'SAFE', duration: '30m', ppe: 'All Compliant', risk: 'LOW', notified: false }
+  ]);
+
+  // Worker Runtime & Shift Log Table data
+  const [shiftWorkers, setShiftWorkers] = useState([
+    { id: 'W-204', name: 'James Carter', activeZone: 'Zone A - Steel Framing', ppe: { helmet: true, vest: true, gloves: true, harness: true, boots: true }, violations: 0, riskLevel: 'Low', compliance: 100, signed: false },
+    { id: 'W-109', name: 'Nikhil Kumar', activeZone: 'Zone B - Scaffold Area', ppe: { helmet: false, vest: true, gloves: true, harness: false, boots: true }, violations: 2, riskLevel: 'High', compliance: 60, signed: false },
+    { id: 'W-088', name: 'Carlos Gomez', activeZone: 'Zone C - Brickwork Warehouse', ppe: { helmet: true, vest: false, gloves: true, harness: true, boots: true }, violations: 1, riskLevel: 'Medium', compliance: 80, signed: false },
+    { id: 'W-112', name: 'Sarah Jenkins', activeZone: 'Zone A - Steel Framing', ppe: { helmet: true, vest: true, gloves: true, harness: true, boots: true }, violations: 0, riskLevel: 'Low', compliance: 100, signed: false },
+    { id: 'W-055', name: 'David Miller', activeZone: 'Zone B - Scaffold Area', ppe: { helmet: true, vest: true, gloves: false, harness: true, boots: false }, violations: 2, riskLevel: 'High', compliance: 60, signed: false },
+    { id: 'W-144', name: 'Anita Patel', activeZone: 'Zone D - Loading Dock', ppe: { helmet: true, vest: true, gloves: true, harness: true, boots: true }, violations: 0, riskLevel: 'Low', compliance: 100, signed: false },
+    { id: 'W-182', name: 'Emma Watson', activeZone: 'Zone C - Brickwork Warehouse', ppe: { helmet: true, vest: true, gloves: true, harness: true, boots: true }, violations: 0, riskLevel: 'Low', compliance: 100, signed: false },
+    { id: 'W-221', name: 'Rohan Sharma', activeZone: 'Zone B - Scaffold Area', ppe: { helmet: false, vest: true, gloves: true, harness: true, boots: true }, violations: 1, riskLevel: 'Medium', compliance: 80, signed: false },
+    { id: 'W-290', name: 'Michael Chang', activeZone: 'Zone D - Loading Dock', ppe: { helmet: true, vest: true, gloves: true, harness: true, boots: true }, violations: 0, riskLevel: 'Low', compliance: 100, signed: false },
+    { id: 'W-304', name: 'Li Wei', activeZone: 'Zone A - Steel Framing', ppe: { helmet: true, vest: true, gloves: true, harness: true, boots: true }, violations: 0, riskLevel: 'Low', compliance: 100, signed: false }
+  ]);
+
+  // Filters for shift log table
+  const [workerSearch, setWorkerSearch] = useState('');
+  const [zoneFilter, setZoneFilter] = useState('All');
+  const [riskFilter, setRiskFilter] = useState('All');
+  const [scoreFilter, setScoreFilter] = useState('All');
+
+  const handleNotifySupervisor = (index) => {
+    setTrackingLogs(prev => prev.map((item, i) => i === index ? { ...item, notified: true } : item));
+    alert(`Notification dispatched to supervisor for Worker ${trackingLogs[index].workerId}.`);
+  };
+
+  const handleSignoff = (workerId) => {
+    setShiftWorkers(prev => prev.map(w => w.id === workerId ? { ...w, signed: !w.signed } : w));
+  };
+
+  const handleExportCSV = () => {
+    const headers = 'Worker ID,Name,Active Zone,Helmet,Vest,Gloves,Harness,Boots,Violations,Risk Level,Compliance,Signed\\n';
+    const rows = shiftWorkers.map(w => 
+      `${w.id},"${w.name}","${w.activeZone}",${w.ppe.helmet},${w.ppe.vest},${w.ppe.gloves},${w.ppe.harness},${w.ppe.boots},${w.violations},${w.riskLevel},${w.compliance}%,${w.signed}`
+    ).join('\\n');
+    
+    const blob = new Blob([headers + rows], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'Worker_Shift_Compliance_Log.csv');
+    a.click();
+  };
+
+  const handleExportPDF = () => {
+    alert('Preparing PDF generation... Your document will download shortly.');
+  };
+
+  // Compute filtered list of workers for Table 2
+  const filteredShiftWorkers = shiftWorkers.filter(w => {
+    const matchesSearch = w.name.toLowerCase().includes(workerSearch.toLowerCase()) || 
+                          w.id.toLowerCase().includes(workerSearch.toLowerCase());
+    const matchesZone = zoneFilter === 'All' || w.activeZone.startsWith(zoneFilter);
+    const matchesRisk = riskFilter === 'All' || w.riskLevel.toLowerCase() === riskFilter.toLowerCase();
+    const matchesScore = scoreFilter === 'All' || w.compliance === parseInt(scoreFilter);
+    return matchesSearch && matchesZone && matchesRisk && matchesScore;
+  });
+
   // Chart ref for AI Inference tab
   const aiChartCanvasRef = useRef(null);
   const aiChartRef = useRef(null);
@@ -1556,6 +1624,243 @@ function Dashboard({ onLogout }) {
                     <div className="h-44 w-full bg-sky-950/40 rounded-xl p-2 border border-sky-400/40">
                       <canvas ref={aiChartCanvasRef} />
                     </div>
+                  </div>
+                </section>
+
+                {/* Real-Time Worker Tracking & Zone Safety Log */}
+                <section className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl text-slate-800 space-y-6">
+                  <header className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                    <span className="material-symbols-outlined text-sky-600 text-2xl">transfer_within_a_station</span>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800">Real-Time Worker Tracking & Zone Safety Log</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Live monitoring of active personnel, zone entry times, and PPE compliance alerts.</p>
+                    </div>
+                  </header>
+
+                  {/* Card Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {[
+                      { label: 'TOTAL WORKERS ON-SITE', val: '8 active', icon: 'person', color: 'text-sky-600 bg-sky-50 border-sky-100' },
+                      { label: 'ACTIVE COMPLIANCE', val: '5 workers', icon: 'check_circle', color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
+                      { label: 'IN RESTRICTED ZONES', val: '3 workers', icon: 'warning', color: 'text-rose-600 bg-rose-50 border-rose-100 animate-pulse' },
+                      { label: 'FATIGUE RISK FLAGS', val: '2 flagged', icon: 'security', color: 'text-amber-600 bg-amber-50 border-amber-100' }
+                    ].map((card, idx) => (
+                      <div key={idx} className={`border rounded-xl p-4 flex items-center justify-between shadow-sm ${card.color.split(' ')[1]} ${card.color.split(' ')[2]}`}>
+                        <div>
+                          <span className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">{card.label}</span>
+                          <span className="text-lg font-black text-slate-800 mt-1 block">{card.val}</span>
+                        </div>
+                        <span className={`material-symbols-outlined text-2xl ${card.color.split(' ')[0]}`}>{card.icon}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Table */}
+                  <div className="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
+                    <table className="w-full text-xs text-left text-slate-600">
+                      <thead className="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-200">
+                        <tr>
+                          <th className="px-4 py-3">Timestamp</th>
+                          <th className="px-4 py-3">Worker ID</th>
+                          <th className="px-4 py-3">Zone Visited</th>
+                          <th className="px-4 py-3">Zone Type</th>
+                          <th className="px-4 py-3">Duration</th>
+                          <th className="px-4 py-3">PPE Status</th>
+                          <th className="px-4 py-3">Risk Flag</th>
+                          <th className="px-4 py-3 text-center">Supervisor Notified</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {trackingLogs.map((log, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-4 py-3 font-mono text-slate-500">{log.timestamp}</td>
+                            <td className="px-4 py-3 font-bold text-sky-600">{log.workerId}</td>
+                            <td className="px-4 py-3 font-medium text-slate-700">{log.zone}</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider ${
+                                log.zoneType === 'RESTRICTED' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              }`}>
+                                {log.zoneType}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-slate-500">{log.duration}</td>
+                            <td className="px-4 py-3 font-medium text-slate-600">{log.ppe}</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+                                log.risk === 'HIGH' ? 'bg-rose-600 text-white' : log.risk === 'MEDIUM' ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'
+                              }`}>
+                                {log.risk}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <button
+                                onClick={() => handleNotifySupervisor(idx)}
+                                className={`px-3 py-1 rounded text-[10px] font-bold shadow-sm transition-all border ${
+                                  log.notified 
+                                    ? 'bg-emerald-500 text-white border border-emerald-400'
+                                    : 'bg-white hover:bg-sky-100 border-slate-200 text-slate-700'
+                                }`}
+                              >
+                                {log.notified ? '✓ Sent' : 'Notify'}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                {/* Worker Runtime & Shift Log Table */}
+                <section className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl text-slate-800 space-y-6">
+                  <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-sky-600 text-2xl">calendar_month</span>
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-800">Worker Runtime & Shift Log Table</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">Interactive log tracking worker shifts, violations counters, and supervisor sign-offs.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => handleExportCSV()}
+                        className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold py-2 px-3 rounded-lg flex items-center gap-1.5 shadow-sm"
+                      >
+                        <span className="material-symbols-outlined text-slate-500 text-base">csv</span>
+                        Export to CSV
+                      </button>
+                      <button 
+                        onClick={() => handleExportPDF()}
+                        className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold py-2 px-3 rounded-lg flex items-center gap-1.5 shadow-sm"
+                      >
+                        <span className="material-symbols-outlined text-slate-500 text-base">picture_as_pdf</span>
+                        Export to PDF
+                      </button>
+                    </div>
+                  </header>
+
+                  {/* Filters */}
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
+                      <input
+                        type="text"
+                        placeholder="Search by worker..."
+                        value={workerSearch}
+                        onChange={(e) => setWorkerSearch(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 bg-slate-50/50"
+                      />
+                    </div>
+
+                    <select
+                      value={zoneFilter}
+                      onChange={(e) => setZoneFilter(e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 bg-slate-50/50 cursor-pointer"
+                    >
+                      <option value="All">All Zones</option>
+                      <option value="Zone A">Zone A - Steel Framing</option>
+                      <option value="Zone B">Zone B - Scaffold Area</option>
+                      <option value="Zone C">Zone C - Brickwork Warehouse</option>
+                      <option value="Zone D">Zone D - Loading Dock</option>
+                    </select>
+
+                    <select
+                      value={riskFilter}
+                      onChange={(e) => setRiskFilter(e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 bg-slate-50/50 cursor-pointer"
+                    >
+                      <option value="All">All Risks</option>
+                      <option value="Low">Low Risk</option>
+                      <option value="Medium">Medium Risk</option>
+                      <option value="High">High Risk</option>
+                    </select>
+
+                    <select
+                      value={scoreFilter}
+                      onChange={(e) => setScoreFilter(e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 bg-slate-50/50 cursor-pointer"
+                    >
+                      <option value="All">All Scores</option>
+                      <option value="100">100% Compliance</option>
+                      <option value="80">80% Compliance</option>
+                      <option value="60">60% Compliance</option>
+                    </select>
+                  </div>
+
+                  {/* Table */}
+                  <div className="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
+                    <table className="w-full text-xs text-left text-slate-600">
+                      <thead className="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-200">
+                        <tr>
+                          <th className="px-4 py-3">Worker ID</th>
+                          <th className="px-4 py-3">Name</th>
+                          <th className="px-4 py-3">Active Zone</th>
+                          <th className="px-4 py-3 text-center">Helmet</th>
+                          <th className="px-4 py-3 text-center">Vest</th>
+                          <th className="px-4 py-3 text-center">Gloves</th>
+                          <th className="px-4 py-3 text-center">Harness</th>
+                          <th className="px-4 py-3 text-center">Boots</th>
+                          <th className="px-4 py-3 text-center">Violations</th>
+                          <th className="px-4 py-3">Risk Level</th>
+                          <th className="px-4 py-3">Compliance</th>
+                          <th className="px-4 py-3 text-center">Sign-off</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {filteredShiftWorkers.map((worker, idx) => (
+                          <tr 
+                            key={idx} 
+                            className={`hover:bg-slate-50 transition-colors ${
+                              worker.riskLevel === 'High' ? 'bg-rose-50/30' : ''
+                            }`}
+                          >
+                            <td className="px-4 py-3 font-bold text-slate-800">{worker.id}</td>
+                            <td className="px-4 py-3 font-semibold text-slate-700">{worker.name}</td>
+                            <td className="px-4 py-3 text-slate-500">{worker.activeZone}</td>
+                            
+                            {/* Status indicators */}
+                            {['helmet', 'vest', 'gloves', 'harness', 'boots'].map((item) => (
+                              <td key={item} className="px-4 py-3 text-center">
+                                <span className={`inline-block w-2.5 h-2.5 rounded-full ${
+                                  worker.ppe[item] ? 'bg-emerald-500' : 'bg-rose-500'
+                                }`}></span>
+                              </td>
+                            ))}
+
+                            <td className="px-4 py-3 text-center font-extrabold text-slate-800">{worker.violations}</td>
+                            
+                            <td className="px-4 py-3">
+                              <span className={`px-2.5 py-0.5 rounded text-[9px] font-black uppercase ${
+                                worker.riskLevel === 'High' ? 'bg-rose-600 text-white' : worker.riskLevel === 'Medium' ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'
+                              }`}>
+                                {worker.riskLevel}
+                              </span>
+                            </td>
+
+                            <td className="px-4 py-3 font-extrabold">
+                              <span className={
+                                worker.compliance === 100 ? 'text-emerald-600' : worker.compliance === 80 ? 'text-amber-500' : 'text-rose-500'
+                              }>
+                                {worker.compliance}%
+                              </span>
+                            </td>
+
+                            <td className="px-4 py-3 text-center">
+                              <button
+                                onClick={() => handleSignoff(worker.id)}
+                                className={`px-3 py-1 rounded text-[10px] font-bold shadow-sm transition-all border ${
+                                  worker.signed 
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    : 'bg-white hover:bg-sky-100 border-slate-200 text-slate-700'
+                                }`}
+                              >
+                                {worker.signed ? '✓ Signed' : '✍ Sign'}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </section>
               </div>
