@@ -197,12 +197,22 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
     const renderCharts = () => {
       // Read live/stored AI stats
       const storedStats = JSON.parse(localStorage.getItem('z_drone_ai_stats') || '{}');
-      const totalPedsVal = storedStats.totalPeds !== undefined ? storedStats.totalPeds : 142;
-      const totalHelmetsVal = storedStats.totalHelmets !== undefined ? storedStats.totalHelmets : 98;
-      const totalVestsVal = storedStats.totalVests !== undefined ? storedStats.totalVests : 76;
-      const totalCranesVal = storedStats.totalCranes !== undefined ? storedStats.totalCranes : 12;
-      const totalBulldozersVal = storedStats.totalBulldozers !== undefined ? storedStats.totalBulldozers : 18;
-      const totalConcreteMixersVal = storedStats.totalConcreteMixers !== undefined ? storedStats.totalConcreteMixers : 9;
+      let totalPedsVal = storedStats.totalPeds !== undefined ? storedStats.totalPeds : 142;
+      let totalHelmetsVal = storedStats.totalHelmets !== undefined ? storedStats.totalHelmets : 98;
+      let totalVestsVal = storedStats.totalVests !== undefined ? storedStats.totalVests : 76;
+      let totalCranesVal = storedStats.totalCranes !== undefined ? storedStats.totalCranes : 12;
+      let totalBulldozersVal = storedStats.totalBulldozers !== undefined ? storedStats.totalBulldozers : 18;
+      let totalConcreteMixersVal = storedStats.totalConcreteMixers !== undefined ? storedStats.totalConcreteMixers : 9;
+
+      // Fallback to dummy data if all counts are 0
+      if (totalPedsVal === 0 && totalHelmetsVal === 0 && totalVestsVal === 0 && totalCranesVal === 0 && totalBulldozersVal === 0 && totalConcreteMixersVal === 0) {
+        totalPedsVal = 142;
+        totalHelmetsVal = 98;
+        totalVestsVal = 76;
+        totalCranesVal = 12;
+        totalBulldozersVal = 18;
+        totalConcreteMixersVal = 9;
+      }
 
       // 1. Chart 1: Vehicle Distribution Donut
       if (canvas1Ref.current) {
