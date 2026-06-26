@@ -522,17 +522,19 @@ function Dashboard({ onLogout }) {
 
     // Generate realistic pedestrian and action counts based on current video time
     const t = video.currentTime;
-    const pedCount = Math.floor(2 + Math.sin(t * 0.4) * 2);
-    const actCount = Math.floor(1 + Math.cos(t * 0.6) * 1);
+    
+    // Deterministic, realistic count calculations based on video time
+    const pedCount = t % 40 < 15 ? 1 : t % 40 < 30 ? 2 : 0;
+    const actCount = pedCount > 0 ? 1 : 0;
 
     setLivePed(pedCount);
     setLiveAct(actCount);
 
-    const curHelmets = Math.max(0, Math.min(pedCount, Math.floor(pedCount * 0.85 + Math.sin(t * 0.9) * 0.5)));
-    const curVests = Math.max(0, Math.min(pedCount, Math.floor(pedCount * 0.75 + Math.cos(t * 0.8) * 0.5)));
-    const curCranes = (t % 30 > 10 && t % 30 < 25) ? 1 : 0;
-    const curBulldozers = (t % 45 > 5 && t % 45 < 30) ? 1 : (t % 45 >= 30 && t % 45 < 40) ? 2 : 0;
-    const curConcreteMixers = (t % 25 > 15) ? 1 : 0;
+    const curHelmets = pedCount > 0 ? Math.max(0, pedCount - (t % 25 < 5 ? 1 : 0)) : 0;
+    const curVests = pedCount > 0 ? Math.max(0, pedCount - (t % 35 < 8 ? 1 : 0)) : 0;
+    const curCranes = (t % 60 > 15 && t % 60 < 45) ? 1 : 0;
+    const curBulldozers = (t % 50 > 10 && t % 50 < 35) ? 1 : 0;
+    const curConcreteMixers = (t % 55 > 25 && t % 55 < 50) ? 1 : 0;
 
     setLiveHelmets(curHelmets);
     setLiveVests(curVests);
@@ -540,18 +542,20 @@ function Dashboard({ onLogout }) {
     setLiveBulldozers(curBulldozers);
     setLiveConcreteMixers(curConcreteMixers);
 
-    // Accumulate cumulative totals once per integer second
-    const second = Math.floor(t);
-    if (second !== lastSecondRef.current) {
-      lastSecondRef.current = second;
-      
-      setTotalPeds(prev => prev + pedCount);
-      setTotalHelmets(prev => prev + curHelmets);
-      setTotalVests(prev => prev + curVests);
-      setTotalCranes(prev => prev + curCranes);
-      setTotalBulldozers(prev => prev + curBulldozers);
-      setTotalConcreteMixers(prev => prev + curConcreteMixers);
-    }
+    // Realistic cumulative totals (capped unique objects in the scene)
+    const totPeds = t < 5 ? 0 : t < 15 ? 1 : t < 35 ? 2 : 3;
+    const totHelmets = t < 10 ? 0 : t < 25 ? 1 : 2;
+    const totVests = t < 12 ? 0 : t < 28 ? 1 : 2;
+    const totCranes = t < 15 ? 0 : 1;
+    const totBulldozers = t < 10 ? 0 : 1;
+    const totConcreteMixers = t < 25 ? 0 : 1;
+
+    setTotalPeds(totPeds);
+    setTotalHelmets(totHelmets);
+    setTotalVests(totVests);
+    setTotalCranes(totCranes);
+    setTotalBulldozers(totBulldozers);
+    setTotalConcreteMixers(totConcreteMixers);
 
     // Feed AI charts
     if (aiChartRef.current && !inferencePaused) {
