@@ -1283,7 +1283,7 @@ function Dashboard({ onLogout }) {
                       <video
                         ref={videoRef}
                         key={videoPath}
-                        src={`/${videoPath}`}
+                        src={videoPath === 'v3_x_1test.mp4' ? 'https://zdrone-storage.s3.ap-south-1.amazonaws.com/v3_x_1test.mp4' : `/${videoPath}`}
                         className="w-full h-full object-contain cursor-pointer"
                         autoPlay
                         loop
