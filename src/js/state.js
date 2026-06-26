@@ -154,6 +154,61 @@ const DEFAULT_ALERTS = [
         videoUrl: "/cam1.mp4#t=5,10"
     },
     {
+        id: "ALT-009",
+        time: "10:55 AM",
+        unit: "ZD-109",
+        type: "helmet",
+        title: "PPE Safety Violation: No Helmet",
+        description: "AI optical inspection detected ground worker in Sector Gamma without mandatory safety helmet. Visual warning issued.",
+        severity: "warning",
+        resolved: false,
+        videoUrl: "/cam2.mp4#t=5,10"
+    },
+    {
+        id: "ALT-010",
+        time: "10:58 AM",
+        unit: "ZD-112",
+        type: "vest",
+        title: "PPE Safety Violation: No Safety Vest",
+        description: "Visual inspection flagged pilot trainee in Hangar Pad 2 missing high-visibility safety vest. Operations halted.",
+        severity: "warning",
+        resolved: false,
+        videoUrl: "/cam2.mp4#t=10,15"
+    },
+    {
+        id: "ALT-011",
+        time: "11:02 AM",
+        unit: "ZD-088",
+        type: "fall",
+        title: "Man Down / Fall Incident",
+        description: "Pose estimation model detected worker down on ground in Sector Alpha loading bay. Emergency medical services contacted.",
+        severity: "error",
+        resolved: false,
+        videoUrl: "/cam1.mp4#t=12,17"
+    },
+    {
+        id: "ALT-012",
+        time: "11:05 AM",
+        unit: "ZD-088",
+        type: "fire",
+        title: "Active Fire Signature Detected",
+        description: "AI SSD visual inference layer identified an active open flame source in Sector Delta brush boundary zone.",
+        severity: "error",
+        resolved: false,
+        videoUrl: "/cam1.mp4#t=20,25"
+    },
+    {
+        id: "ALT-013",
+        time: "11:10 AM",
+        unit: "ZD-109",
+        type: "progress",
+        title: "Site Survey: 60% Completion Achieved",
+        description: "LIDAR photogrammetry map and volumetric data scan verify structural development progress is at 60.0% completion.",
+        severity: "success",
+        resolved: false,
+        videoUrl: "/cam1.mp4#t=30,35"
+    },
+    {
         id: "ALT-003",
         time: "Yesterday",
         unit: "ZD-109",

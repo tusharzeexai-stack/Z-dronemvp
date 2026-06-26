@@ -703,6 +703,10 @@ function Dashboard({ onLogout }) {
     if (type.includes('intrusion') || title.includes('intrusion') || type.includes('security') || title.includes('security')) return 'security';
     if (type.includes('collision') || title.includes('collision') || type.includes('obstacle') || title.includes('obstacle')) return 'sensors';
     if (type.includes('signal') || title.includes('signal') || type.includes('jamming') || title.includes('jamming') || type.includes('gps')) return 'signal_wifi_bad';
+    if (type.includes('helmet') || title.includes('helmet')) return 'engineering';
+    if (type.includes('vest') || title.includes('vest')) return 'health_and_safety';
+    if (type.includes('down') || title.includes('down') || type.includes('fall') || title.includes('fall')) return 'personal_injury';
+    if (type.includes('progress') || title.includes('progress') || title.includes('%')) return 'analytics';
     if (type.includes('maintenance') || title.includes('maintenance')) return 'build';
     return alert.severity === 'error' ? 'report' : alert.severity === 'warning' ? 'warning' : 'check_circle';
   };
