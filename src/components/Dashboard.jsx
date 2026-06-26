@@ -13,23 +13,23 @@ import LiveStreamViewer from './LiveStreamViewer';
 import AnalyticsCenter from './AnalyticsCenter';
 import AdvancedMissionPlanner from './AdvancedMissionPlanner';
 
-// DTLA flight path interpolation
+// Maruti Suzuki IMT Kharkhoda flight path interpolation
 const FLIGHT_PATH = [
-  [34.0522, -118.2437],
-  [34.0535, -118.2415],
-  [34.0550, -118.2400],
-  [34.0572, -118.2388],
-  [34.0595, -118.2395],
-  [34.0610, -118.2415],
-  [34.0620, -118.2440],
-  [34.0618, -118.2470],
-  [34.0605, -118.2495],
-  [34.0585, -118.2510],
-  [34.0560, -118.2515],
-  [34.0535, -118.2505],
-  [34.0515, -118.2485],
-  [34.0510, -118.2460],
-  [34.0522, -118.2437]
+  [28.8308, 76.9311],
+  [28.8325, 76.9335],
+  [28.8340, 76.9358],
+  [28.8355, 76.9380],
+  [28.8375, 76.9395],
+  [28.8390, 76.9375],
+  [28.8405, 76.9350],
+  [28.8395, 76.9325],
+  [28.8375, 76.9300],
+  [28.8350, 76.9280],
+  [28.8325, 76.9275],
+  [28.8300, 76.9285],
+  [28.8285, 76.9305],
+  [28.8295, 76.9325],
+  [28.8308, 76.9311]
 ];
 
 function interpolatePoints(path, steps = 50) {
@@ -1014,7 +1014,7 @@ function Dashboard({ onLogout }) {
                       <span className="material-symbols-outlined text-white">my_location</span>
                       <h3 className="font-bold text-white">Active Flight Tracking Map</h3>
                     </div>
-                    <span className="text-[10px] bg-sky-900/40 border border-sky-400/40 text-white font-bold rounded px-2 py-0.5">LA DOWNTOWN</span>
+                    <span className="text-[10px] bg-sky-900/40 border border-sky-400/40 text-white font-bold rounded px-2 py-0.5">IMT KHARKHODA</span>
                   </header>
                   <div className="w-full h-[400px] relative">
                     <TrackingMap detailedPath={detailedPath} />

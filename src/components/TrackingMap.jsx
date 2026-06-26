@@ -13,7 +13,7 @@ function TrackingMap({ detailedPath }) {
 
     // Create Leaflet instance
     const map = L.map(mapRef.current, {
-      center: [34.056, -118.245],
+      center: [28.8308, 76.9311],
       zoom: 15,
       zoomControl: false,
       attributionControl: false
@@ -44,21 +44,21 @@ function TrackingMap({ detailedPath }) {
     });
 
     const flightPathCoords = [
-      [34.0522, -118.2437],
-      [34.0535, -118.2415],
-      [34.0550, -118.2400],
-      [34.0572, -118.2388],
-      [34.0595, -118.2395],
-      [34.0610, -118.2415],
-      [34.0620, -118.2440],
-      [34.0618, -118.2470],
-      [34.0605, -118.2495],
-      [34.0585, -118.2510],
-      [34.0560, -118.2515],
-      [34.0535, -118.2505],
-      [34.0515, -118.2485],
-      [34.0510, -118.2460],
-      [34.0522, -118.2437]
+      [28.8308, 76.9311],
+      [28.8325, 76.9335],
+      [28.8340, 76.9358],
+      [28.8355, 76.9380],
+      [28.8375, 76.9395],
+      [28.8390, 76.9375],
+      [28.8405, 76.9350],
+      [28.8395, 76.9325],
+      [28.8375, 76.9300],
+      [28.8350, 76.9280],
+      [28.8325, 76.9275],
+      [28.8300, 76.9285],
+      [28.8285, 76.9305],
+      [28.8295, 76.9325],
+      [28.8308, 76.9311]
     ];
 
     // Plot path
@@ -70,7 +70,8 @@ function TrackingMap({ detailedPath }) {
     }).addTo(map);
 
     // Place marker
-    markerRef.current = L.marker(detailedPath[0] || [34.0522, -118.2437], { icon: droneIcon }).addTo(map);
+    markerRef.current = L.marker(detailedPath[0] || [28.8308, 76.9311], { icon: droneIcon }).addTo(map);
+
 
     // Expose global markers for update from parent/SSE
     window.droneMarker = markerRef.current;

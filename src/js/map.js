@@ -8,24 +8,25 @@ let pathPolyline = null;
 let animationFrameId = null;
 let currentPathIndex = 0;
 
-// Coordinate path simulating a flight loop in Downtown Los Angeles
+// Coordinate path simulating a flight loop in IMT Kharkhoda, Haryana, India
 const FLIGHT_PATH = [
-    [34.0522, -118.2437],
-    [34.0535, -118.2415],
-    [34.0550, -118.2400],
-    [34.0572, -118.2388],
-    [34.0595, -118.2395],
-    [34.0610, -118.2415],
-    [34.0620, -118.2440],
-    [34.0618, -118.2470],
-    [34.0605, -118.2495],
-    [34.0585, -118.2510],
-    [34.0560, -118.2515],
-    [34.0535, -118.2505],
-    [34.0515, -118.2485],
-    [34.0510, -118.2460],
-    [34.0522, -118.2437] // complete loop
+    [28.8308, 76.9311],
+    [28.8325, 76.9335],
+    [28.8340, 76.9358],
+    [28.8355, 76.9380],
+    [28.8375, 76.9395],
+    [28.8390, 76.9375],
+    [28.8405, 76.9350],
+    [28.8395, 76.9325],
+    [28.8375, 76.9300],
+    [28.8350, 76.9280],
+    [28.8325, 76.9275],
+    [28.8300, 76.9285],
+    [28.8285, 76.9305],
+    [28.8295, 76.9325],
+    [28.8308, 76.9311]
 ];
+
 
 // Generate intermediate steps between coordinates for smooth movement
 function interpolatePoints(path, stepsPerSegment = 30) {
@@ -64,11 +65,12 @@ export function initMap(containerId) {
 
     // Create Leaflet instance
     mapInstance = L.map(containerId, {
-        center: [34.056, -118.245],
+        center: [28.8308, 76.9311],
         zoom: 15,
         zoomControl: false,
         attributionControl: false
     });
+
 
     updateMapTileLayer();
 

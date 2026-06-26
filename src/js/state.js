@@ -9,12 +9,13 @@ const DEFAULT_DRONES = [
         signal: "Excellent",
         altitude: 45,
         speed: 12,
-        lat: 34.0522,
-        lng: -118.2437,
+        lat: 28.8308,
+        lng: 76.9311,
         health: { propulsion: 98, optical: 92, chassis: 84 },
         payload: "2.5 kg Medical Package",
         destination: "Westside Hospital Pad",
         operator: "C. Nolan"
+
     },
     {
         id: "ZD-088",
@@ -25,12 +26,13 @@ const DEFAULT_DRONES = [
         signal: "Poor",
         altitude: 15,
         speed: 5,
-        lat: 34.0622,
-        lng: -118.2537,
+        lat: 28.8322,
+        lng: 76.9322,
         health: { propulsion: 94, optical: 88, chassis: 78 },
         payload: "FLIR Camera Pod",
         destination: "Automated Return-to-Base",
         operator: "A. Miller"
+
     },
     {
         id: "ZD-112",
@@ -41,12 +43,13 @@ const DEFAULT_DRONES = [
         signal: "None",
         altitude: 0,
         speed: 0,
-        lat: 34.0422,
-        lng: -118.2337,
+        lat: 28.8288,
+        lng: 76.9298,
         health: { propulsion: 90, optical: 85, chassis: 80 },
         payload: "LIDAR System",
         destination: "Hangar Sector 4",
         operator: "S. Jobs"
+
     },
     {
         id: "ZD-055",
@@ -57,12 +60,13 @@ const DEFAULT_DRONES = [
         signal: "None",
         altitude: 0,
         speed: 0,
-        lat: 34.0489,
-        lng: -118.2611,
+        lat: 28.8315,
+        lng: 76.9345,
         health: { propulsion: 80, optical: 75, chassis: 90 },
         payload: "High-Res Mapping Camera",
         destination: "Storage Rack B",
         operator: "E. Musk"
+
     }
 ];
 
@@ -168,8 +172,9 @@ export class AppState {
             signal: "Excellent",
             altitude: 0,
             speed: 0,
-            lat: 34.0522 + (Math.random() - 0.5) * 0.02,
-            lng: -118.2437 + (Math.random() - 0.5) * 0.02,
+            lat: 28.8308 + (Math.random() - 0.5) * 0.02,
+            lng: 76.9311 + (Math.random() - 0.5) * 0.02,
+
             health: { propulsion: 100, optical: 100, chassis: 100 },
             destination: "Charging Pad Alpha",
             ...drone

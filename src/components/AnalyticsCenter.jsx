@@ -13,20 +13,21 @@ import {
 
 // --- MOCK RAW INTELLIGENCE DATASETS ---
 const MOCK_MISSIONS = [
-  { id: 'MSN-2026-08A', name: 'Westside Infrastructure Scan', drone: 'ZD-109', operator: 'Alex Rivera', location: 'Los Angeles (Downtown)', date: '2026-06-25', weather: 'Clear / Sunny', zone: 'Sector Alpha', status: 'Completed', duration: '42m 12s', distance: '12.4 km', coverage: '94.2%', speed: '12 m/s', altitude: '45 m', objects: 182, incidents: 2 },
-  { id: 'MSN-2026-08B', name: 'Downtown Traffic Surveillance', drone: 'ZD-088', operator: 'C. Nolan', location: 'Los Angeles (Downtown)', date: '2026-06-25', weather: 'High Winds', zone: 'Sector Beta', status: 'Completed', duration: '15m 08s', distance: '4.2 km', coverage: '88.5%', speed: '8 m/s', altitude: '15 m', objects: 94, incidents: 1 },
-  { id: 'MSN-2026-08C', name: 'Industrial Hangar Thermal Check', drone: 'ZD-112', operator: 'S. Jobs', location: 'Industrial Sector 4', date: '2026-06-24', weather: 'Clear / Night', zone: 'Sector Gamma', status: 'Completed', duration: '28m 45s', distance: '8.1 km', coverage: '98.0%', speed: '10 m/s', altitude: '30 m', objects: 45, incidents: 0 },
-  { id: 'MSN-2026-08D', name: 'East Side Pipeline Inspection', drone: 'ZD-055', operator: 'A. Miller', location: 'East Pipeline Corridor', date: '2026-06-23', weather: 'Overcast', zone: 'Sector Delta', status: 'Completed', duration: '34m 10s', distance: '10.5 km', coverage: '91.4%', speed: '14 m/s', altitude: '60 m', objects: 112, incidents: 4 }
+  { id: 'MSN-2026-08A', name: 'IMT Kharkhoda Infrastructure Scan', drone: 'ZD-109', operator: 'Alex Rivera', location: 'Kharkhoda (Maruti Plant)', date: '2026-06-25', weather: 'Clear / Sunny', zone: 'Sector Alpha', status: 'Completed', duration: '42m 12s', distance: '12.4 km', coverage: '94.2%', speed: '12 m/s', altitude: '45 m', objects: 182, incidents: 2 },
+  { id: 'MSN-2026-08B', name: 'Factory Traffic Surveillance', drone: 'ZD-088', operator: 'C. Nolan', location: 'Kharkhoda (Maruti Plant)', date: '2026-06-25', weather: 'High Winds', zone: 'Sector Beta', status: 'Completed', duration: '15m 08s', distance: '4.2 km', coverage: '88.5%', speed: '8 m/s', altitude: '15 m', objects: 94, incidents: 1 },
+  { id: 'MSN-2026-08C', name: 'Assembly Hangar Thermal Check', drone: 'ZD-112', operator: 'S. Jobs', location: 'Industrial Sector 4', date: '2026-06-24', weather: 'Clear / Night', zone: 'Sector Gamma', status: 'Completed', duration: '28m 45s', distance: '8.1 km', coverage: '98.0%', speed: '10 m/s', altitude: '30 m', objects: 45, incidents: 0 },
+  { id: 'MSN-2026-08D', name: 'East Boundary Pipeline Inspection', drone: 'ZD-055', operator: 'A. Miller', location: 'East Pipeline Corridor', date: '2026-06-23', weather: 'Overcast', zone: 'Sector Delta', status: 'Completed', duration: '34m 10s', distance: '10.5 km', coverage: '91.4%', speed: '14 m/s', altitude: '60 m', objects: 112, incidents: 4 }
 ];
 
 const MOCK_DETECTIONS = [
-  { id: 'DET-001', time: '10:42 AM', location: 'Westside Hospital Pad', object: 'Car', confidence: 98.4, coords: '34.0522, -118.2437', thumbnail: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=150&auto=format&fit=crop&q=60' },
-  { id: 'DET-002', time: '10:45 AM', location: 'Sector B Intersection', object: 'Pedestrian', confidence: 91.2, coords: '34.0535, -118.2415', thumbnail: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=60' },
-  { id: 'DET-003', time: '10:48 AM', location: 'Central Warehouse Area', object: 'Smoke Warning', confidence: 84.6, coords: '34.0550, -118.2400', thumbnail: 'https://images.unsplash.com/photo-1518173946687-a4c8a383392e?w=150&auto=format&fit=crop&q=60' },
-  { id: 'DET-004', time: '10:52 AM', location: 'East Pipeline Pad', object: 'Construction Crane', confidence: 89.1, coords: '34.0572, -118.2388', thumbnail: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=150&auto=format&fit=crop&q=60' },
-  { id: 'DET-005', time: '10:55 AM', location: 'Downtown Freeway Exit', object: 'Truck', confidence: 95.7, coords: '34.0595, -118.2395', thumbnail: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=150&auto=format&fit=crop&q=60' },
-  { id: 'DET-006', time: '10:58 AM', location: 'Sector Alpha North', object: 'Fire Hazard', confidence: 92.4, coords: '34.0610, -118.2415', thumbnail: 'https://images.unsplash.com/photo-1508873696983-2df519f0397e?w=150&auto=format&fit=crop&q=60' }
+  { id: 'DET-001', time: '10:42 AM', location: 'IMT Hangar Pad', object: 'Car', confidence: 98.4, coords: '28.8308, 76.9311', thumbnail: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=150&auto=format&fit=crop&q=60' },
+  { id: 'DET-002', time: '10:45 AM', location: 'Sector B Intersection', object: 'Pedestrian', confidence: 91.2, coords: '28.8325, 76.9335', thumbnail: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=60' },
+  { id: 'DET-003', time: '10:48 AM', location: 'Central Warehouse Area', object: 'Smoke Warning', confidence: 84.6, coords: '28.8340, 76.9358', thumbnail: 'https://images.unsplash.com/photo-1518173946687-a4c8a383392e?w=150&auto=format&fit=crop&q=60' },
+  { id: 'DET-004', time: '10:52 AM', location: 'East Boundary Gate', object: 'Construction Crane', confidence: 89.1, coords: '28.8355, 76.9380', thumbnail: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=150&auto=format&fit=crop&q=60' },
+  { id: 'DET-005', time: '10:55 AM', location: 'Factory Express Exit', object: 'Truck', confidence: 95.7, coords: '28.8375, 76.9395', thumbnail: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=150&auto=format&fit=crop&q=60' },
+  { id: 'DET-006', time: '10:58 AM', location: 'Sector Alpha North', object: 'Fire Hazard', confidence: 92.4, coords: '28.8390, 76.9375', thumbnail: 'https://images.unsplash.com/photo-1508873696983-2df519f0397e?w=150&auto=format&fit=crop&q=60' }
 ];
+
 
 export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
   // --- STATE MANAGEMENT ---
@@ -85,7 +86,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
     }
 
     const map = L.map(gisMapRef.current, {
-      center: [34.056, -118.245],
+      center: [28.8308, 76.9311],
       zoom: 14,
       zoomControl: true,
       attributionControl: false
@@ -105,21 +106,22 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
     // Render Path & Boundaries
     const latlngs = [
-      [34.0522, -118.2437],
-      [34.0535, -118.2415],
-      [34.0550, -118.2400],
-      [34.0572, -118.2388],
-      [34.0595, -118.2395],
-      [34.0610, -118.2415],
-      [34.0620, -118.2440],
-      [34.0618, -118.2470],
-      [34.0605, -118.2495],
-      [34.0585, -118.2510],
-      [34.0560, -118.2515],
-      [34.0522, -118.2437]
+      [28.8308, 76.9311],
+      [28.8325, 76.9335],
+      [28.8340, 76.9358],
+      [28.8355, 76.9380],
+      [28.8375, 76.9395],
+      [28.8390, 76.9375],
+      [28.8405, 76.9350],
+      [28.8395, 76.9325],
+      [28.8375, 76.9300],
+      [28.8350, 76.9280],
+      [28.8325, 76.9275],
+      [28.8308, 76.9311]
     ];
     L.polyline(latlngs, { color: '#06b6d4', weight: 3, dashArray: '8, 8' }).addTo(map);
     L.polygon(latlngs, { color: '#06b6d4', fillColor: '#06b6d4', fillOpacity: 0.05 }).addTo(map);
+
 
     return () => {
       if (gisMapInstanceRef.current) {
@@ -139,18 +141,19 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
 
     // 1. Draw Simulated Heatmaps on the Map based on selection
     if (heatmapType === 'vehicle') {
-      [[34.0535, -118.2415, 80], [34.0595, -118.2395, 90], [34.0550, -118.2400, 60]].forEach(([lat, lng, radius]) => {
+      [[28.8325, 76.9335, 80], [28.8375, 76.9395, 90], [28.8340, 76.9358, 60]].forEach(([lat, lng, radius]) => {
         L.circle([lat, lng], { radius, color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.4, weight: 0 }).addTo(mapHeatmapGroupRef.current);
       });
     } else if (heatmapType === 'crowd') {
-      [[34.0560, -118.2515, 120], [34.0522, -118.2437, 70]].forEach(([lat, lng, radius]) => {
+      [[28.8390, 76.9375, 120], [28.8308, 76.9311, 70]].forEach(([lat, lng, radius]) => {
         L.circle([lat, lng], { radius, color: '#a855f7', fillColor: '#a855f7', fillOpacity: 0.4, weight: 0 }).addTo(mapHeatmapGroupRef.current);
       });
     } else if (heatmapType === 'fire') {
-      [[34.0610, -118.2415, 60], [34.0550, -118.2400, 50]].forEach(([lat, lng, radius]) => {
+      [[28.8390, 76.9375, 60], [28.8340, 76.9358, 50]].forEach(([lat, lng, radius]) => {
         L.circle([lat, lng], { radius, color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.5, weight: 0 }).addTo(mapHeatmapGroupRef.current);
       });
     }
+
 
     // 2. Draw Detection Markers
     MOCK_DETECTIONS.forEach(det => {
@@ -487,8 +490,9 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
             <div className="space-y-1">
               <span className="text-xs font-bold text-white">Zeex-AI Co-Pilot Integration</span>
               <p className="text-xs text-sky-100 leading-relaxed">
-                "Active drone analytics for Sector Alpha processed. Traffic volumes are elevated by 18% near coordinates [34.0522, -118.2437]. Anomalous thermal signature detected in warehouse zone Sector B — recommend deploying target mission check immediately."
+                "Active drone analytics for Sector Alpha processed. Traffic volumes are elevated by 18% near coordinates [28.8308, 76.9311]. Anomalous thermal signature detected in warehouse zone Sector B — recommend deploying target mission check immediately."
               </p>
+
             </div>
           </div>
         </div>
@@ -643,10 +647,11 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
           </div>
 
           <div className="border-t border-sky-400/40 pt-4 mt-6 text-xs text-sky-200 space-y-2">
-            <div className="flex justify-between"><span>Coordinate Center:</span><span className="font-mono text-white">34.0560, -118.2450</span></div>
+            <div className="flex justify-between"><span>Coordinate Center:</span><span className="font-mono text-white">28.8308, 76.9311</span></div>
             <div className="flex justify-between"><span>Tracking Nodes:</span><span className="font-bold text-white">12 Waypoints</span></div>
             <div className="flex justify-between"><span>Mission Perimeter:</span><span className="font-bold text-white">1.4 km²</span></div>
           </div>
+
         </div>
       </div>
 
