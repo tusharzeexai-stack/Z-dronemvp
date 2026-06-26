@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { 
@@ -1546,7 +1547,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
     </div>
 
       {/* --- ADD MISSION MODAL --- */}
-      {addModalOpen && (
+      {addModalOpen && createPortal(
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gradient-to-br from-sky-850 to-sky-950 border border-sky-500/40 p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4 text-left">
             <div className="flex justify-between items-center border-b border-sky-500/30 pb-3">
@@ -1660,11 +1661,12 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* --- EDIT MISSION MODAL --- */}
-      {editModalOpen && (
+      {editModalOpen && createPortal(
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gradient-to-br from-sky-850 to-sky-950 border border-sky-550/40 p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4 text-left">
             <div className="flex justify-between items-center border-b border-sky-500/30 pb-3">
@@ -1749,7 +1751,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                     max="120"
                     value={editMissionAlt}
                     onChange={(e) => setEditMissionAlt(Number(e.target.value))}
-                    className="w-full text-xs px-3 py-2 rounded-lg border border-sky-500/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-sky-550/30 bg-sky-900/60 text-white focus:outline-none focus:border-sky-400"
                   />
                 </div>
               </div>
@@ -1786,7 +1788,8 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
