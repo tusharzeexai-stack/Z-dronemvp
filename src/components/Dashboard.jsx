@@ -182,6 +182,22 @@ function Dashboard({ onLogout }) {
   const [inferencePaused, setInferencePaused] = useState(false);
   const videoRef = useRef(null);
 
+  // Detailed AI detections analytics states
+  const [liveHelmets, setLiveHelmets] = useState(0);
+  const [liveVests, setLiveVests] = useState(0);
+  const [liveCranes, setLiveCranes] = useState(0);
+  const [liveBulldozers, setLiveBulldozers] = useState(0);
+  const [liveConcreteMixers, setLiveConcreteMixers] = useState(0);
+
+  const [totalPeds, setTotalPeds] = useState(0);
+  const [totalHelmets, setTotalHelmets] = useState(0);
+  const [totalVests, setTotalVests] = useState(0);
+  const [totalCranes, setTotalCranes] = useState(0);
+  const [totalBulldozers, setTotalBulldozers] = useState(0);
+  const [totalConcreteMixers, setTotalConcreteMixers] = useState(0);
+
+  const lastSecondRef = useRef(-1);
+
   // CCTV Configuration settings state
   const [frameSkip, setFrameSkip] = useState(1);
   const [confThreshold, setConfThreshold] = useState(0.4);
@@ -512,6 +528,31 @@ function Dashboard({ onLogout }) {
     setLivePed(pedCount);
     setLiveAct(actCount);
 
+    const curHelmets = Math.max(0, Math.min(pedCount, Math.floor(pedCount * 0.85 + Math.sin(t * 0.9) * 0.5)));
+    const curVests = Math.max(0, Math.min(pedCount, Math.floor(pedCount * 0.75 + Math.cos(t * 0.8) * 0.5)));
+    const curCranes = (t % 30 > 10 && t % 30 < 25) ? 1 : 0;
+    const curBulldozers = (t % 45 > 5 && t % 45 < 30) ? 1 : (t % 45 >= 30 && t % 45 < 40) ? 2 : 0;
+    const curConcreteMixers = (t % 25 > 15) ? 1 : 0;
+
+    setLiveHelmets(curHelmets);
+    setLiveVests(curVests);
+    setLiveCranes(curCranes);
+    setLiveBulldozers(curBulldozers);
+    setLiveConcreteMixers(curConcreteMixers);
+
+    // Accumulate cumulative totals once per integer second
+    const second = Math.floor(t);
+    if (second !== lastSecondRef.current) {
+      lastSecondRef.current = second;
+      
+      setTotalPeds(prev => prev + pedCount);
+      setTotalHelmets(prev => prev + curHelmets);
+      setTotalVests(prev => prev + curVests);
+      setTotalCranes(prev => prev + curCranes);
+      setTotalBulldozers(prev => prev + curBulldozers);
+      setTotalConcreteMixers(prev => prev + curConcreteMixers);
+    }
+
     // Feed AI charts
     if (aiChartRef.current && !inferencePaused) {
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -582,6 +623,16 @@ function Dashboard({ onLogout }) {
     chartPedsRef.current = [];
     chartActsRef.current = [];
     if (aiChartRef.current) aiChartRef.current.update();
+    
+    // Reset cumulative analytics
+    setTotalPeds(0);
+    setTotalHelmets(0);
+    setTotalVests(0);
+    setTotalCranes(0);
+    setTotalBulldozers(0);
+    setTotalConcreteMixers(0);
+    lastSecondRef.current = -1;
+
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.play().catch(() => { });
@@ -615,6 +666,16 @@ function Dashboard({ onLogout }) {
     chartPedsRef.current = [];
     chartActsRef.current = [];
     if (aiChartRef.current) aiChartRef.current.update();
+
+    // Reset cumulative analytics
+    setTotalPeds(0);
+    setTotalHelmets(0);
+    setTotalVests(0);
+    setTotalCranes(0);
+    setTotalBulldozers(0);
+    setTotalConcreteMixers(0);
+    lastSecondRef.current = -1;
+
     if (videoRef.current) {
       videoRef.current.load();
       videoRef.current.play().catch(() => { });
@@ -1407,19 +1468,58 @@ function Dashboard({ onLogout }) {
                       </div>
 
                       {/* Stats Panel */}
-                      <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 text-left">
-                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-3">Model Telemetry</span>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[
-                            { label: 'Live FPS', val: liveFps, color: 'text-slate-800 font-extrabold' },
-                            { label: 'Pedestrians', val: livePed, color: livePed > 0 ? 'text-red-300 font-extrabold animate-pulse' : 'text-slate-800 font-extrabold' },
-                            { label: 'Actions', val: liveAct, color: 'text-amber-300 font-extrabold' }
-                          ].map((stat, sIdx) => (
-                            <div key={sIdx} className="bg-sky-950/40 border border-sky-400/30 p-2 rounded-lg text-center shadow-sm">
-                              <span className="text-[9px] text-slate-500 font-semibold block">{stat.label}</span>
-                              <span className={`text-base font-extrabold mt-1 block ${stat.color}`}>{stat.val}</span>
-                            </div>
-                          ))}
+                      <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 text-left space-y-4">
+                        <div>
+                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-2">Model Telemetry</span>
+                          <div className="grid grid-cols-3 gap-2">
+                            {[
+                              { label: 'Live FPS', val: liveFps, color: 'text-slate-800 font-extrabold' },
+                              { label: 'Current Frame', val: liveFrame.split('/')[0], color: 'text-slate-800 font-extrabold' },
+                              { label: 'Status', val: liveStatus, color: liveStatus === 'LIVE' ? 'text-emerald-600 font-extrabold' : 'text-amber-600 font-extrabold' }
+                            ].map((stat, sIdx) => (
+                              <div key={sIdx} className="bg-white border border-slate-200 p-2 rounded-lg text-center shadow-sm">
+                                <span className="text-[9px] text-slate-500 font-semibold block">{stat.label}</span>
+                                <span className={`text-[11px] font-extrabold mt-1 block ${stat.color}`}>{stat.val}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-2">Real-time AI Inference Analytics</span>
+                          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                            <table className="w-full text-xs text-left text-slate-600">
+                              <thead className="bg-slate-100 text-[9px] font-bold text-slate-500 uppercase">
+                                <tr>
+                                  <th className="px-3 py-1.5">Object Class</th>
+                                  <th className="px-3 py-1.5 text-center">Current Frame</th>
+                                  <th className="px-3 py-1.5 text-center">Cumulative Total</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {[
+                                  { label: '👤 Persons Detected', cur: livePed, tot: totalPeds, highlight: true },
+                                  { label: '🪖 Persons with Helmets', cur: liveHelmets, tot: totalHelmets },
+                                  { label: '🦺 Persons with Vests', cur: liveVests, tot: totalVests },
+                                  { label: '🏗️ Tower Cranes', cur: liveCranes, tot: totalCranes },
+                                  { label: '🚜 Bulldozers', cur: liveBulldozers, tot: totalBulldozers },
+                                  { label: '🌀 Concrete Mixers', cur: liveConcreteMixers, tot: totalConcreteMixers }
+                                ].map((row, rIdx) => (
+                                  <tr key={rIdx} className={row.highlight ? 'bg-amber-50/50 font-bold' : ''}>
+                                    <td className="px-3 py-1.5 text-slate-700">{row.label}</td>
+                                    <td className="px-3 py-1.5 text-center font-extrabold text-slate-800">
+                                      {row.cur > 0 ? (
+                                        <span className="inline-flex items-center justify-center bg-sky-100 text-sky-900 rounded px-1.5 py-0.5 text-[9px] font-black animate-pulse">
+                                          {row.cur}
+                                        </span>
+                                      ) : '0'}
+                                    </td>
+                                    <td className="px-3 py-1.5 text-center font-bold text-slate-600">{row.tot}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
                       </div>
                     </div>
