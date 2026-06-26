@@ -11,6 +11,7 @@ import UpcomingMissionsWidget from './UpcomingMissionsWidget';
 import WeatherWidget from './WeatherWidget';
 import LiveStreamViewer from './LiveStreamViewer';
 import AnalyticsCenter from './AnalyticsCenter';
+import AdvancedMissionPlanner from './AdvancedMissionPlanner';
 
 // DTLA flight path interpolation
 const FLIGHT_PATH = [
@@ -1222,85 +1223,7 @@ function Dashboard({ onLogout }) {
 
           {/* TAB: MISSION PLANNER */}
           {activeTab === 'mission_planner' && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-120px)] min-h-[500px]">
-              {/* Left Section (60%): Interactive Map */}
-              <div className="col-span-12 lg:col-span-7 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden p-4 flex flex-col justify-between h-full">
-                <header className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-sky-500">near_me</span>
-                    <h3 className="font-bold text-slate-800 dark:text-white">Flight Route Workspace Map</h3>
-                  </div>
-                  <span className="text-[10px] bg-sky-500/10 text-sky-500 font-bold rounded px-2 py-0.5 uppercase">Waypoint Editor</span>
-                </header>
-                <div className="w-full flex-1 relative min-h-[400px]">
-                  <MissionMap 
-                    waypoints={missionWaypoints}
-                    onAddWaypoint={(lat, lng) => {
-                      setMissionWaypoints([...missionWaypoints, { lat, lng, altitude: 50, action: 'Hover' }]);
-                    }}
-                    onUpdateWaypoint={(idx, updated) => {
-                      const updatedWps = [...missionWaypoints];
-                      updatedWps[idx] = { ...updatedWps[idx], ...updated };
-                      setMissionWaypoints(updatedWps);
-                    }}
-                    onDeleteWaypoint={(idx) => {
-                      setMissionWaypoints(missionWaypoints.filter((_, i) => i !== idx));
-                    }}
-                    onClearRoute={() => setMissionWaypoints([])}
-                    geofence={geofenceCoords}
-                    noFlyZones={noFlyZones}
-                    satelliteMode={satelliteMode}
-                    setSatelliteMode={setSatelliteMode}
-                  />
-                </div>
-              </div>
-
-              {/* Right Section (40%): Mission Planner Form and controls */}
-              <div className="col-span-12 lg:col-span-5 h-full">
-                <MissionPlannerCard 
-                  drones={appState.drones}
-                  waypoints={missionWaypoints}
-                  onUpdateWaypoint={(idx, updated) => {
-                    const updatedWps = [...missionWaypoints];
-                    updatedWps[idx] = { ...updatedWps[idx], ...updated };
-                    setMissionWaypoints(updatedWps);
-                  }}
-                  onDeleteWaypoint={(idx) => {
-                    setMissionWaypoints(missionWaypoints.filter((_, i) => i !== idx));
-                  }}
-                  onClearRoute={() => setMissionWaypoints([])}
-                  onSubmitMission={(mission) => {
-                    if (mission.status === 'In Progress') {
-                      // Add to flights in AppState
-                      actions.addFlight({
-                        drone: mission.drone,
-                        pilot: 'A. Rivera',
-                        destination: 'DTLA Coordinates Grid',
-                        payload: mission.name,
-                        status: 'In Progress'
-                      });
-                      
-                      // Also add to upcoming/active list
-                      setUpcomingMissions([
-                        { name: mission.name, drone: mission.drone, time: 'In Progress (Active)', status: 'In Progress' },
-                        ...upcomingMissions
-                      ]);
-
-                      // Change tab to overview to view tracking
-                      setActiveTab('overview');
-                    } else {
-                      // Schedule
-                      setUpcomingMissions([
-                        { name: mission.name, drone: mission.drone, time: mission.time, status: 'Scheduled' },
-                        ...upcomingMissions
-                      ]);
-                      // Stay or view dashboard
-                      setActiveTab('overview');
-                    }
-                  }}
-                />
-              </div>
-            </div>
+            <AdvancedMissionPlanner appState={appState} actions={actions} getApiUrl={getApiUrl} />
           )}
 
           {/* TAB 2: LIVE CCTV MONITOR */}
