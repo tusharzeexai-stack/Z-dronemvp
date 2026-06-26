@@ -692,6 +692,21 @@ function Dashboard({ onLogout }) {
     }, 100);
   };
 
+  // Helper to resolve alert icons dynamically based on alert type/title
+  const getAlertIcon = (alert) => {
+    const type = alert.type?.toLowerCase() || '';
+    const title = alert.title?.toLowerCase() || '';
+    if (type.includes('battery') || title.includes('battery')) return 'battery_alert';
+    if (type.includes('wind') || title.includes('wind')) return 'air';
+    if (type.includes('fire') || title.includes('fire') || type.includes('thermal') || title.includes('thermal')) return 'local_fire_department';
+    if (type.includes('smoke') || title.includes('smoke')) return 'detector_smoke';
+    if (type.includes('intrusion') || title.includes('intrusion') || type.includes('security') || title.includes('security')) return 'security';
+    if (type.includes('collision') || title.includes('collision') || type.includes('obstacle') || title.includes('obstacle')) return 'sensors';
+    if (type.includes('signal') || title.includes('signal') || type.includes('jamming') || title.includes('jamming') || type.includes('gps')) return 'signal_wifi_bad';
+    if (type.includes('maintenance') || title.includes('maintenance')) return 'build';
+    return alert.severity === 'error' ? 'report' : alert.severity === 'warning' ? 'warning' : 'check_circle';
+  };
+
   // Derived values - MUST be defined before sidebarMenu
   const activeAlerts = appState.alerts.filter(a => !a.resolved);
 
@@ -1124,7 +1139,7 @@ function Dashboard({ onLogout }) {
                                 'bg-emerald-500 text-white'
                               }`}>
                                 <span className="material-symbols-outlined text-base">
-                                  {alert.severity === 'error' ? 'battery_alert' : alert.severity === 'warning' ? 'air' : 'check_circle'}
+                                  {getAlertIcon(alert)}
                                 </span>
                               </div>
                             </div>
@@ -1576,6 +1591,9 @@ function Dashboard({ onLogout }) {
                               alert.severity === 'error' ? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400' :
                               'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400'
                             }`}>{alert.severity === 'error' ? 'Critical' : 'Warning'}</span>
+                            <span className="material-symbols-outlined text-sm text-slate-500 dark:text-slate-400">
+                              {getAlertIcon(alert)}
+                            </span>
                             <span className="text-xs text-slate-400">{alert.time} • Unit: {alert.unit}</span>
                           </div>
                           <h4 className="font-bold text-sm text-slate-800 dark:text-white">{alert.title}</h4>

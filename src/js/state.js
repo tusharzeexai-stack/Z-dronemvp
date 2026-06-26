@@ -99,6 +99,61 @@ const DEFAULT_ALERTS = [
         resolved: false
     },
     {
+        id: "ALT-004",
+        time: "10:50 AM",
+        unit: "ZD-109",
+        type: "intrusion",
+        title: "Security Zone Intrusion",
+        description: "AI Inference model detected unauthorized human presence in restricted Hangar Zone C. Perimeter locks engaged.",
+        severity: "error",
+        resolved: false,
+        videoUrl: "/cam2.mp4#t=15,20"
+    },
+    {
+        id: "ALT-005",
+        time: "10:15 AM",
+        unit: "ZD-088",
+        type: "thermal",
+        title: "Thermal Hotspot Warning",
+        description: "FLIR infrared camera detected a thermal anomaly exceeding 88°C in Warehouse Roof Sector 4. High fire risk.",
+        severity: "error",
+        resolved: false,
+        videoUrl: "/cam1.mp4#t=25,30"
+    },
+    {
+        id: "ALT-006",
+        time: "09:40 AM",
+        unit: "ZD-109",
+        type: "collision",
+        title: "Collision Proximity Alert",
+        description: "Ultrasonic proximity and LIDAR sensors detected tower crane arm obstruction within 3.5 meters. Auto-hover engaged.",
+        severity: "warning",
+        resolved: false,
+        videoUrl: "/cam1.mp4#t=45,50"
+    },
+    {
+        id: "ALT-007",
+        time: "Yesterday",
+        unit: "ZD-112",
+        type: "smoke",
+        title: "Smoke Plume Identified",
+        description: "AI visual analytics verified smoke pattern propagation in Sector Beta North utility ducts. Dispatched local response.",
+        severity: "warning",
+        resolved: true,
+        videoUrl: "/cam2.mp4#t=8,13"
+    },
+    {
+        id: "ALT-008",
+        time: "08:22 AM",
+        unit: "ZD-088",
+        type: "gps_jamming",
+        title: "GPS Spoofing / Jamming",
+        description: "Receiver reported signal lock lost and abnormal multi-path noise floor in Sector Delta. Switched to visual navigation.",
+        severity: "warning",
+        resolved: false,
+        videoUrl: "/cam1.mp4#t=5,10"
+    },
+    {
         id: "ALT-003",
         time: "Yesterday",
         unit: "ZD-109",
@@ -135,7 +190,21 @@ export class AppState {
     loadState() {
         this.drones = JSON.parse(localStorage.getItem('z_drone_fleet')) || DEFAULT_DRONES;
         this.flights = JSON.parse(localStorage.getItem('z_drone_flights')) || DEFAULT_FLIGHTS;
-        this.alerts = JSON.parse(localStorage.getItem('z_drone_alerts')) || DEFAULT_ALERTS;
+        
+        let loadedAlerts = JSON.parse(localStorage.getItem('z_drone_alerts'));
+        if (loadedAlerts) {
+            const loadedIds = new Set(loadedAlerts.map(a => a.id));
+            const newDefaults = DEFAULT_ALERTS.filter(a => !loadedIds.has(a.id));
+            if (newDefaults.length > 0) {
+                this.alerts = [...newDefaults, ...loadedAlerts];
+                localStorage.setItem('z_drone_alerts', JSON.stringify(this.alerts));
+            } else {
+                this.alerts = loadedAlerts;
+            }
+        } else {
+            this.alerts = DEFAULT_ALERTS;
+        }
+
         this.users = JSON.parse(localStorage.getItem('z_drone_users')) || DEFAULT_USERS;
         this.settings = JSON.parse(localStorage.getItem('z_drone_settings')) || DEFAULT_SETTINGS;
     }
