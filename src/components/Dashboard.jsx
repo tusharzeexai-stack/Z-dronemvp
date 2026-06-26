@@ -1618,13 +1618,7 @@ function Dashboard({ onLogout }) {
                     </div>
                   </div>
 
-                  {/* Real-time Detections Chart */}
-                  <div className="mt-6 border-t border-sky-400/40 pt-6">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-3 text-left">Model Detection Curves</span>
-                    <div className="h-44 w-full bg-sky-950/40 rounded-xl p-2 border border-sky-400/40">
-                      <canvas ref={aiChartCanvasRef} />
-                    </div>
-                  </div>
+
                 </section>
 
                 {/* Real-Time Worker Tracking & Zone Safety Log */}
