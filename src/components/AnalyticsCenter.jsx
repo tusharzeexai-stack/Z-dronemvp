@@ -347,7 +347,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
     <div className="space-y-6 text-white font-sans pb-12">
       
       {/* ── STICKY CONTROL & FILTER PANEL ── */}
-      <div className="sticky top-[73px] z-30 bg-gradient-to-r from-sky-600 to-sky-700 border border-sky-500 rounded-2xl p-4 shadow-2xl flex flex-wrap items-center justify-between gap-4">
+      <div className="sticky top-0 z-30 bg-gradient-to-r from-sky-600 to-sky-700 border border-sky-500 rounded-2xl p-4 shadow-2xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-sky-200" />
