@@ -977,10 +977,10 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
       {/* ── DETAIL MODAL DETECTIONS INSPECTION ── */}
       {activeModalDetection && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-sky-700 to-sky-900 border border-sky-500 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden text-left flex flex-col md:flex-row">
+          <div className="bg-gradient-to-br from-sky-700 to-sky-900 border border-sky-500 rounded-2xl w-full max-w-2xl min-w-[280px] sm:min-w-[500px] md:min-w-[650px] shrink-0 shadow-2xl overflow-hidden text-left flex flex-col md:flex-row">
             
             {/* Modal Image Block */}
-            <div className="md:w-1/2 relative bg-sky-955 flex items-center justify-center border-r border-sky-500/50">
+            <div className="w-full md:w-1/2 relative bg-sky-955 flex items-center justify-center border-b md:border-b-0 md:border-r border-sky-500/50 min-h-[220px]">
               <img 
                 src={activeModalDetection.thumbnail} 
                 alt={activeModalDetection.object} 
@@ -994,7 +994,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
             </div>
 
             {/* Modal Specs Content */}
-            <div className="md:w-1/2 p-6 flex flex-col justify-between">
+            <div className="w-full md:w-1/2 p-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <header className="flex justify-between items-start border-b border-sky-400/40 pb-3">
                   <div>
@@ -1021,7 +1021,7 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
               <div className="border-t border-sky-400/40 pt-4 mt-6 flex gap-2">
                 <button 
                   onClick={() => setActiveModalDetection(null)}
-                  className="flex-1 bg-sky-950/40 border border-sky-400/60 hover:bg-sky-900/45 text-white py-2.5 rounded-xl text-xs font-bold transition-all text-center"
+                  className="flex-1 bg-sky-900/40 border border-sky-400/60 hover:bg-sky-500/40 text-white py-2.5 rounded-xl text-xs font-bold transition-all text-center"
                 >
                   Close Detail
                 </button>
@@ -1040,7 +1040,6 @@ export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
           </div>
         </div>
       )}
-
     </div>
   );
 }

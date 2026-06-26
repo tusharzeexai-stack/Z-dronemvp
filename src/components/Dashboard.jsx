@@ -984,20 +984,20 @@ function Dashboard({ onLogout }) {
               {/* KPIs */}
               <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 {[
-                  { title: 'Total Flights', val: appState.flights.length, icon: 'flight_takeoff', color: 'text-sky-500', path: 'M0,15 Q10,5 20,12 T40,8 T60,15 T80,5 T100,10' },
-                  { title: 'Flight Time', val: `${Math.floor(detailedPath.length / 3.0 / 60)}m 12s`, icon: 'schedule', color: 'text-sky-500', path: 'M0,10 L10,8 L20,14 L30,5 L40,12 L50,10 L60,18 L70,12 L80,15 L90,8 L100,10' },
-                  { title: 'Distance Flown', val: '12.40 km', icon: 'route', color: 'text-sky-500', path: 'M0,18 L20,15 L40,17 L60,8 L80,5 L100,2' },
-                  { title: 'Images Captured', val: '1,432', icon: 'photo_library', color: 'text-sky-500', path: 'M0,10 Q25,10 50,5 T100,15' },
-                  { title: 'Active Alerts', val: activeAlerts.length, icon: 'warning', color: 'text-red-500 animate-pulse', path: 'M0,15 L10,5 L20,15 L30,5 L40,15 L50,5 L60,15 L70,5 L80,15 L90,5 L100,15', border: 'border-l-4 border-l-red-500' }
+                  { title: 'Total Flights', val: appState.flights.length, icon: 'flight_takeoff', color: 'text-white', path: 'M0,15 Q10,5 20,12 T40,8 T60,15 T80,5 T100,10' },
+                  { title: 'Flight Time', val: `${Math.floor(detailedPath.length / 3.0 / 60)}m 12s`, icon: 'schedule', color: 'text-white', path: 'M0,10 L10,8 L20,14 L30,5 L40,12 L50,10 L60,18 L70,12 L80,15 L90,8 L100,10' },
+                  { title: 'Distance Flown', val: '12.40 km', icon: 'route', color: 'text-white', path: 'M0,18 L20,15 L40,17 L60,8 L80,5 L100,2' },
+                  { title: 'Images Captured', val: '1,432', icon: 'photo_library', color: 'text-white', path: 'M0,10 Q25,10 50,5 T100,15' },
+                  { title: 'Active Alerts', val: activeAlerts.length, icon: 'warning', color: 'text-amber-300 animate-pulse', path: 'M0,15 L10,5 L20,15 L30,5 L40,15 L50,5 L60,15 L70,5 L80,15 L90,5 L100,15', border: 'border-l-4 border-l-amber-500' }
                 ].map((kpi, idx) => (
-                  <div key={idx} className={`bg-white dark:bg-[#1E293B] p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-all flex flex-col justify-between ${kpi.border || ''}`}>
+                  <div key={idx} className={`bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 p-4 rounded-xl shadow-xl hover:shadow-2xl transition-all flex flex-col justify-between text-white ${kpi.border || ''}`}>
                     <div className="flex justify-between items-start">
-                      <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{kpi.title}</p>
+                      <p className="text-[11px] font-bold text-sky-200 uppercase tracking-wider">{kpi.title}</p>
                       <span className={`material-symbols-outlined text-lg ${kpi.color}`}>{kpi.icon}</span>
                     </div>
-                    <h3 className="font-extrabold text-2xl text-slate-800 dark:text-white mt-2">{kpi.val}</h3>
+                    <h3 className="font-extrabold text-2xl text-white mt-2">{kpi.val}</h3>
                     <div className="h-6 mt-3">
-                      <svg className="w-full h-full fill-none stroke-current stroke-[1.5]" viewBox="0 0 100 20" style={{ color: idx === 4 ? '#ef4444' : '#38bdf8' }}>
+                      <svg className="w-full h-full fill-none stroke-current stroke-[1.5]" viewBox="0 0 100 20" style={{ color: idx === 4 ? '#fca5a5' : '#ffffff' }}>
                         <path d={kpi.path}></path>
                       </svg>
                     </div>
@@ -1008,13 +1008,13 @@ function Dashboard({ onLogout }) {
               {/* Map & Live telemetry grid */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Tracking Map card */}
-                <div className="col-span-12 lg:col-span-7 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden p-4">
+                <div className="col-span-12 lg:col-span-7 bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl overflow-hidden p-4 shadow-xl text-white">
                   <header className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-sky-500">my_location</span>
-                      <h3 className="font-bold text-slate-800 dark:text-white">Active Flight Tracking Map</h3>
+                      <span className="material-symbols-outlined text-white">my_location</span>
+                      <h3 className="font-bold text-white">Active Flight Tracking Map</h3>
                     </div>
-                    <span className="text-[10px] bg-sky-500/10 text-sky-500 font-bold rounded px-2 py-0.5">LA DOWNTOWN</span>
+                    <span className="text-[10px] bg-sky-900/40 border border-sky-400/40 text-white font-bold rounded px-2 py-0.5">LA DOWNTOWN</span>
                   </header>
                   <div className="w-full h-[400px] relative">
                     <TrackingMap detailedPath={detailedPath} />
@@ -1022,19 +1022,19 @@ function Dashboard({ onLogout }) {
                 </div>
 
                 {/* Drone HUD / Telemetry card */}
-                <div className="col-span-12 lg:col-span-5 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                <div className="col-span-12 lg:col-span-5 bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-4 flex flex-col justify-between shadow-xl text-white">
                   <div>
-                    <header className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+                    <header className="flex items-center justify-between border-b border-sky-400/40 pb-3 mb-4">
                       <div>
-                        <h4 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <h4 className="font-bold text-white flex items-center gap-2">
                           <span>Unit Status HUD: {activeDrone.id}</span>
                         </h4>
-                        <p className="text-[10px] text-slate-500">{activeDrone.model}</p>
+                        <p className="text-[10px] text-sky-200">{activeDrone.model}</p>
                       </div>
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                        activeDrone.status === 'Online' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400' :
-                        activeDrone.status === 'Maintenance' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400' :
-                        'bg-slate-100 text-slate-700'
+                        activeDrone.status === 'Online' ? 'bg-emerald-500 text-white border border-emerald-400' :
+                        activeDrone.status === 'Maintenance' ? 'bg-amber-500 text-white border border-amber-400' :
+                        'bg-sky-955 text-white border border-sky-400/40'
                       }`}>{activeDrone.status}</span>
                     </header>
 
@@ -1046,10 +1046,10 @@ function Dashboard({ onLogout }) {
                         { label: 'Signal Quality', val: activeDrone.signal, icon: 'wifi' },
                         { label: 'Coordinates', val: `${activeDrone.lat.toFixed(4)}, ${activeDrone.lng.toFixed(4)}`, icon: 'location_on' }
                       ].map((hud, hIdx) => (
-                        <div key={hIdx} className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 border border-slate-100 dark:border-slate-800/80">
-                          <span className="text-[10px] text-slate-500 font-semibold">{hud.label}</span>
-                          <p className="font-bold text-sm text-slate-800 dark:text-white mt-1 flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-slate-400 text-sm">{hud.icon}</span>
+                        <div key={hIdx} className="bg-sky-900/40 rounded-xl p-3 border border-sky-400/40 text-white">
+                          <span className="text-[10px] text-sky-200 font-semibold">{hud.label}</span>
+                          <p className="font-bold text-sm text-white mt-1 flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-sky-200 text-sm">{hud.icon}</span>
                             <span>{hud.val}</span>
                           </p>
                         </div>
@@ -1059,12 +1059,12 @@ function Dashboard({ onLogout }) {
                     {/* Battery Bar */}
                     <div className="mt-6 space-y-2">
                       <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-slate-500">Lithium Cell Level</span>
-                        <span className={activeDrone.battery < 20 ? 'text-red-500 animate-pulse' : 'text-slate-800 dark:text-white'}>
+                        <span className="text-sky-200">Lithium Cell Level</span>
+                        <span className={activeDrone.battery < 20 ? 'text-red-300 animate-pulse font-extrabold' : 'text-white font-extrabold'}>
                           {Math.round(activeDrone.battery)}%
                         </span>
                       </div>
-                      <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-200/50 dark:border-slate-700/50">
+                      <div className="w-full bg-sky-900/40 rounded-full h-2 overflow-hidden border border-sky-400/30">
                         <div 
                           className={`h-full rounded-full transition-all duration-300 ${activeDrone.battery < 20 ? 'bg-red-500 animate-pulse' : 'bg-emerald-500'}`}
                           style={{ width: `${activeDrone.battery}%` }}
@@ -1073,9 +1073,9 @@ function Dashboard({ onLogout }) {
                     </div>
                   </div>
 
-                  <div className="border-t border-slate-100 dark:border-slate-800 pt-4 mt-6">
-                    <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block">Current Task Overlay</span>
-                    <p className="text-xs font-bold text-slate-800 dark:text-white mt-1 bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800">
+                  <div className="border-t border-sky-400/40 pt-4 mt-6">
+                    <span className="text-[10px] text-sky-200 font-semibold uppercase tracking-wider block">Current Task Overlay</span>
+                    <p className="text-xs font-bold text-white mt-1 bg-sky-900/40 p-2.5 rounded-lg border border-sky-400/40">
                       {activeDrone.status === 'Online' ? `Dispatch Mission: ${activeDrone.payload} ➔ ${activeDrone.destination}` : 'Charging / Static Standby'}
                     </p>
                   </div>
@@ -1085,11 +1085,11 @@ function Dashboard({ onLogout }) {
               {/* Charts & Alerts Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Real-time scrolling chart */}
-                <div className="col-span-12 lg:col-span-8 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-                  <header className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">
+                <div className="col-span-12 lg:col-span-8 bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-4 shadow-xl text-white">
+                  <header className="flex items-center justify-between mb-4 border-b border-sky-400/40 pb-2">
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-sky-500">show_chart</span>
-                      <h4 className="font-bold text-slate-800 dark:text-white">Active Flight Real-time Telemetry (Alt / Speed)</h4>
+                      <span className="material-symbols-outlined text-white">show_chart</span>
+                      <h4 className="font-bold text-white">Active Flight Real-time Telemetry (Alt / Speed)</h4>
                     </div>
                   </header>
                   <div className="h-64">
@@ -1100,28 +1100,28 @@ function Dashboard({ onLogout }) {
                 {/* Alerts list timeline & Mission/Weather widgets */}
                 <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
                   {/* Alerts list timeline */}
-                  <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col">
-                    <header className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">
+                  <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-4 flex flex-col shadow-xl text-white">
+                    <header className="flex items-center justify-between mb-4 border-b border-sky-400/40 pb-2">
                       <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-red-500">notifications_active</span>
-                        <h4 className="font-bold text-slate-800 dark:text-white">Security Alerts Log</h4>
+                        <span className="material-symbols-outlined text-amber-300 animate-pulse">notifications_active</span>
+                        <h4 className="font-bold text-white">Security Alerts Log</h4>
                       </div>
                     </header>
                     <div className="flex-1 overflow-y-auto space-y-4 max-h-[250px] pr-2 scrollbar-thin">
                       {activeAlerts.length === 0 ? (
-                        <div className="py-8 text-center text-xs text-slate-500 flex flex-col items-center">
-                          <span className="material-symbols-outlined text-emerald-500 text-3xl mb-2">check_circle</span>
+                        <div className="py-8 text-center text-xs text-sky-200 flex flex-col items-center">
+                          <span className="material-symbols-outlined text-emerald-400 text-3xl mb-2">check_circle</span>
                           <p className="font-semibold">Network Clear</p>
-                          <p className="text-[10px] text-slate-400 mt-0.5">Drones running clean telemetry.</p>
+                          <p className="text-[10px] text-sky-300 mt-0.5">Drones running clean telemetry.</p>
                         </div>
                       ) : (
                         activeAlerts.map((alert, idx) => (
                           <div key={`${alert.id}-${idx}`} className="flex gap-3 text-left">
                             <div className="flex flex-col items-center">
                               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                alert.severity === 'error' ? 'bg-red-50 dark:bg-red-950/20 text-red-500' :
-                                alert.severity === 'warning' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-500' :
-                                'bg-emerald-50 text-emerald-500'
+                                alert.severity === 'error' ? 'bg-red-500 text-white' :
+                                alert.severity === 'warning' ? 'bg-amber-500 text-white' :
+                                'bg-emerald-500 text-white'
                               }`}>
                                 <span className="material-symbols-outlined text-base">
                                   {alert.severity === 'error' ? 'battery_alert' : alert.severity === 'warning' ? 'air' : 'check_circle'}
@@ -1129,26 +1129,26 @@ function Dashboard({ onLogout }) {
                               </div>
                             </div>
                             <div className="flex-1">
-                              <span className="text-[9px] text-slate-400 font-semibold">{alert.time} • Unit: {alert.unit}</span>
+                              <span className="text-[9px] text-sky-200 font-semibold">{alert.time} • Unit: {alert.unit}</span>
                               <div className="flex justify-between items-start gap-1">
-                                <h5 className="font-bold text-xs text-slate-800 dark:text-white">{alert.title}</h5>
+                                <h5 className="font-bold text-xs text-white">{alert.title}</h5>
                                 <div className="flex gap-2 shrink-0">
                                   <button 
                                     onClick={() => setSelectedAlert(alert)}
-                                    className="text-[10px] text-sky-500 hover:underline font-semibold flex items-center gap-0.5"
+                                    className="text-[10px] text-sky-200 hover:text-white hover:underline font-semibold flex items-center gap-0.5"
                                   >
                                     <span className="material-symbols-outlined text-[10px]">visibility</span>
                                     <span>View</span>
                                   </button>
                                   <button 
                                     onClick={() => actions.resolveAlert(alert.id)}
-                                    className="text-[10px] text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 font-semibold"
+                                    className="text-[10px] text-sky-200 hover:text-white font-semibold"
                                   >
                                     Ack
                                   </button>
                                 </div>
                               </div>
-                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{alert.description}</p>
+                              <p className="text-[10px] text-sky-100 mt-0.5 leading-relaxed">{alert.description}</p>
                             </div>
                           </div>
                         ))
@@ -1165,15 +1165,15 @@ function Dashboard({ onLogout }) {
               </div>
 
               {/* Recent flight logs */}
-              <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+              <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-4 shadow-xl text-white">
                 <header className="flex justify-between items-center mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-sky-500">list_alt</span>
-                    <h3 className="font-bold text-slate-800 dark:text-white">Active Flight Plan Overview</h3>
+                    <span className="material-symbols-outlined text-white">list_alt</span>
+                    <h3 className="font-bold text-white">Active Flight Plan Overview</h3>
                   </div>
                   <button 
                     onClick={() => setActiveTab('reports')}
-                    className="text-xs text-sky-500 hover:underline font-semibold"
+                    className="text-xs text-sky-200 hover:text-white hover:underline font-bold"
                   >
                     View All Logs
                   </button>
@@ -1181,7 +1181,7 @@ function Dashboard({ onLogout }) {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-bold uppercase tracking-wider">
+                      <tr className="bg-sky-950/40 border-b border-sky-400/40 text-sky-200 font-bold uppercase tracking-wider">
                         <th className="px-4 py-2.5">Flight ID</th>
                         <th className="px-4 py-2.5">Drone ID</th>
                         <th className="px-4 py-2.5">Date</th>
@@ -1191,25 +1191,25 @@ function Dashboard({ onLogout }) {
                         <th className="px-4 py-2.5">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody className="divide-y divide-sky-500/20">
                       {appState.flights.slice(0, 4).map(flight => (
                         <tr 
                           key={flight.id} 
                           onClick={() => handleTrackDrone(flight.drone)}
-                          className="hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer transition-colors"
+                          className="hover:bg-sky-500/30 cursor-pointer transition-colors"
                         >
-                          <td className="px-4 py-3 font-bold text-slate-800 dark:text-white">{flight.id}</td>
-                          <td className="px-4 py-3 text-slate-600 dark:text-slate-300 font-semibold">{flight.drone}</td>
-                          <td className="px-4 py-3 text-slate-500">{flight.date}</td>
-                          <td className="px-4 py-3 text-slate-500">{flight.duration}</td>
-                          <td className="px-4 py-3 text-slate-500">{flight.distance}</td>
-                          <td className="px-4 py-3 text-slate-500">{flight.pilot}</td>
+                          <td className="px-4 py-3 font-bold text-white">{flight.id}</td>
+                          <td className="px-4 py-3 text-white font-semibold">{flight.drone}</td>
+                          <td className="px-4 py-3 text-sky-200">{flight.date}</td>
+                          <td className="px-4 py-3 text-sky-200">{flight.duration}</td>
+                          <td className="px-4 py-3 text-sky-200">{flight.distance}</td>
+                          <td className="px-4 py-3 text-sky-200">{flight.pilot}</td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                              flight.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900' :
-                              flight.status === 'In Progress' ? 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/20 dark:text-sky-400 dark:border-sky-900 animate-pulse' :
-                              flight.status === 'Aborted' ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900' :
-                              'bg-slate-50 text-slate-700 border-slate-200'
+                              flight.status === 'Completed' ? 'bg-emerald-500 text-white border-emerald-400' :
+                              flight.status === 'In Progress' ? 'bg-amber-500 text-white border-amber-400 animate-pulse' :
+                              flight.status === 'Aborted' ? 'bg-red-500 text-white border-red-400' :
+                              'bg-sky-955 text-white border-sky-400/40'
                             }`}>{flight.status}</span>
                           </td>
                         </tr>
@@ -1229,25 +1229,25 @@ function Dashboard({ onLogout }) {
           {/* TAB 2: LIVE CCTV MONITOR */}
           {activeTab === 'cctv' && (
             <div className="space-y-6">
-              <section className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
-                <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+              <section className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-4 shadow-xl text-white">
+                <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-sky-400/40 pb-4 mb-4">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                      <span className="material-symbols-outlined text-sky-500 text-xl">smart_toy</span>
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <span className="material-symbols-outlined text-white text-xl">smart_toy</span>
                       AI Inference — Annotated Video Stream
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Running OpenVINO SSD model on: <span className="font-bold text-sky-500">{videoPath}</span> · Pedestrian + Action detection
+                    <p className="text-xs text-sky-200 mt-1">
+                      Running OpenVINO SSD model on: <span className="font-bold text-white">{videoPath}</span> · Pedestrian + Action detection
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-mono text-slate-500 font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-2 py-1">
+                    <span className="text-xs font-mono text-sky-200 font-bold bg-sky-900/40 border border-sky-400/40 rounded px-2 py-1">
                       Frame: {liveFrame}
                     </span>
-                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                      liveStatus === 'LIVE' ? 'bg-emerald-100 text-emerald-700' : liveStatus === 'PAUSED' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700 animate-pulse'
+                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border ${
+                      liveStatus === 'LIVE' ? 'bg-emerald-500 text-white border-emerald-400' : liveStatus === 'PAUSED' ? 'bg-amber-500 text-white border-amber-400' : 'bg-red-500 text-white border-red-400 animate-pulse'
                     }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${liveStatus === 'LIVE' ? 'bg-emerald-500 animate-pulse' : liveStatus === 'PAUSED' ? 'bg-amber-500' : 'bg-red-500'}`}></span>
+                      <span className={`w-1.5 h-1.5 rounded-full ${liveStatus === 'LIVE' ? 'bg-emerald-400 animate-pulse' : liveStatus === 'PAUSED' ? 'bg-amber-400' : 'bg-red-400'}`}></span>
                       <span>{liveStatus}</span>
                     </span>
                   </div>
@@ -1286,13 +1286,12 @@ function Dashboard({ onLogout }) {
 
                   {/* Sidebar controls */}
                   <div className="col-span-12 lg:col-span-4 flex flex-col justify-between gap-6">
-                    {/* Control Buttons */}
                     <div className="space-y-4">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Receiver Controls</span>
+                      <span className="text-[10px] text-sky-200 font-bold uppercase tracking-wider block">Receiver Controls</span>
                       <div className="flex gap-2">
                         <button 
                           onClick={handleTogglePlay}
-                          className="flex-1 bg-primary text-white text-xs font-bold py-2.5 rounded-xl hover:bg-primary/95 flex items-center justify-center gap-1.5 shadow-sm"
+                          className="flex-1 bg-white hover:bg-sky-100 text-sky-900 text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow"
                         >
                           <span className="material-symbols-outlined text-base">
                             {inferencePaused ? 'play_arrow' : 'pause'}
@@ -1302,7 +1301,7 @@ function Dashboard({ onLogout }) {
 
                         <button 
                           onClick={handleReset}
-                          className="px-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 text-slate-600 dark:text-slate-300"
+                          className="px-3 border border-sky-400/60 bg-sky-900/40 hover:bg-sky-550 text-white rounded-xl"
                           title="Reset feed"
                         >
                           <span className="material-symbols-outlined text-base mt-1">replay</span>
@@ -1311,22 +1310,22 @@ function Dashboard({ onLogout }) {
 
                       {/* Video Source Dropdown */}
                       <div className="space-y-1">
-                        <label className="text-[10px] text-slate-500 font-semibold block uppercase tracking-wider">📂 Video Source</label>
+                        <label className="text-[10px] text-sky-200 font-semibold block uppercase tracking-wider">📂 Video Source</label>
                         <select 
                           value={videoPath} 
                           onChange={(e) => handleSetVideo(e.target.value)}
-                          className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 py-2 px-2 focus:ring-2 focus:ring-sky-500 focus:outline-none cursor-pointer"
+                          className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white py-2 px-2 focus:ring-2 focus:ring-sky-500 focus:outline-none cursor-pointer"
                         >
                           {videoSources.map(vs => (
-                            <option key={vs.value} value={vs.value}>{vs.label}</option>
+                            <option key={vs.value} value={vs.value} className="bg-sky-850 text-white">{vs.label}</option>
                           ))}
                         </select>
-                        <p className="text-[9px] text-slate-400 mt-0.5">Currently: <span className="font-bold text-sky-500">{videoPath}</span></p>
+                        <p className="text-[9px] text-sky-200 mt-0.5">Currently: <span className="font-bold text-white">{videoPath}</span></p>
                       </div>
 
                       {/* Mode Select */}
                       <div className="space-y-2">
-                        <label className="text-[10px] text-slate-500 font-semibold block">SSD Detection Layer Mode</label>
+                        <label className="text-[10px] text-sky-200 font-bold block">SSD Detection Layer Mode</label>
                         <div className="grid grid-cols-3 gap-2">
                           {[
                             { id: 1, label: 'Bbox Only' },
@@ -1338,8 +1337,8 @@ function Dashboard({ onLogout }) {
                               onClick={() => handleSetMode(mode.id)}
                               className={`py-2 px-1 text-center rounded-lg text-[10px] font-bold transition-all border ${
                                 inferenceMode === mode.id 
-                                  ? 'bg-primary text-white border-primary shadow-sm' 
-                                  : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
+                                  ? 'bg-white text-sky-900 border-white shadow-sm' 
+                                  : 'bg-sky-900/40 border-sky-400/40 text-white hover:bg-sky-550'
                               }`}
                             >
                               {mode.label}
@@ -1351,7 +1350,7 @@ function Dashboard({ onLogout }) {
                       {/* Threshold Sliders */}
                       <div className="space-y-3 pt-2">
                         <div>
-                          <div className="flex justify-between text-[10px] font-semibold text-slate-500 mb-1">
+                          <div className="flex justify-between text-[10px] font-semibold text-sky-200 mb-1">
                             <span>Confidence Threshold</span>
                             <span>{confThreshold.toFixed(2)}</span>
                           </div>
@@ -1362,39 +1361,39 @@ function Dashboard({ onLogout }) {
                             step="0.05"
                             value={confThreshold}
                             onChange={(e) => handleSetConf(e.target.value)}
-                            className="w-full accent-primary h-1 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                            className="w-full accent-white h-1 bg-sky-900/50 rounded-lg appearance-none cursor-pointer"
                           />
                         </div>
 
                         <div>
-                          <div className="flex justify-between text-[10px] font-semibold text-slate-500 mb-1">
+                          <div className="flex justify-between text-[10px] font-semibold text-sky-200 mb-1">
                             <span>Frame Skip Rate</span>
                             <span>{frameSkip}x</span>
                           </div>
                           <select 
                             value={frameSkip}
                             onChange={(e) => handleSetSpeed(e.target.value)}
-                            className="w-full text-xs rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-1.5 focus:ring-sky-500"
+                            className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 py-1.5 focus:ring-sky-500 text-white"
                           >
-                            <option value={1}>1 (Process all frames)</option>
-                            <option value={2}>2 (Skip every second frame)</option>
-                            <option value={5}>5 (Skip 4/5 frames - High Speed)</option>
+                            <option value={1} className="bg-sky-850 text-white">1 (Process all frames)</option>
+                            <option value={2} className="bg-sky-850 text-white">2 (Skip every second frame)</option>
+                            <option value={5} className="bg-sky-850 text-white">5 (Skip 4/5 frames - High Speed)</option>
                           </select>
                         </div>
                       </div>
                     </div>
 
                     {/* Stats Panel */}
-                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4 border border-slate-100 dark:border-slate-800 text-left">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-3">Model Telemetry</span>
+                    <div className="bg-sky-900/40 rounded-xl p-4 border border-sky-400/40 text-left">
+                      <span className="text-[10px] text-sky-200 font-bold uppercase tracking-wider block mb-3">Model Telemetry</span>
                       <div className="grid grid-cols-3 gap-2">
                         {[
-                          { label: 'Live FPS', val: liveFps, color: 'text-sky-500' },
-                          { label: 'Pedestrians', val: livePed, color: livePed > 0 ? 'text-red-500 font-bold animate-pulse' : 'text-slate-800 dark:text-white' },
-                          { label: 'Actions', val: liveAct, color: 'text-amber-500' }
+                          { label: 'Live FPS', val: liveFps, color: 'text-white font-extrabold' },
+                          { label: 'Pedestrians', val: livePed, color: livePed > 0 ? 'text-red-300 font-extrabold animate-pulse' : 'text-white font-extrabold' },
+                          { label: 'Actions', val: liveAct, color: 'text-amber-300 font-extrabold' }
                         ].map((stat, sIdx) => (
-                          <div key={sIdx} className="bg-white dark:bg-[#1E293B] border border-slate-200/50 dark:border-slate-800 p-2 rounded-lg text-center shadow-xs">
-                            <span className="text-[9px] text-slate-400 font-semibold block">{stat.label}</span>
+                          <div key={sIdx} className="bg-sky-950/40 border border-sky-400/30 p-2 rounded-lg text-center shadow-sm">
+                            <span className="text-[9px] text-sky-200 font-semibold block">{stat.label}</span>
                             <span className={`text-base font-extrabold mt-1 block ${stat.color}`}>{stat.val}</span>
                           </div>
                         ))}
@@ -1404,9 +1403,9 @@ function Dashboard({ onLogout }) {
                 </div>
 
                 {/* Real-time Detections Chart */}
-                <div className="mt-6 border-t border-slate-100 dark:border-slate-800 pt-6">
-                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-3 text-left">Model Detection Curves</span>
-                  <div className="h-44 w-full bg-slate-50 dark:bg-slate-900/40 rounded-xl p-2 border border-slate-100 dark:border-slate-800">
+                <div className="mt-6 border-t border-sky-400/40 pt-6">
+                  <span className="text-[10px] text-sky-200 font-bold uppercase tracking-wider block mb-3 text-left">Model Detection Curves</span>
+                  <div className="h-44 w-full bg-sky-950/40 rounded-xl p-2 border border-sky-400/40">
                     <canvas ref={aiChartCanvasRef} />
                   </div>
                 </div>
@@ -1414,22 +1413,21 @@ function Dashboard({ onLogout }) {
             </div>
           )}
 
-          {/* TAB: LIVE DRONE MONITORING (WebRTC via AWS KVS) */}
           {activeTab === 'live_mon' && (
             <div className="space-y-6">
-              <section className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
-                <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+              <section className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl p-4 shadow-xl text-white">
+                <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-sky-400/40 pb-4 mb-4">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                      <span className="material-symbols-outlined text-sky-500 text-xl">sensors</span>
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <span className="material-symbols-outlined text-white text-xl">sensors</span>
                       Live Drone Telemetry & Kinesis Stream
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-sky-200 mt-1">
                       Direct low-latency WebRTC streams from drone hardware to browser via AWS Kinesis Video Streams.
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="px-2 py-1 rounded text-[10px] font-bold bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 uppercase tracking-wider">
+                    <span className="px-2 py-1 rounded text-[10px] font-bold bg-sky-900/40 border border-sky-400/40 text-white uppercase tracking-wider">
                       AWS Cloud Enabled
                     </span>
                   </div>
@@ -1442,19 +1440,19 @@ function Dashboard({ onLogout }) {
                       <LiveStreamViewer
                         droneId={selectedLiveDroneId}
                         droneName={appState.drones.find(d => d.id === selectedLiveDroneId)?.model || selectedLiveDroneId}
-                        className="w-full aspect-video shadow-lg border border-slate-200 dark:border-slate-800"
+                        className="w-full aspect-video shadow-2xl border border-sky-400/40 rounded-xl overflow-hidden"
                       />
                     ) : (
-                      <div className="bg-slate-900 rounded-xl overflow-hidden aspect-video flex flex-col items-center justify-center gap-3 text-center p-4 border border-slate-800" style={{ minHeight: 300 }}>
-                        <span className="material-symbols-outlined text-4xl text-slate-500">videocam_off</span>
-                        <p className="text-slate-400 text-sm">Select a drone to start live video monitoring</p>
+                      <div className="bg-sky-955 rounded-xl overflow-hidden aspect-video flex flex-col items-center justify-center gap-3 text-center p-4 border border-sky-400/40 shadow-inner" style={{ minHeight: 300 }}>
+                        <span className="material-symbols-outlined text-4xl text-sky-200">videocam_off</span>
+                        <p className="text-sky-100 text-sm">Select a drone to start live video monitoring</p>
                       </div>
                     )}
                   </div>
 
                   {/* Sidebar with Drone List */}
                   <div className="col-span-12 lg:col-span-4 flex flex-col gap-4">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block text-left">Select Drone Camera Feed</span>
+                    <span className="text-[10px] text-sky-200 font-bold uppercase tracking-wider block text-left">Select Drone Camera Feed</span>
                     <div className="space-y-3 overflow-y-auto max-h-[400px] pr-1">
                       {appState.drones.map((drone) => {
                         const isSelected = selectedLiveDroneId === drone.id;
@@ -1464,35 +1462,35 @@ function Dashboard({ onLogout }) {
                             onClick={() => setSelectedLiveDroneId(drone.id)}
                             className={`p-4 rounded-xl border transition-all cursor-pointer text-left ${
                               isSelected
-                                ? 'bg-sky-50/50 dark:bg-sky-950/20 border-sky-400 dark:border-sky-500/50 shadow-sm'
-                                : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                                ? 'bg-sky-900/70 border-white shadow-md'
+                                : 'bg-sky-900/40 border-sky-400/45 hover:bg-sky-550/20'
                             }`}
                           >
                             <div className="flex justify-between items-start">
                               <div>
-                                <h4 className="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-1.5">
+                                <h4 className="font-bold text-sm text-white flex items-center gap-1.5">
                                   <span className={`w-2 h-2 rounded-full ${
-                                    drone.status === 'flying' || drone.status === 'Active' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                                    drone.status === 'flying' || drone.status === 'Active' ? 'bg-emerald-400 animate-pulse' : 'bg-sky-300'
                                   }`} />
                                   {drone.model}
                                 </h4>
-                                <p className="text-[10px] text-slate-400 font-semibold font-mono mt-0.5">{drone.id}</p>
+                                <p className="text-[10px] text-sky-200 font-semibold font-mono mt-0.5">{drone.id}</p>
                               </div>
-                              <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
-                                drone.status === 'flying' || drone.status === 'Active' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                              <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase border ${
+                                drone.status === 'flying' || drone.status === 'Active' ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-sky-955 text-white border-sky-400/40'
                               }`}>
                                 {drone.status}
                               </span>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-200/50 dark:border-slate-800/50 text-[11px]">
-                              <div className="flex items-center gap-1 text-slate-500">
+                            <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-sky-400/40 text-[11px]">
+                              <div className="flex items-center gap-1 text-sky-200">
                                 <span className="material-symbols-outlined text-xs">battery_charging_full</span>
-                                <span className="font-semibold text-slate-700 dark:text-slate-300">{drone.battery}%</span>
+                                <span className="font-semibold text-white">{drone.battery}%</span>
                               </div>
-                              <div className="flex items-center gap-1 text-slate-500">
+                              <div className="flex items-center gap-1 text-sky-200">
                                 <span className="material-symbols-outlined text-xs">signal_cellular_alt</span>
-                                <span className="font-semibold text-slate-700 dark:text-slate-300">{drone.signal || '92%'}</span>
+                                <span className="font-semibold text-white">{drone.signal || '92%'}</span>
                               </div>
                             </div>
                           </div>
@@ -2051,68 +2049,68 @@ function Dashboard({ onLogout }) {
       {/* ===== MODAL: REGISTER DRONE ===== */}
       {addDroneOpen && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#1E293B] rounded-2xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden text-left p-6">
-            <header className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
-              <h3 className="font-bold text-slate-800 dark:text-white">Register Fleet Drone</h3>
-              <button onClick={() => setAddDroneOpen(false)} className="text-slate-400 hover:text-slate-600">
+          <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden text-left p-6 text-white">
+            <header className="flex justify-between items-center border-b border-sky-400/40 pb-3 mb-4">
+              <h3 className="font-bold text-white">Register Fleet Drone</h3>
+              <button onClick={() => setAddDroneOpen(false)} className="text-sky-200 hover:text-white">
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
             </header>
 
             <form onSubmit={handleAddDrone} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500 block">Drone Model</label>
+                <label className="text-xs font-semibold text-sky-200 block">Drone Model</label>
                 <input 
                   type="text" 
                   required
                   placeholder="e.g. Inspector Pro V3"
                   value={newDroneModel}
                   onChange={(e) => setNewDroneModel(e.target.value)}
-                  className="w-full text-xs rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500 block">Mission Class Type</label>
+                <label className="text-xs font-semibold text-sky-200 block">Mission Class Type</label>
                 <select 
                   value={newDroneType} 
                   onChange={(e) => setNewDroneType(e.target.value)}
-                  className="w-full text-xs rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 >
-                  <option value="Cargo Delivery">Cargo Delivery</option>
-                  <option value="Surveillance">Surveillance</option>
-                  <option value="Infrastructure Inspection">Infrastructure Inspection</option>
-                  <option value="Mapping">Mapping</option>
+                  <option value="Cargo Delivery" className="bg-sky-850 text-white">Cargo Delivery</option>
+                  <option value="Surveillance" className="bg-sky-850 text-white">Surveillance</option>
+                  <option value="Infrastructure Inspection" className="bg-sky-850 text-white">Infrastructure Inspection</option>
+                  <option value="Mapping" className="bg-sky-850 text-white">Mapping</option>
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500 block">Camera Payload</label>
+                <label className="text-xs font-semibold text-sky-200 block">Camera Payload</label>
                 <input 
                   type="text" 
                   required
                   placeholder="e.g. FLIR Sensor Pod"
                   value={newDronePayload}
                   onChange={(e) => setNewDronePayload(e.target.value)}
-                  className="w-full text-xs rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500 block">Pilot In Command</label>
+                <label className="text-xs font-semibold text-sky-200 block">Pilot In Command</label>
                 <input 
                   type="text" 
                   required
                   placeholder="e.g. A. Rivera"
                   value={newDroneOperator}
                   onChange={(e) => setNewDroneOperator(e.target.value)}
-                  className="w-full text-xs rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 
               <button 
                 type="submit" 
-                className="w-full bg-primary text-white text-xs font-bold py-2.5 rounded-xl hover:bg-primary/95 transition-all shadow-sm mt-2"
+                className="w-full bg-white hover:bg-sky-100 text-sky-900 text-xs font-bold py-2.5 rounded-xl transition-all shadow-md mt-2"
               >
                 Register Drone
               </button>
@@ -2124,70 +2122,70 @@ function Dashboard({ onLogout }) {
       {/* ===== MODAL: FLIGHT PLANNER ===== */}
       {flightPlannerOpen && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#1E293B] rounded-2xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden text-left p-6">
-            <header className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
-              <h3 className="font-bold text-slate-800 dark:text-white">Dispatch Flight Plan</h3>
-              <button onClick={() => setFlightPlannerOpen(false)} className="text-slate-400 hover:text-slate-600">
+          <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden text-left p-6 text-white">
+            <header className="flex justify-between items-center border-b border-sky-400/40 pb-3 mb-4">
+              <h3 className="font-bold text-white">Dispatch Flight Plan</h3>
+              <button onClick={() => setFlightPlannerOpen(false)} className="text-sky-200 hover:text-white">
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
             </header>
 
             <form onSubmit={handleDispatchFlight} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500 block">Select Available Drone</label>
+                <label className="text-xs font-semibold text-sky-200 block">Select Available Drone</label>
                 <select 
                   required
                   value={newFlightDrone}
                   onChange={(e) => setNewFlightDrone(e.target.value)}
-                  className="w-full text-xs rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 >
-                  <option value="">-- Choose Drone --</option>
+                  <option value="" className="bg-sky-850 text-white">-- Choose Drone --</option>
                   {appState.drones.filter(d => d.status !== 'Maintenance').map(d => (
-                    <option key={d.id} value={d.id}>{d.id} ({d.model}) - {Math.round(d.battery)}% batt</option>
+                    <option key={d.id} value={d.id} className="bg-sky-850 text-white">{d.id} ({d.model}) - {Math.round(d.battery)}% batt</option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500 block">Operator Pilot</label>
+                <label className="text-xs font-semibold text-sky-200 block">Operator Pilot</label>
                 <input 
                   type="text" 
                   required
                   placeholder="Operator name"
                   value={newFlightPilot}
                   onChange={(e) => setNewFlightPilot(e.target.value)}
-                  className="w-full text-xs rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500 block">Mission Destination</label>
+                <label className="text-xs font-semibold text-sky-200 block">Mission Destination</label>
                 <select 
                   value={newFlightDest} 
                   onChange={(e) => setNewFlightDest(e.target.value)}
-                  className="w-full text-xs rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 >
-                  <option value="Westside Hospital Pad">Westside Hospital Pad</option>
-                  <option value="Storage Rack B">Storage Hangar Sector Alpha</option>
-                  <option value="Charging Pad Alpha">Charging Pad Alpha</option>
+                  <option value="Westside Hospital Pad" className="bg-sky-850 text-white">Westside Hospital Pad</option>
+                  <option value="Storage Rack B" className="bg-sky-850 text-white">Storage Hangar Sector Alpha</option>
+                  <option value="Charging Pad Alpha" className="bg-sky-850 text-white">Charging Pad Alpha</option>
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-500 block">Payload Contents</label>
+                <label className="text-xs font-semibold text-sky-200 block">Payload Contents</label>
                 <input 
                   type="text" 
                   required
                   placeholder="e.g. Medical package"
                   value={newFlightPayload}
                   onChange={(e) => setNewFlightPayload(e.target.value)}
-                  className="w-full text-xs rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                  className="w-full text-xs rounded-lg border border-sky-400/40 bg-sky-900/50 text-white placeholder-sky-200 focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 
               <button 
                 type="submit" 
-                className="w-full bg-primary text-white text-xs font-bold py-2.5 rounded-xl hover:bg-primary/95 transition-all shadow-sm mt-2"
+                className="w-full bg-white hover:bg-sky-100 text-sky-900 text-xs font-bold py-2.5 rounded-xl transition-all shadow-md mt-2"
               >
                 Dispatch Flight Mission
               </button>
@@ -2199,15 +2197,15 @@ function Dashboard({ onLogout }) {
       {/* ===== MODAL: ALERT EVIDENCE VIEW ===== */}
       {selectedAlert && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#1E293B] rounded-2xl w-full max-w-xl min-w-[280px] sm:min-w-[480px] md:min-w-[576px] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden text-left p-6">
-            <header className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+          <div className="bg-gradient-to-br from-sky-600 to-sky-850 border border-sky-550 rounded-2xl w-full max-w-xl min-w-[280px] sm:min-w-[480px] md:min-w-[576px] shadow-2xl overflow-hidden text-left p-6 text-white">
+            <header className="flex justify-between items-center border-b border-sky-400/40 pb-3 mb-4">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-red-500 animate-pulse">videocam</span>
-                <h3 className="font-extrabold text-slate-800 dark:text-white">Incident Capture Evidence</h3>
+                <span className="material-symbols-outlined text-rose-300 animate-pulse">videocam</span>
+                <h3 className="font-extrabold text-white">Incident Capture Evidence</h3>
               </div>
               <button 
                 onClick={() => setSelectedAlert(null)} 
-                className="text-slate-400 hover:text-slate-650 dark:hover:text-slate-200"
+                className="text-sky-200 hover:text-white"
               >
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
@@ -2215,29 +2213,29 @@ function Dashboard({ onLogout }) {
 
             <div className="space-y-4">
               {/* Telemetry info */}
-              <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div className="grid grid-cols-2 gap-2 text-xs bg-sky-900/40 p-3 rounded-xl border border-sky-400/40">
                 <div>
-                  <span className="text-slate-400 font-semibold uppercase text-[9px] block">Alert Event</span>
-                  <span className="font-bold text-slate-800 dark:text-white">{selectedAlert.title}</span>
+                  <span className="text-sky-250 font-semibold uppercase text-[9px] block">Alert Event</span>
+                  <span className="font-bold text-white">{selectedAlert.title}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold uppercase text-[9px] block">Trigger Unit</span>
-                  <span className="font-bold text-slate-800 dark:text-white">{selectedAlert.unit}</span>
+                  <span className="text-sky-250 font-semibold uppercase text-[9px] block">Trigger Unit</span>
+                  <span className="font-bold text-white">{selectedAlert.unit}</span>
                 </div>
                 <div className="mt-1">
-                  <span className="text-slate-400 font-semibold uppercase text-[9px] block">Time Logged</span>
-                  <span className="font-bold text-slate-800 dark:text-white">{selectedAlert.time}</span>
+                  <span className="text-sky-250 font-semibold uppercase text-[9px] block">Time Logged</span>
+                  <span className="font-bold text-white">{selectedAlert.time}</span>
                 </div>
                 <div className="mt-1">
-                  <span className="text-slate-400 font-semibold uppercase text-[9px] block">Status</span>
-                  <span className={`font-bold ${selectedAlert.resolved ? 'text-emerald-500' : 'text-amber-500'}`}>
+                  <span className="text-sky-250 font-semibold uppercase text-[9px] block">Status</span>
+                  <span className={`font-bold ${selectedAlert.resolved ? 'text-emerald-300' : 'text-amber-300'}`}>
                     {selectedAlert.resolved ? 'Acknowledged' : 'Active Warning'}
                   </span>
                 </div>
               </div>
 
               {/* Video Player Box */}
-              <div className="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-black aspect-video flex items-center justify-center group">
+              <div className="relative rounded-xl overflow-hidden border border-sky-400/50 bg-black aspect-video flex items-center justify-center group">
                 <video
                   key={selectedAlert.id} // force reload on alert change
                   src={selectedAlert.videoUrl || "/cam2.mp4#t=10,15"}
@@ -2280,15 +2278,15 @@ function Dashboard({ onLogout }) {
                 <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,6px_100%] opacity-40"></div>
               </div>
 
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed italic">
+              <p className="text-xs text-sky-100 leading-relaxed italic">
                 "{selectedAlert.description}"
               </p>
             </div>
 
-            <footer className="flex justify-end gap-2.5 mt-6 border-t border-slate-100 dark:border-slate-800 pt-4">
+            <footer className="flex justify-end gap-2.5 mt-6 border-t border-sky-400/40 pt-4">
               <button
                 onClick={() => setSelectedAlert(null)}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold py-2 px-4 rounded-xl shadow-xs"
+                className="bg-sky-900/40 border border-sky-400/60 hover:bg-sky-550 text-white text-xs font-bold py-2 px-4 rounded-xl shadow-xs"
               >
                 Close
               </button>
@@ -2298,7 +2296,7 @@ function Dashboard({ onLogout }) {
                     actions.resolveAlert(selectedAlert.id);
                     setSelectedAlert({ ...selectedAlert, resolved: true });
                   }}
-                  className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 px-4 rounded-xl shadow-sm transition-colors"
+                  className="bg-white hover:bg-sky-100 text-sky-900 text-xs font-bold py-2 px-4 rounded-xl shadow-md transition-colors"
                 >
                   Acknowledge Incident
                 </button>
