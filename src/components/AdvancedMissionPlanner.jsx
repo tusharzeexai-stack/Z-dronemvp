@@ -371,7 +371,6 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
   };
 
   const triggerAIPlanner = (type) => {
-    // Generate an automatic optimized mission layout on map
     if (type === 'optimize') {
       alert("AI Optimization: Adjusting paths to optimize battery consumption (-14% drag efficiency).");
       return;
@@ -394,32 +393,32 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)] text-slate-100 font-sans pb-4">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)] text-white font-sans pb-4">
       
       {/* ── LEFT PANEL: MISSION LIBRARY (3 cols) ── */}
-      <div className="lg:col-span-3 bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between h-full overflow-y-auto">
+      <div className="lg:col-span-3 bg-gradient-to-br from-sky-600 to-sky-800 border border-sky-500 rounded-2xl p-4 flex flex-col justify-between h-full overflow-y-auto shadow-xl">
         <div className="space-y-4">
           <header className="flex justify-between items-center">
-            <h3 className="font-extrabold text-sm text-white">Autonomous Missions</h3>
-            <button className="p-1.5 bg-cyan-500 hover:bg-cyan-600 text-slate-950 rounded-xl transition-all">
+            <h3 className="font-extrabold text-sm text-white drop-shadow-md">Autonomous Missions</h3>
+            <button className="p-1.5 bg-white hover:bg-sky-100 text-sky-800 rounded-xl transition-all shadow">
               <Plus className="w-4 h-4" />
             </button>
           </header>
 
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-500" />
+            <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-sky-200" />
             <input 
               type="text" 
               placeholder="Search library..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs w-full focus:outline-none text-slate-200"
+              className="bg-sky-900/40 border border-sky-400/50 rounded-xl pl-9 pr-4 py-2 text-xs w-full focus:outline-none text-white placeholder-sky-200/70"
             />
           </div>
 
-          <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-850 text-[10px] font-bold">
+          <div className="flex items-center gap-1.5 bg-sky-900/50 p-1 rounded-xl border border-sky-400/30 text-[10px] font-bold">
             {['All', 'Drafts', 'Scheduled', 'Done'].map(tab => (
-              <button key={tab} className="flex-1 py-1 rounded hover:bg-slate-900 transition-colors text-slate-400 hover:text-white">
+              <button key={tab} className="flex-1 py-1 rounded hover:bg-sky-500/40 transition-colors text-sky-100 hover:text-white">
                 {tab}
               </button>
             ))}
@@ -433,23 +432,21 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 onClick={() => setSelectedMissionId(m.id)}
                 className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${
                   selectedMissionId === m.id 
-                    ? 'bg-slate-950 border-cyan-500/50 shadow-md shadow-cyan-500/5' 
-                    : 'bg-slate-950/40 border-slate-850 hover:border-slate-700'
+                    ? 'bg-sky-500/40 border-white shadow-lg' 
+                    : 'bg-sky-900/20 border-sky-500/30 hover:bg-sky-900/40 hover:border-sky-400'
                 }`}
               >
                 <div className="flex justify-between items-start">
-                  <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest">{m.id}</span>
-                  <span className={`text-[8px] font-black px-1.5 py-0.5 rounded ${
-                    m.status === 'Scheduled' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
-                    m.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                    'bg-slate-800 text-slate-400 border border-slate-700'
-                  }`}>{m.status}</span>
+                  <span className="text-[9px] font-bold text-sky-200 uppercase tracking-widest">{m.id}</span>
+                  <span className={`text-[8px] font-black px-1.5 py-0.5 rounded bg-white/20 text-white border border-white/25`}>
+                    {m.status}
+                  </span>
                 </div>
-                <h4 className="font-extrabold text-xs text-slate-200 mt-1.5 truncate">{m.name}</h4>
-                <div className="grid grid-cols-3 gap-2 mt-3 text-[10px] text-slate-500">
-                  <div><span>Time:</span><span className="font-bold text-slate-400 block">{m.time}</span></div>
-                  <div><span>Dist:</span><span className="font-bold text-slate-400 block">{m.distance}</span></div>
-                  <div><span>Drone:</span><span className="font-bold text-slate-400 block">{m.drone}</span></div>
+                <h4 className="font-extrabold text-xs text-white mt-1.5 truncate">{m.name}</h4>
+                <div className="grid grid-cols-3 gap-2 mt-3 text-[10px] text-sky-100">
+                  <div><span>Time:</span><span className="font-bold text-white block">{m.time}</span></div>
+                  <div><span>Dist:</span><span className="font-bold text-white block">{m.distance}</span></div>
+                  <div><span>Drone:</span><span className="font-bold text-white block">{m.drone}</span></div>
                 </div>
               </div>
             ))}
@@ -457,34 +454,34 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
         </div>
 
         {/* Import / Export / Templates footer actions */}
-        <div className="border-t border-slate-850 pt-3 mt-4 flex justify-between gap-2">
-          <button className="flex-1 bg-slate-950 border border-slate-800 hover:border-cyan-500/50 text-slate-300 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1.5">
+        <div className="border-t border-sky-400/40 pt-3 mt-4 flex justify-between gap-2">
+          <button className="flex-1 bg-sky-900/40 border border-sky-400/50 hover:bg-sky-500/40 text-white py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1.5 shadow">
             <Upload className="w-3.5 h-3.5" /> Import
           </button>
-          <button className="flex-1 bg-slate-950 border border-slate-800 hover:border-cyan-500/50 text-slate-300 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1.5">
+          <button className="flex-1 bg-sky-900/40 border border-sky-400/50 hover:bg-sky-500/40 text-white py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1.5 shadow">
             <Download className="w-3.5 h-3.5" /> Export
           </button>
         </div>
       </div>
 
       {/* ── CENTER PANEL: INTERACTIVE WORKSPACE MAP (6 cols) ── */}
-      <div className="lg:col-span-6 bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between h-full relative overflow-hidden">
+      <div className="lg:col-span-6 bg-gradient-to-br from-sky-600 to-sky-800 border border-sky-500 rounded-2xl p-4 flex flex-col justify-between h-full relative overflow-hidden shadow-xl">
         <header className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2 text-left">
-            <Compass className="w-4.5 h-4.5 text-cyan-400" />
+            <Compass className="w-4.5 h-4.5 text-white" />
             <div>
               <h3 className="font-bold text-xs text-white">GIS Flight Workspace</h3>
-              <p className="text-[10px] text-slate-500">Left-click the map to append active path waypoints.</p>
+              <p className="text-[10px] text-sky-100">Left-click the map to append active path waypoints.</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-850">
+          <div className="flex items-center gap-2 bg-sky-900/40 p-1 rounded-xl border border-sky-400/40">
             {DRAWING_MODES.map(mode => (
               <button
                 key={mode.id}
                 onClick={() => setDrawingMode(mode.id)}
                 className={`p-1.5 rounded-lg transition-all ${
-                  drawingMode === mode.id ? 'bg-cyan-500 text-slate-950' : 'text-slate-500 hover:text-slate-200'
+                  drawingMode === mode.id ? 'bg-white text-sky-850 shadow' : 'text-sky-200 hover:text-white'
                 }`}
                 title={mode.label}
               >
@@ -495,11 +492,11 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
         </header>
 
         {/* Leaflet Target Container */}
-        <div ref={mapContainerRef} className="flex-1 rounded-xl overflow-hidden border border-slate-850 z-10" />
+        <div ref={mapContainerRef} className="flex-1 rounded-xl overflow-hidden border border-sky-400/40 z-10" />
 
         {/* Simulation HUD Overlay (during simulation) */}
         {simulating && (
-          <div className="absolute top-20 left-8 right-8 z-20 bg-slate-950/95 border border-emerald-500/30 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-6 text-left">
+          <div className="absolute top-20 left-8 right-8 z-20 bg-sky-950/95 border border-sky-400 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-6 text-left">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400">
                 <Activity className="w-6 h-6 animate-pulse" />
@@ -511,10 +508,10 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
             </div>
 
             <div className="grid grid-cols-4 gap-6 text-xs flex-1 max-w-lg">
-              <div><span className="text-slate-500 block">Battery Level:</span><span className="font-bold text-emerald-400">{simBattery.toFixed(1)}%</span></div>
-              <div><span className="text-slate-500 block">Velocity:</span><span className="font-bold text-slate-200">{simSpeed} m/s</span></div>
-              <div><span className="text-slate-500 block">Altitude AGL:</span><span className="font-bold text-slate-200">{simAlt} m</span></div>
-              <div><span className="text-slate-500 block">Completion:</span><span className="font-bold text-slate-200">{simProgress}%</span></div>
+              <div><span className="text-sky-250 block">Battery Level:</span><span className="font-bold text-emerald-400">{simBattery.toFixed(1)}%</span></div>
+              <div><span className="text-sky-250 block">Velocity:</span><span className="font-bold text-white">{simSpeed} m/s</span></div>
+              <div><span className="text-sky-250 block">Altitude AGL:</span><span className="font-bold text-white">{simAlt} m</span></div>
+              <div><span className="text-sky-250 block">Completion:</span><span className="font-bold text-white">{simProgress}%</span></div>
             </div>
           </div>
         )}
@@ -524,7 +521,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
           <button 
             onClick={() => setSatelliteView(!satelliteView)}
             className={`p-2.5 rounded-xl border shadow-md flex items-center justify-center gap-1.5 transition-all text-[10px] font-bold ${
-              satelliteView ? 'bg-cyan-500 text-slate-950 border-cyan-600' : 'bg-slate-950 border-slate-800 text-slate-200'
+              satelliteView ? 'bg-white text-sky-850 border-white' : 'bg-sky-900 border-sky-500 text-white'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -533,16 +530,16 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
         </div>
 
         {/* Custom Timeline Events Log Track at Bottom (3 cols width) */}
-        <div className="border-t border-slate-850 pt-3 mt-4 h-24 overflow-y-auto text-left space-y-1">
+        <div className="border-t border-sky-400/40 pt-3 mt-4 h-24 overflow-y-auto text-left space-y-1">
           {simLogs.length === 0 ? (
-            <div className="text-center text-slate-500 text-[10px] py-4">
+            <div className="text-center text-sky-100 text-[10px] py-4">
               Pre-flight checks ready. Press "Simulate Mission" to initialize diagnostics.
             </div>
           ) : (
             simLogs.map((log, idx) => (
               <div key={idx} className="flex gap-3 text-[10px] font-mono leading-relaxed">
-                <span className="text-cyan-400 shrink-0">[{log.time}]</span>
-                <span className="text-slate-300">{log.event}</span>
+                <span className="text-white shrink-0">[{log.time}]</span>
+                <span className="text-sky-100">{log.event}</span>
               </div>
             ))
           )}
@@ -550,11 +547,11 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
       </div>
 
       {/* ── RIGHT PANEL: PROPERTIES, CONTROLS, AI PLANNER (3 cols) ── */}
-      <div className="lg:col-span-3 bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between h-full overflow-y-auto">
+      <div className="lg:col-span-3 bg-gradient-to-br from-sky-600 to-sky-800 border border-sky-500 rounded-2xl p-4 flex flex-col justify-between h-full overflow-y-auto shadow-xl">
         <div className="space-y-4 text-left">
           
           {/* Sub Tab Headers */}
-          <div className="flex border-b border-slate-800 pb-1 text-[10px] font-bold">
+          <div className="flex border-b border-sky-400/40 pb-1 text-[10px] font-bold">
             {[
               { id: 'overview', label: 'Properties' },
               { id: 'waypoint', label: `Waypoint (${waypoints.length})` },
@@ -564,7 +561,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                 key={tab.id}
                 onClick={() => setSelectedTab(tab.id)}
                 className={`flex-1 pb-2 border-b-2 transition-all ${
-                  selectedTab === tab.id ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-slate-500 hover:text-slate-300'
+                  selectedTab === tab.id ? 'border-white text-white' : 'border-transparent text-sky-200 hover:text-white'
                 }`}
               >
                 {tab.label}
@@ -576,50 +573,50 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
           {selectedTab === 'overview' && (
             <div className="space-y-4">
               <div className="space-y-2 text-xs">
-                <div className="flex justify-between border-b border-slate-850/60 py-1.5">
-                  <span className="text-slate-500">Selected Mission:</span>
-                  <span className="font-bold text-slate-200">{activeMission.name}</span>
+                <div className="flex justify-between border-b border-sky-450/40 py-1.5">
+                  <span className="text-sky-100 font-semibold">Selected Mission:</span>
+                  <span className="font-bold text-white text-right break-words max-w-[150px]">{activeMission.name}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-850/60 py-1.5">
-                  <span className="text-slate-500">Assigned Aircraft:</span>
-                  <span className="font-bold text-cyan-400">{activeMission.drone}</span>
+                <div className="flex justify-between border-b border-sky-450/40 py-1.5">
+                  <span className="text-sky-100 font-semibold">Assigned Aircraft:</span>
+                  <span className="font-bold text-white">{activeMission.drone}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-850/60 py-1.5">
-                  <span className="text-slate-500">Mission Type:</span>
-                  <span className="font-bold text-slate-200">{activeMission.type}</span>
+                <div className="flex justify-between border-b border-sky-450/40 py-1.5">
+                  <span className="text-sky-100 font-semibold">Mission Type:</span>
+                  <span className="font-bold text-white">{activeMission.type}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-850/60 py-1.5">
-                  <span className="text-slate-500">Estimated Duration:</span>
-                  <span className="font-bold text-slate-200">~{activeMission.time}</span>
+                <div className="flex justify-between border-b border-sky-450/40 py-1.5">
+                  <span className="text-sky-100 font-semibold">Estimated Duration:</span>
+                  <span className="font-bold text-white">~{activeMission.time}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-850/60 py-1.5">
-                  <span className="text-slate-500">Path Distance:</span>
-                  <span className="font-bold text-slate-200">{activeMission.distance}</span>
+                <div className="flex justify-between border-b border-sky-450/40 py-1.5">
+                  <span className="text-sky-100 font-semibold">Path Distance:</span>
+                  <span className="font-bold text-white">{activeMission.distance}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-850/60 py-1.5">
-                  <span className="text-slate-500">Battery Required:</span>
-                  <span className="font-bold text-emerald-400">{activeMission.battery}</span>
+                <div className="flex justify-between border-b border-sky-450/40 py-1.5">
+                  <span className="text-sky-100 font-semibold">Battery Required:</span>
+                  <span className="font-bold text-emerald-350">{activeMission.battery}</span>
                 </div>
               </div>
 
               {/* Geo Boundaries toggles */}
-              <div className="bg-slate-950/60 border border-slate-850 p-3 rounded-xl space-y-2.5">
-                <label className="flex items-center justify-between text-[10px] font-bold text-slate-400 cursor-pointer">
+              <div className="bg-sky-900/40 border border-sky-400/40 p-3 rounded-xl space-y-2.5">
+                <label className="flex items-center justify-between text-[10px] font-bold text-sky-100 cursor-pointer">
                   <span>GeoFence Boundary Overlay</span>
                   <input 
                     type="checkbox" 
                     checked={showGeofence} 
                     onChange={(e) => setShowGeofence(e.target.checked)}
-                    className="rounded text-cyan-500 focus:ring-cyan-450 w-3.5 h-3.5 bg-slate-900 border-slate-800"
+                    className="rounded text-sky-600 focus:ring-sky-450 w-3.5 h-3.5 bg-sky-900 border-sky-400"
                   />
                 </label>
-                <label className="flex items-center justify-between text-[10px] font-bold text-slate-400 cursor-pointer">
+                <label className="flex items-center justify-between text-[10px] font-bold text-sky-100 cursor-pointer">
                   <span>No-Fly Zone Alerts</span>
                   <input 
                     type="checkbox" 
                     checked={showNoFlyZones} 
                     onChange={(e) => setShowNoFlyZones(e.target.checked)}
-                    className="rounded text-cyan-500 focus:ring-cyan-450 w-3.5 h-3.5 bg-slate-900 border-slate-800"
+                    className="rounded text-sky-600 focus:ring-sky-450 w-3.5 h-3.5 bg-sky-900 border-sky-400"
                   />
                 </label>
               </div>
@@ -630,16 +627,16 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
           {selectedTab === 'waypoint' && (
             <div className="space-y-4">
               {waypoints.length === 0 ? (
-                <div className="text-center text-slate-500 text-xs py-8">
+                <div className="text-center text-sky-150 text-xs py-8">
                   No active waypoints. Click map coordinates to add nodes.
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center bg-slate-950/60 p-2.5 rounded-xl border border-slate-850">
-                    <span className="text-xs font-bold text-cyan-400">Editing Waypoint #{activeWaypointIndex + 1}</span>
+                  <div className="flex justify-between items-center bg-sky-900/40 p-2.5 rounded-xl border border-sky-400/40">
+                    <span className="text-xs font-bold text-white">Editing Waypoint #{activeWaypointIndex + 1}</span>
                     <button 
                       onClick={() => handleDeleteWaypoint(activeWaypointIndex)}
-                      className="text-rose-400 hover:text-rose-300"
+                      className="text-red-300 hover:text-red-200"
                       title="Delete Waypoint"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -649,27 +646,27 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                   <div className="space-y-2.5 text-xs">
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <span className="text-[10px] text-slate-500 font-bold block mb-1">Latitude</span>
+                        <span className="text-[10px] text-sky-100 font-bold block mb-1">Latitude</span>
                         <input 
                           type="number" 
                           value={waypoints[activeWaypointIndex]?.lat.toFixed(5)}
                           disabled
-                          className="bg-slate-950 border border-slate-850 rounded-lg p-2 text-xs w-full text-slate-400"
+                          className="bg-sky-900/40 border border-sky-450/40 rounded-lg p-2 text-xs w-full text-sky-200"
                         />
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-500 font-bold block mb-1">Longitude</span>
+                        <span className="text-[10px] text-sky-100 font-bold block mb-1">Longitude</span>
                         <input 
                           type="number" 
                           value={waypoints[activeWaypointIndex]?.lng.toFixed(5)}
                           disabled
-                          className="bg-slate-950 border border-slate-850 rounded-lg p-2 text-xs w-full text-slate-400"
+                          className="bg-sky-900/40 border border-sky-450/40 rounded-lg p-2 text-xs w-full text-sky-200"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <span className="text-[10px] text-slate-500 font-bold block mb-1">Altitude (AGL)</span>
+                      <span className="text-[10px] text-sky-100 font-bold block mb-1">Altitude (AGL)</span>
                       <div className="flex items-center gap-2">
                         <input 
                           type="range" 
@@ -684,14 +681,14 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                               return updated;
                             });
                           }}
-                          className="flex-1 accent-cyan-500"
+                          className="flex-1 accent-white"
                         />
-                        <span className="font-mono text-xs w-10 text-right">{waypoints[activeWaypointIndex]?.altitude}m</span>
+                        <span className="font-mono text-xs w-10 text-right text-white">{waypoints[activeWaypointIndex]?.altitude}m</span>
                       </div>
                     </div>
 
                     <div>
-                      <span className="text-[10px] text-slate-500 font-bold block mb-1">Airspeed</span>
+                      <span className="text-[10px] text-sky-100 font-bold block mb-1">Airspeed</span>
                       <div className="flex items-center gap-2">
                         <input 
                           type="range" 
@@ -706,15 +703,15 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                               return updated;
                             });
                           }}
-                          className="flex-1 accent-cyan-500"
+                          className="flex-1 accent-white"
                         />
-                        <span className="font-mono text-xs w-10 text-right">{waypoints[activeWaypointIndex]?.speed}m/s</span>
+                        <span className="font-mono text-xs w-10 text-right text-white">{waypoints[activeWaypointIndex]?.speed}m/s</span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <span className="text-[10px] text-slate-500 font-bold block mb-1">Action</span>
+                        <span className="text-[10px] text-sky-100 font-bold block mb-1">Action</span>
                         <select 
                           value={waypoints[activeWaypointIndex]?.action}
                           onChange={(e) => {
@@ -725,17 +722,17 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                               return updated;
                             });
                           }}
-                          className="bg-slate-950 border border-slate-850 rounded-lg p-2 text-[10px] w-full text-slate-200"
+                          className="bg-sky-900/60 border border-sky-400/50 rounded-lg p-2 text-[10px] w-full text-white focus:outline-none"
                         >
-                          <option value="None">None</option>
-                          <option value="Hover">Hover</option>
-                          <option value="Photo Interval">Photo Interval</option>
-                          <option value="Video Start">Video Start</option>
-                          <option value="Video Stop">Video Stop</option>
+                          <option value="None" className="text-sky-900">None</option>
+                          <option value="Hover" className="text-sky-900">Hover</option>
+                          <option value="Photo Interval" className="text-sky-900">Photo Interval</option>
+                          <option value="Video Start" className="text-sky-900">Video Start</option>
+                          <option value="Video Stop" className="text-sky-900">Video Stop</option>
                         </select>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-500 font-bold block mb-1">Heading</span>
+                        <span className="text-[10px] text-sky-100 font-bold block mb-1">Heading</span>
                         <input 
                           type="number" 
                           value={waypoints[activeWaypointIndex]?.heading}
@@ -747,7 +744,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                               return updated;
                             });
                           }}
-                          className="bg-slate-950 border border-slate-850 rounded-lg p-2 text-xs w-full text-slate-200"
+                          className="bg-sky-900/60 border border-sky-400/50 rounded-lg p-2 text-xs w-full text-white"
                         />
                       </div>
                     </div>
@@ -755,7 +752,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
 
                   <button 
                     onClick={() => handleDuplicateWaypoint(waypoints[activeWaypointIndex])}
-                    className="w-full bg-slate-950 border border-slate-800 hover:border-cyan-500/50 py-2 rounded-xl text-xs font-bold transition-all text-center mt-2"
+                    className="w-full bg-sky-900/40 border border-sky-400/60 hover:bg-sky-500/40 py-2 rounded-xl text-xs font-bold transition-all text-center mt-2 text-white"
                   >
                     Duplicate Waypoint
                   </button>
@@ -767,11 +764,11 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
           {/* TAB CONTENT: AI PLANNER */}
           {selectedTab === 'ai_planner' && (
             <div className="space-y-4">
-              <div className="bg-slate-950 border border-slate-850 rounded-xl p-3.5 flex items-start gap-2.5">
-                <Bot className="w-5 h-5 text-cyan-400 shrink-0" />
+              <div className="bg-sky-900/40 border border-sky-400/40 rounded-xl p-3.5 flex items-start gap-2.5">
+                <Bot className="w-5 h-5 text-white shrink-0 animate-bounce" />
                 <div className="text-xs space-y-1">
-                  <span className="font-bold text-cyan-400 block">Zeex-AI Planning Assistant</span>
-                  <p className="text-slate-400 leading-relaxed">
+                  <span className="font-bold text-white block">Zeex-AI Planning Assistant</span>
+                  <p className="text-sky-100 leading-relaxed">
                     "I have parsed the topography and weather. Estimated success score: 98%. Battery requirement verified."
                   </p>
                 </div>
@@ -780,22 +777,22 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               <div className="space-y-2">
                 <button 
                   onClick={() => triggerAIPlanner('survey')}
-                  className="w-full bg-slate-950 border border-slate-800 hover:border-cyan-500/50 p-2.5 rounded-xl text-xs text-left transition-all flex items-center gap-2"
+                  className="w-full bg-sky-900/40 border border-sky-400/50 hover:bg-sky-500/40 p-2.5 rounded-xl text-xs text-left transition-all flex items-center gap-2"
                 >
-                  <Sparkles className="w-4 h-4 text-cyan-400" />
+                  <Sparkles className="w-4 h-4 text-white" />
                   <div>
-                    <span className="font-bold text-slate-200 block text-[11px]">Generate Autonomous Survey</span>
-                    <span className="text-[9px] text-slate-500 block">Creates optimized scan mapping grids.</span>
+                    <span className="font-bold text-white block text-[11px]">Generate Autonomous Survey</span>
+                    <span className="text-[9px] text-sky-100 block">Creates optimized scan mapping grids.</span>
                   </div>
                 </button>
                 <button 
                   onClick={() => triggerAIPlanner('optimize')}
-                  className="w-full bg-slate-950 border border-slate-800 hover:border-cyan-500/50 p-2.5 rounded-xl text-xs text-left transition-all flex items-center gap-2"
+                  className="w-full bg-sky-900/40 border border-sky-400/50 hover:bg-sky-500/40 p-2.5 rounded-xl text-xs text-left transition-all flex items-center gap-2"
                 >
-                  <Cpu className="w-4 h-4 text-purple-400" />
+                  <Cpu className="w-4 h-4 text-white" />
                   <div>
-                    <span className="font-bold text-slate-200 block text-[11px]">Optimize Battery Efficiency</span>
-                    <span className="text-[9px] text-slate-500 block">Adjusts waypoints to minimize drag.</span>
+                    <span className="font-bold text-white block text-[11px]">Optimize Battery Efficiency</span>
+                    <span className="text-[9px] text-sky-100 block">Adjusts waypoints to minimize drag.</span>
                   </div>
                 </button>
               </div>
@@ -805,14 +802,14 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
         </div>
 
         {/* Mission controls footer */}
-        <div className="border-t border-slate-850 pt-4 mt-6 space-y-2">
+        <div className="border-t border-sky-400/40 pt-4 mt-6 space-y-2">
           {!simulating ? (
             <button 
               onClick={() => {
                 setSimStep(0);
                 setSimulating(true);
               }}
-              className="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors shadow-md shadow-cyan-500/10"
+              className="w-full bg-white hover:bg-sky-100 text-sky-900 font-extrabold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors shadow-md"
             >
               <Play className="w-3.5 h-3.5 fill-current" />
               Simulate Mission Path
@@ -820,7 +817,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
           ) : (
             <button 
               onClick={() => setSimulating(false)}
-              className="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full bg-red-500 hover:bg-red-650 text-white font-extrabold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors shadow-md"
             >
               <Pause className="w-3.5 h-3.5 fill-current" />
               Abort Simulation
@@ -839,7 +836,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
               });
               alert(`Uploading flight plans to UAV drone ${activeMission.drone}... Initializing motors.`);
             }}
-            className="w-full bg-slate-950 border border-slate-800 hover:border-cyan-500/50 text-slate-200 hover:text-white py-2.5 rounded-xl text-xs font-bold transition-all text-center block"
+            className="w-full bg-sky-900/40 border border-sky-400/60 hover:bg-sky-500/40 text-white py-2.5 rounded-xl text-xs font-bold transition-all text-center block"
           >
             Upload & Launch Mission
           </button>
