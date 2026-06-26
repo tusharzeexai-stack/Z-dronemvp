@@ -34,7 +34,9 @@ from app.config import get_settings
 from app.database import init_db, AsyncSessionLocal
 from app.models import User, Drone, Flight, Alert
 from app.routers import auth, drones, flights, alerts, streams
+from app.routers import autopilot
 from app.ws_manager import telemetry_manager, alert_manager
+from app.services.mavlink_bridge import get_bridge
 
 settings = get_settings()
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -122,8 +124,21 @@ async def lifespan(app: FastAPI):
     print("🚀 Starting Z-DRONE Backend...")
     await init_db()
     await seed_database()
+
+    # Wire MAVLink bridge telemetry → /ws/telemetry broadcaster
+    async def _on_mavlink_telemetry(state: dict):
+        """Called by MAVLinkBridge on every telemetry tick, forwarded to GCS clients."""
+        await telemetry_manager.broadcast({
+            "type": "mavlink_telemetry",
+            "data": state,
+        })
+    get_bridge().add_telemetry_callback(_on_mavlink_telemetry)
+    print("✅ MAVLink telemetry bridge wired to WebSocket broadcaster.")
     print(f"✅ Backend running. Docs: http://localhost:{settings.port}/docs")
     yield
+    # Cleanup on shutdown
+    get_bridge().remove_telemetry_callback(_on_mavlink_telemetry)
+    await get_bridge().disconnect()
     print("🛑 Shutting down Z-DRONE Backend.")
 
 
@@ -152,6 +167,7 @@ app.include_router(drones.router)
 app.include_router(flights.router)
 app.include_router(alerts.router)
 app.include_router(streams.router)
+app.include_router(autopilot.router)   # ArduPilot / MAVLink GCS control
 
 
 # ── WebSocket: Live Telemetry ─────────────────────────────────

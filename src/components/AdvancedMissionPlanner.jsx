@@ -329,12 +329,130 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
   const droneMarkerRef = useRef(null);
   const tileLayerRef = useRef(null);
 
+  // Live WebSocket to backend telemetry (/ws/telemetry)
+  const liveWsRef = useRef(null);
+
   // API Service abstraction
   const apiService = useMemo(() => new ArduPilotService(getApiUrl), [getApiUrl]);
+
 
   const activeMission = useMemo(() => {
     return MOCK_MISSIONS.find(m => m.id === selectedMissionId) || MOCK_MISSIONS[0];
   }, [selectedMissionId]);
+
+  // --- LIVE BACKEND WEBSOCKET TELEMETRY ---
+  // Opens ws/telemetry when connected, feeds real data into all GCS indicators
+  useEffect(() => {
+    if (connectionStatus !== 'CONNECTED') {
+      if (liveWsRef.current) {
+        liveWsRef.current.close();
+        liveWsRef.current = null;
+      }
+      return;
+    }
+
+    const base = (getApiUrl ? getApiUrl() : 'http://localhost:8000')
+      .replace('https://', 'wss://')
+      .replace('http://', 'ws://');
+    const wsUrl = `${base}/ws/telemetry`;
+
+    try {
+      const ws = new WebSocket(wsUrl);
+      liveWsRef.current = ws;
+
+      ws.onopen = () => {
+        logEvent('SUCCESS', `Live MAVLink telemetry stream connected: ${wsUrl}`);
+        const ping = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) ws.send('ping');
+        }, 30000);
+        ws._pingInterval = ping;
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'mavlink_telemetry' && msg.data) {
+            const d = msg.data;
+            // Update live telemetry state from backend bridge
+            setTelemetry(prev => ({
+              ...prev,
+              lat: d.lat ?? prev.lat,
+              lng: d.lng ?? prev.lng,
+              altitude: d.altitude ?? prev.altitude,
+              relativeAlt: d.relative_alt ?? prev.relativeAlt,
+              groundSpeed: d.ground_speed ?? prev.groundSpeed,
+              airSpeed: d.air_speed ?? prev.airSpeed,
+              verticalSpeed: d.vertical_speed ?? prev.verticalSpeed,
+              heading: d.heading ?? prev.heading,
+              yaw: d.yaw ?? prev.yaw,
+              pitch: d.pitch ?? prev.pitch,
+              roll: d.roll ?? prev.roll,
+              batteryPercent: d.battery_percent ?? prev.batteryPercent,
+              flightTimeSeconds: d.flight_time_seconds ?? prev.flightTimeSeconds,
+              distanceTravelled: d.distance_travelled ?? prev.distanceTravelled,
+            }));
+            // Sync GCS status indicators from live bridge
+            if (d.flight_mode) setFlightMode(d.flight_mode);
+            if (typeof d.armed === 'boolean') setArmedStatus(d.armed ? 'ARMED' : 'DISARMED');
+            if (d.satellites) setSatellitesCount(d.satellites);
+            if (d.gps_type) setGpsLockType(d.gps_type);
+            if (d.hdop) setHdop(d.hdop);
+            if (d.firmware) setFirmware(d.firmware);
+            if (d.battery_voltage) setBatteryVoltage(d.battery_voltage);
+
+            // Animate drone marker on map with live position
+            if (d.lat && d.lng) {
+              const map = mapInstanceRef.current;
+              if (map) {
+                if (droneMarkerRef.current) {
+                  droneMarkerRef.current.setLatLng([d.lat, d.lng]);
+                } else {
+                  const L = window.L || (mapInstanceRef.current && mapInstanceRef.current._container && window.L);
+                  if (window.L) {
+                    const droneHtmlIcon = window.L.divIcon({
+                      html: `
+                        <div class="relative flex items-center justify-center w-10 h-10">
+                            <div class="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
+                            <div class="w-8 h-8 bg-sky-900 border-2 border-white rounded-full flex items-center justify-center shadow-2xl text-white z-20">
+                                <span class="material-symbols-outlined text-[16px]">flight_takeoff</span>
+                            </div>
+                        </div>
+                      `,
+                      className: 'custom-sim-drone-icon',
+                      iconSize: [40, 40],
+                      iconAnchor: [20, 20]
+                    });
+                    droneMarkerRef.current = window.L.marker([d.lat, d.lng], { icon: droneHtmlIcon }).addTo(map);
+                  }
+                }
+              }
+            }
+          }
+        } catch (err) {
+          // non-JSON or pong — ignore
+        }
+      };
+
+      ws.onerror = () => {
+        logEvent('WARNING', 'Live WebSocket telemetry error — using local simulation.');
+      };
+
+      ws.onclose = () => {
+        if (ws._pingInterval) clearInterval(ws._pingInterval);
+        logEvent('INFO', 'Telemetry WebSocket closed.');
+      };
+    } catch (e) {
+      logEvent('WARNING', `Could not open WS to backend (${wsUrl}). Using local simulation.`);
+    }
+
+    return () => {
+      if (liveWsRef.current) {
+        liveWsRef.current.close();
+        liveWsRef.current = null;
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectionStatus]);
 
   useEffect(() => {
     const selected = MOCK_MISSIONS.find(m => m.id === selectedMissionId);

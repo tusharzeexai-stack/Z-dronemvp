@@ -16,3 +16,5 @@ botocore==1.34.100
 httpx==0.27.0
 websockets==12.0
 aiohttp==3.9.5
+# ArduPilot / MAVLink integration (optional — falls back to mock simulation if unavailable)
+mavsdk==1.4.1
