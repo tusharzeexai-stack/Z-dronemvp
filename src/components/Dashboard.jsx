@@ -10,6 +10,7 @@ import MissionPlannerCard from './MissionPlannerCard';
 import UpcomingMissionsWidget from './UpcomingMissionsWidget';
 import WeatherWidget from './WeatherWidget';
 import LiveStreamViewer from './LiveStreamViewer';
+import AnalyticsCenter from './AnalyticsCenter';
 
 // DTLA flight path interpolation
 const FLIGHT_PATH = [
@@ -1583,23 +1584,7 @@ function Dashboard({ onLogout }) {
 
           {/* TAB 3: ZONE ANALYTICS */}
           {activeTab === 'analytics' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6">
-                  <h4 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-4 text-left">Fleet Node Utilization</h4>
-                  <div className="h-64 flex items-center justify-center">
-                    <UtilizationChart drones={appState.drones} theme={appState.settings.theme} />
-                  </div>
-                </div>
-                
-                <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6">
-                  <h4 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-4 text-left">Weekly Battery Health Cycle</h4>
-                  <div className="h-64">
-                    <BatteryHealthChart theme={appState.settings.theme} />
-                  </div>
-                </div>
-              </div>
-            </div>
+            <AnalyticsCenter appState={appState} actions={actions} getApiUrl={getApiUrl} />
           )}
 
           {/* TAB 4: AI MODELS HUB */}
