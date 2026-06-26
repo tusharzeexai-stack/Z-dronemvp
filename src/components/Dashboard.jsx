@@ -206,7 +206,8 @@ function Dashboard({ onLogout }) {
   const [videoSources, setVideoSources] = useState([
     { value: 'cam1.mp4', label: '📹 Sector Delta — cam1.mp4 (Recorded/Annotated)' },
     { value: 'cam2.mp4', label: '📹 Sector Charlie — cam2.mp4 (New Footage)' },
-    { value: 'v3_x_1test.mp4', label: '📹 Sector Bravo — v3_x_1test.mp4 (Test Footage)' }
+    { value: 'v3_x_1test.mp4', label: '📹 Sector Bravo — v3_x_1test.mp4 (Test Footage)' },
+    { value: 'v3_AvatarG0008_test.mp4', label: '📹 Sector Alpha — v3_AvatarG0008_test.mp4 (Field Footage)' }
   ]);
 
   // Chart ref for AI Inference tab
@@ -1348,7 +1349,7 @@ function Dashboard({ onLogout }) {
                       <video
                         ref={videoRef}
                         key={videoPath}
-                        src={videoPath === 'v3_x_1test.mp4' ? 'https://zdrone-storage.s3.ap-south-1.amazonaws.com/v3_x_1test.mp4' : `/${videoPath}`}
+                        src={videoPath === 'v3_x_1test.mp4' || videoPath === 'v3_AvatarG0008_test.mp4' ? `https://zdrone-storage.s3.ap-south-1.amazonaws.com/${videoPath}` : `/${videoPath}`}
                         crossOrigin="anonymous"
                         className="w-full h-full object-contain cursor-pointer"
                         autoPlay
