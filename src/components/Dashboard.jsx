@@ -198,6 +198,11 @@ function Dashboard({ onLogout }) {
 
   const lastSecondRef = useRef(-1);
 
+  // User Management form states
+  const [newUserUsername, setNewUserUsername] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserRole, setNewUserRole] = useState('Drone Operator');
+
   // CCTV Configuration settings state
   const [frameSkip, setFrameSkip] = useState(1);
   const [confThreshold, setConfThreshold] = useState(0.4);
@@ -745,6 +750,19 @@ function Dashboard({ onLogout }) {
     setActiveTab('live_mon');
   };
 
+  const handleCreateUser = (e) => {
+    e.preventDefault();
+    if (!newUserUsername || !newUserPassword) return;
+    actions.addUser({
+      username: newUserUsername,
+      password: newUserPassword,
+      role: newUserRole
+    });
+    setNewUserUsername('');
+    setNewUserPassword('');
+    setNewUserRole('Drone Operator');
+  };
+
   const handleDispatchFlight = (e) => {
     e.preventDefault();
     if (!newFlightDrone) return;
@@ -801,7 +819,8 @@ function Dashboard({ onLogout }) {
     { id: 'live_mon', label: 'Live Monitoring', icon: 'sensors' },
     { id: 'analytics', label: 'Analytics', icon: 'analytics' },
     { id: 'safety', label: 'Alerts', icon: 'notifications', badge: activeAlerts.length },
-    { id: 'maintenance', label: 'Maintenance', icon: 'build' }
+    { id: 'maintenance', label: 'Maintenance', icon: 'build' },
+    { id: 'user_management', label: 'User Management', icon: 'manage_accounts' }
   ];
 
   // Active Drone Telemetry variables
@@ -880,17 +899,6 @@ function Dashboard({ onLogout }) {
 
           {/* Users & Logout at the bottom */}
           <div className="p-3 border-t border-sky-100 dark:border-slate-800 flex flex-col gap-1.5">
-            <button
-              onClick={() => setActiveTab('employee')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${activeTab === 'employee'
-                  ? 'bg-sky-500 text-slate-800 font-bold border-l-4 border-sky-600 shadow-sm shadow-sky-100 dark:shadow-none'
-                  : 'hover:bg-sky-50/80 dark:hover:bg-slate-800 hover:text-sky-600 dark:hover:text-sky-300 text-sky-800 dark:text-slate-300'
-                }`}
-            >
-              <span className="material-symbols-outlined text-lg">group</span>
-              <span className="text-xs font-semibold">Users</span>
-            </button>
-
             <button
               onClick={onLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 dark:text-red-400 hover:text-red-700 font-semibold"
@@ -1827,35 +1835,105 @@ function Dashboard({ onLogout }) {
               </div>
             )}
 
-            {/* TAB 7: EMPLOYEE MONITOR */}
-            {activeTab === 'employee' && (
+            {/* TAB 7: USER MANAGEMENT */}
+            {activeTab === 'user_management' && (
               <div className="space-y-6">
-                <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6 text-left">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-800">Employee Operators Grid</h3>
-                  <p className="text-xs text-slate-500 mt-1">Duty state of certified drone pilots and tech handlers.</p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-left">
+                  {/* Left Column: Create User Form */}
+                  <div className="col-span-1 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6 h-fit shadow-sm">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-800 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-sky-500">person_add</span>
+                      Create User Account
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">Register new drone flight controllers and system administrators.</p>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-                    {appState.users.map((user, idx) => (
-                      <div key={idx} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-xs">
-                        <div className="relative mb-4">
-                          <img
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBijJZddpbaAwXrMcKxkk4y5a8XK3TNesNW3AycY6mN2XMSPWhi-KOtgNnDLiV7jx7kJRTX8NreKaVxQeo6CFq-GUV4ewnI2U6Vb1rZ90U3HS2UdQ6RwMHkl8qlfM-aPxnBmFCzL8Jb2Coc0PUZEMekUHPT5KHuRTpRndBVSNGdP9wR1kvr-E2RJst4YVbbbMsSyh05z_ZwxxiBlxAZOdc_RkAy5OP3aU9gZF1k_fjuiztN5z-x2YDpQGWd0_coz4R7mUbce-uDKmA"
-                            className="w-16 h-16 rounded-full border-2 border-sky-500/20 object-cover"
-                            alt="Operator avatar"
-                          />
-                          <span className={`w-3.5 h-3.5 rounded-full absolute bottom-0 right-0 border-2 border-white dark:border-[#1E293B] ${user.status === 'Active' ? 'bg-emerald-500' :
-                              user.status === 'Away' ? 'bg-amber-500' : 'bg-slate-400'
-                            }`}></span>
-                        </div>
-                        <h4 className="font-bold text-slate-800 dark:text-slate-800 text-sm">{user.name}</h4>
-                        <p className="text-xs text-slate-400 mt-1">{user.role}</p>
-
-                        <div className="mt-6 pt-3 border-t border-slate-100 dark:border-slate-800 w-full flex justify-between items-center text-xs">
-                          <span className="text-slate-400 font-semibold">Flights Overseen:</span>
-                          <span className="font-bold text-slate-700 dark:text-slate-300">{user.flights}</span>
-                        </div>
+                    <form onSubmit={handleCreateUser} className="space-y-4 mt-6">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block">Username / Full Name</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. John Doe"
+                          value={newUserUsername}
+                          onChange={(e) => setNewUserUsername(e.target.value)}
+                          className="w-full text-xs rounded-lg border border-slate-200 bg-white dark:bg-slate-900 text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none py-2 px-3"
+                        />
                       </div>
-                    ))}
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block">Password</label>
+                        <input
+                          type="password"
+                          required
+                          placeholder="••••••••"
+                          value={newUserPassword}
+                          onChange={(e) => setNewUserPassword(e.target.value)}
+                          className="w-full text-xs rounded-lg border border-slate-200 bg-white dark:bg-slate-900 text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none py-2 px-3"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block">System Role</label>
+                        <select
+                          value={newUserRole}
+                          onChange={(e) => setNewUserRole(e.target.value)}
+                          className="w-full text-xs rounded-lg border border-slate-200 bg-white dark:bg-slate-900 text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none py-2 px-3"
+                        >
+                          <option value="Fleet Manager">Fleet Manager</option>
+                          <option value="Flight Supervisor">Flight Supervisor</option>
+                          <option value="Drone Operator">Drone Operator</option>
+                          <option value="Hardware Technician">Hardware Technician</option>
+                        </select>
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
+                      >
+                        <span className="material-symbols-outlined text-sm">person_add</span>
+                        <span>Register User</span>
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Right Column: User list */}
+                  <div className="col-span-2 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-800 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-sky-500">group</span>
+                      Registered Operators & Users
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">Manage active pilots, tech handlers, and administrators of the system.</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                      {appState.users.map((user, idx) => (
+                        <div key={idx} className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl flex items-center justify-between shadow-xs">
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              <span className="material-symbols-outlined text-2xl text-sky-600 bg-sky-100 dark:bg-sky-950 p-2 rounded-full">person</span>
+                              <span className={`w-3 h-3 rounded-full absolute bottom-0 right-0 border-2 border-white dark:border-slate-900 ${
+                                user.status === 'Active' ? 'bg-emerald-500' :
+                                user.status === 'Away' ? 'bg-amber-500' : 'bg-slate-400'
+                              }`}></span>
+                            </div>
+                            <div className="text-left">
+                              <h4 className="font-bold text-slate-850 dark:text-slate-200 text-xs">{user.name}</h4>
+                              <p className="text-[10px] text-slate-400">{user.role}</p>
+                              <p className="text-[10px] text-sky-500 font-semibold">{user.email}</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="text-[9px] font-bold text-slate-400">Flights: {user.flights}</span>
+                            <button
+                              onClick={() => actions.deleteUser(user.name)}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 p-1.5 rounded-lg transition-all"
+                              title="Delete User"
+                            >
+                              <span className="material-symbols-outlined text-xs">delete</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

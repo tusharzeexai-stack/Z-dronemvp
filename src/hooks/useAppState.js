@@ -53,7 +53,9 @@ export function useAppState() {
       },
       addMission: (m) => state.addMission(m),
       updateMission: (id, updatedFields) => state.updateMission(id, updatedFields),
-      updateMissionWaypoints: (id, waypointsList) => state.updateMissionWaypoints(id, waypointsList)
+      updateMissionWaypoints: (id, waypointsList) => state.updateMissionWaypoints(id, waypointsList),
+      addUser: (u) => state.addUser(u),
+      deleteUser: (name) => state.deleteUser(name)
     }
   };
 }

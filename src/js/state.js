@@ -434,6 +434,23 @@ export class AppState {
         this.saveState();
     }
 
+    addUser(user) {
+        this.users.push({
+            name: user.username,
+            role: user.role || "Drone Operator",
+            email: `${user.username.toLowerCase().replace(/\s+/g, '')}@z-drone.com`,
+            status: "Active",
+            flights: 0,
+            password: user.password
+        });
+        this.saveState();
+    }
+
+    deleteUser(name) {
+        this.users = this.users.filter(u => u.name !== name);
+        this.saveState();
+    }
+
     updateDroneTelemetry(id, telemetry) {
         const drone = this.drones.find(d => d.id === id);
         if (drone) {
