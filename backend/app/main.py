@@ -60,6 +60,11 @@ async def seed_database():
 
         # Seed sample drone fleet
         drones_data = [
+            {"id": "drone01", "model": "Jetson Edge Cam", "type": "Surveillance",
+             "status": "Online", "battery": 100, "signal": "Excellent", "altitude": 0,
+             "speed": 0, "lat": 28.8308, "lng": 76.9311,
+             "health": {"propulsion": 100, "optical": 100, "chassis": 100},
+             "payload": "Onboard Video Feed", "destination": "Active Site", "operator": "Admin"},
             {"id": "ZD-109", "model": "Falcon Cargo X1", "type": "Cargo Delivery",
              "status": "Online", "battery": 88, "signal": "Excellent", "altitude": 45,
              "speed": 12, "lat": 34.0522, "lng": -118.2437,
