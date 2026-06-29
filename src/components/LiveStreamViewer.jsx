@@ -17,127 +17,112 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 const AUTO_RECONNECT_DELAY_MS = 5_000;
 
-// Helper to filter and reduce SDP size for embedded WebRTC device limits (KVS C++ SDK)
-function filterSDP(sdpString) {
+/**
+ * mungeSDPForKVSCSDK — Transforms the browser SDP offer to be compatible with
+ * the Amazon KVS WebRTC C SDK running on Jetson hardware.
+ *
+ * Two problems the KVS C SDK has with raw Chrome SDP:
+ *
+ * 1. STATUS_SDP_MISSING_ICE_VALUES (0x40100001)
+ *    Chrome puts a=ice-ufrag / a=ice-pwd only at the MEDIA level (inside each
+ *    m= section). The KVS C SDK parses for those attributes at SESSION level
+ *    (before any m= line). Fix: copy the ICE credentials to the session block.
+ *
+ * 2. Audio direction mismatch
+ *    Jetson adds an audio transceiver as SENDRECV. Chrome offered audio as
+ *    recvonly — the C SDK rejects the direction conflict. Fix: strip the audio
+ *    m-line from the offer entirely (drone is video-only anyway).
+ */
+function mungeSDPForKVSCSDK(sdpString) {
   const lines = sdpString.split('\r\n');
-  const newLines = [];
-  
-  let targetVideoPayload = null;
-  let targetAudioPayload = null;
-  
+
+  // ── Step 1: Extract session-level ICE credentials from media sections ─────
+  // Chrome only emits a=ice-ufrag / a=ice-pwd at media level.
+  // KVS C SDK (STATUS_SDP_MISSING_ICE_VALUES = 0x40100001) requires them at
+  // SESSION level (before the first m= line). We copy them up.
+  let iceUfrag = '';
+  let icePwd   = '';
+  let inMedia  = false;
+  for (const line of lines) {
+    if (line.startsWith('m=')) inMedia = true;
+    if (inMedia && !iceUfrag && line.startsWith('a=ice-ufrag:')) iceUfrag = line;
+    if (inMedia && !icePwd   && line.startsWith('a=ice-pwd:'))   icePwd   = line;
+    if (iceUfrag && icePwd) break;
+  }
+
+  // ── Step 2: Find the correct H264 payload type (profile 42E01F, mode 1) ───
+  let targetVideoPayload = '109'; // Chrome default, but verify
   let inVideoSection = false;
-  let inAudioSection = false;
-  
-  // First pass: scan for the exact H264 profile and Opus payload types
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (line.startsWith('m=video ')) {
-      inVideoSection = true;
-      inAudioSection = false;
-    } else if (line.startsWith('m=audio ')) {
-      inAudioSection = true;
-      inVideoSection = false;
-    }
-    
+    if (line.startsWith('m=video')) { inVideoSection = true; continue; }
+    if (line.startsWith('m=') && !line.startsWith('m=video')) { inVideoSection = false; continue; }
     if (inVideoSection && line.startsWith('a=rtpmap:')) {
-      const match = line.match(/^a=rtpmap:(\d+)\s+(\w+)\//);
-      if (match) {
-        const payloadType = match[1];
-        const codec = match[2].toUpperCase();
-        if (codec === 'H264') {
-          // Check subsequent lines to find fmtp for 42e01f and packetization-mode=1
-          for (let j = i + 1; j < Math.min(i + 15, lines.length); j++) {
-            const fmtpLine = lines[j];
-            if (fmtpLine.startsWith(`a=fmtp:${payloadType} `)) {
-              if (fmtpLine.toLowerCase().includes('profile-level-id=42e01f') && fmtpLine.includes('packetization-mode=1')) {
-                targetVideoPayload = payloadType;
-                break;
-              }
-            }
+      const m = line.match(/^a=rtpmap:(\d+)\s+H264\//i);
+      if (m) {
+        const pt = m[1];
+        // look ahead for the matching fmtp line
+        for (let j = i + 1; j < Math.min(i + 20, lines.length); j++) {
+          if (lines[j].startsWith(`a=fmtp:${pt} `) &&
+              lines[j].toLowerCase().includes('profile-level-id=42e01f') &&
+              lines[j].includes('packetization-mode=1')) {
+            targetVideoPayload = pt;
+            break;
           }
         }
       }
     }
-    
-    if (inAudioSection && line.startsWith('a=rtpmap:')) {
-      const match = line.match(/^a=rtpmap:(\d+)\s+(\w+)\//);
-      if (match) {
-        const payloadType = match[1];
-        const codec = match[2].toUpperCase();
-        if (codec === 'OPUS') {
-          targetAudioPayload = payloadType;
-        }
-      }
-    }
   }
-  
-  // Fallbacks if not detected
-  if (!targetVideoPayload) targetVideoPayload = '109';
-  if (!targetAudioPayload) targetAudioPayload = '111';
-  
-  console.log('[KVS SDP Debug] Selected target H264 payload:', targetVideoPayload);
-  console.log('[KVS SDP Debug] Selected target Opus payload:', targetAudioPayload);
-  
-  inVideoSection = false;
-  inAudioSection = false;
-  
+  console.log('[KVS SDP] Using H264 payload type:', targetVideoPayload);
+
+  // ── Step 3: Build the munged SDP ──────────────────────────────────────────
+  const out = [];
+  let sessionDone   = false; // have we injected session-level ICE yet?
+  let inAudio       = false; // are we inside the audio m-section?
+  let skipAudio     = false; // drop audio m-line entirely
+
   for (const line of lines) {
-    // Skip all extmap lines to reduce SDP payload size
-    if (line.startsWith('a=extmap:')) {
-      continue;
+    // Inject session-level ICE just before the first m= line
+    if (!sessionDone && line.startsWith('m=')) {
+      if (iceUfrag) out.push(iceUfrag);
+      if (icePwd)   out.push(icePwd);
+      sessionDone = true;
     }
-    
-    if (line.startsWith('m=video ')) {
-      inVideoSection = true;
-      inAudioSection = false;
+
+    // ── Audio: strip entire m=audio section ──────────────────────────────────
+    // Jetson hardware C SDK adds audio transceiver as SENDRECV; browser offers
+    // recvonly — KVS C SDK rejects the direction mismatch. Drone has no mic anyway.
+    if (line.startsWith('m=audio')) { inAudio = true; skipAudio = true; continue; }
+    if (line.startsWith('m=') && !line.startsWith('m=audio')) { inAudio = false; skipAudio = false; }
+    if (skipAudio) continue;
+
+    // ── Video m-line: lock to single payload type ─────────────────────────────
+    if (line.startsWith('m=video')) {
       const parts = line.split(' ');
-      const protocol = parts[2];
-      newLines.push(`m=video 9 ${protocol} ${targetVideoPayload}`);
-      continue;
-    } else if (line.startsWith('m=audio ')) {
-      inAudioSection = true;
-      inVideoSection = false;
-      const parts = line.split(' ');
-      const protocol = parts[2];
-      newLines.push(`m=audio 9 ${protocol} ${targetAudioPayload}`);
+      out.push(`m=video 9 ${parts[2]} ${targetVideoPayload}`);
       continue;
     }
-    
-    if (inVideoSection) {
-      if (line.startsWith('a=rtpmap:') || line.startsWith('a=rtcp-fb:') || line.startsWith('a=fmtp:')) {
-        const parts = line.split(':');
-        if (parts.length > 1) {
-          const payloadMatch = parts[1].match(/^(\d+)/);
-          if (payloadMatch) {
-            const payloadType = payloadMatch[1];
-            if (payloadType !== targetVideoPayload) {
-              continue;
-            }
-          }
-        }
-      }
+
+    // ── Inside video: keep only lines belonging to our payload type ───────────
+    if (!inAudio && (line.startsWith('a=rtpmap:') || line.startsWith('a=rtcp-fb:') || line.startsWith('a=fmtp:'))) {
+      const m = line.match(/^a=(?:rtpmap|rtcp-fb|fmtp):(\d+)/);
+      if (m && m[1] !== targetVideoPayload) continue; // drop other codecs
     }
-    
-    if (inAudioSection) {
-      if (line.startsWith('a=rtpmap:') || line.startsWith('a=rtcp-fb:') || line.startsWith('a=fmtp:')) {
-        const parts = line.split(':');
-        if (parts.length > 1) {
-          const payloadMatch = parts[1].match(/^(\d+)/);
-          if (payloadMatch) {
-            const payloadType = payloadMatch[1];
-            if (payloadType !== targetAudioPayload) {
-              continue;
-            }
-          }
-        }
-      }
+
+    // ── Strip extmap to keep SDP small ───────────────────────────────────────
+    if (line.startsWith('a=extmap:')) continue;
+
+    // ── Fix BUNDLE group: only video mid=0 ───────────────────────────────────
+    if (line.startsWith('a=group:BUNDLE')) {
+      out.push('a=group:BUNDLE 0');
+      continue;
     }
-    
-    newLines.push(line);
+
+    out.push(line);
   }
-  
-  const sdpResult = newLines.join('\r\n');
-  return sdpResult.replace(/profile-level-id=42e01f/gi, 'profile-level-id=42E01F');
+
+  // ── Step 4: Uppercase H264 profile-level-id (KVS C SDK is case-sensitive) ─
+  return out.join('\r\n').replace(/profile-level-id=42e01f/gi, 'profile-level-id=42E01F');
 }
 
 export default function LiveStreamViewer({ droneId, droneName, getApiUrl, className = '' }) {
@@ -275,55 +260,30 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
 
       signalingClient.on('open', async () => {
         if (!mountedRef.current) return;
-        console.log('[KVS] Signaling open — creating VIDEO-ONLY offer for Jetson master...');
+        console.log('[KVS] Signaling open — building KVS-C-SDK-compatible offer...');
 
-        // ── VIDEO ONLY — no audio transceiver ──────────────────────────────────
-        // The Jetson KVS C SDK adds audio as SENDRECV, but browser offers audio
-        // as recvonly. The KVS C SDK (error 0x40100001) rejects this direction
-        // mismatch and kills the entire peer connection. Removing audio from the
-        // offer means only the video m-line is negotiated, which perfectly matches
-        // the Jetson's SENDONLY video transceiver.
+        // Video-only transceiver. No audio — the Jetson adds audio SENDRECV which
+        // conflicts with browser recvonly; KVS C SDK rejects it (0x40100001).
         pc.addTransceiver('video', { direction: 'recvonly' });
 
-        console.log('[KVS] Generating SDP Offer (video only)...');
         const rawOffer = await pc.createOffer();
 
-        // ── Force H264 profile-level-id uppercase to match KVS C SDK expectation ─
-        const mungedSdp = (rawOffer.sdp || '')
-          .replace(/profile-level-id=42e01f/gi, 'profile-level-id=42E01F');
-        const offer = new RTCSessionDescription({ type: rawOffer.type, sdp: mungedSdp });
+        // ── Full KVS C SDK compatibility munge in one pass ──────────────────────
+        // 1. Injects session-level a=ice-ufrag / a=ice-pwd (fixes STATUS_SDP_MISSING_ICE_VALUES)
+        // 2. Strips audio m-section entirely (avoids SENDRECV vs recvonly mismatch)
+        // 3. Locks to H264 pt=109, uppercase profile-level-id=42E01F
+        // 4. Fixes BUNDLE group to contain only mid 0
+        const finalSdp = mungeSDPForKVSCSDK(rawOffer.sdp || '');
+        const offer = new RTCSessionDescription({ type: rawOffer.type, sdp: finalSdp });
 
         await pc.setLocalDescription(offer);
-        console.log('[KVS] Local description set. SDP lines:', offer.sdp.split('\r\n').length);
 
-        // --- SDP Offer Diagnostics ---
-        const sdp = offer.sdp || '';
-        const lines = sdp.split('\r\n');
-        console.log('[KVS SDP] Offer length:', sdp.length, 'lines:', lines.length);
-        console.log('[KVS SDP Debug] --- FIRST 30 LINES ---');
-        console.log(lines.slice(0, 30).join('\n'));
-        console.log('[KVS SDP Debug] --- LAST 30 LINES ---');
-        console.log(lines.slice(-30).join('\n'));
-        
-        console.log('[KVS SDP Debug] --- CRITICAL KEYS CHECKLIST ---');
-        console.log('  - m=video present:', sdp.includes('m=video'));
-        console.log('  - H264 codec listed:', sdp.toLowerCase().includes('h264'));
-        console.log('  - a=ice-ufrag present:', sdp.includes('a=ice-ufrag'));
-        console.log('  - a=ice-pwd present:', sdp.includes('a=ice-pwd'));
-        console.log('  - a=fingerprint present:', sdp.includes('a=fingerprint'));
-        console.log('  - a=setup:actpass present:', sdp.includes('a=setup:actpass'));
-        
-        const h264Specs = lines.filter(l => l.toLowerCase().includes('h264'));
-        console.log('[KVS SDP Debug] H.264 specific lines:', h264Specs);
+        console.log('[KVS SDP] Final munged offer — length:', finalSdp.length, '| lines:', finalSdp.split('\r\n').length);
+        console.log('[KVS SDP] Audio stripped:', !finalSdp.includes('m=audio'));
+        console.log('[KVS SDP] H264 42E01F present:', finalSdp.includes('profile-level-id=42E01F'));
+        console.log('[KVS SDP] Sending to Jetson master...');
 
-        const filteredSdpString = filterSDP(sdp);
-        console.log('[KVS SDP Debug] Filtered SDP Length:', filteredSdpString.length, 'Total Lines:', filteredSdpString.split('\r\n').length);
-        console.log('[KVS SDP Debug] Filtered SDP:\n', filteredSdpString);
-        console.log('[KVS Debug] Sending filtered SDP offer to KVS signaling channel...');
-        signalingClient.sendSdpOffer(new RTCSessionDescription({
-          type: 'offer',
-          sdp: filteredSdpString
-        }));
+        signalingClient.sendSdpOffer(offer);
       });
 
       signalingClient.on('sdpAnswer', async (answer) => {
