@@ -275,39 +275,31 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
 
       signalingClient.on('open', async () => {
         if (!mountedRef.current) return;
-        console.log('[KVS Debug] Signaling connection opened successfully! Adding video & audio transceivers...');
-        
-        pc.addTransceiver('video', { direction: 'recvonly' });
-        pc.addTransceiver('audio', { direction: 'recvonly' });
-        
-        // --- Codec & Transceiver Diagnostics ---
-        try {
-          console.log('[KVS Debug] RTCPeerConnection Transceivers configured:');
-          pc.getTransceivers().forEach((t, idx) => {
-            const kind = t.receiver?.track?.kind || t.sender?.track?.kind || 'unknown';
-            console.log(`  [Transceiver #${idx}] Kind: ${kind}, Direction: ${t.direction}`);
-            
-            // Log supported video/audio codecs if capability API is available
-            if (RTCRtpReceiver && RTCRtpReceiver.getCapabilities) {
-              const caps = RTCRtpReceiver.getCapabilities(kind);
-              if (caps && caps.codecs) {
-                console.log(`    Available Codecs for ${kind}:`, caps.codecs.map(c => `${c.mimeType} (${c.sdpFmtpLine || 'no parameters'})`));
-              }
-            }
-          });
-        } catch (e) {
-          console.warn('[KVS Debug] Failed to read transceiver capabilities:', e);
-        }
+        console.log('[KVS] Signaling open — creating VIDEO-ONLY offer for Jetson master...');
 
-        console.log('[KVS Debug] Generating SDP Offer...');
-        const offer = await pc.createOffer();
-        console.log('[KVS Debug] Created local SDP Offer. Setting local description...');
+        // ── VIDEO ONLY — no audio transceiver ──────────────────────────────────
+        // The Jetson KVS C SDK adds audio as SENDRECV, but browser offers audio
+        // as recvonly. The KVS C SDK (error 0x40100001) rejects this direction
+        // mismatch and kills the entire peer connection. Removing audio from the
+        // offer means only the video m-line is negotiated, which perfectly matches
+        // the Jetson's SENDONLY video transceiver.
+        pc.addTransceiver('video', { direction: 'recvonly' });
+
+        console.log('[KVS] Generating SDP Offer (video only)...');
+        const rawOffer = await pc.createOffer();
+
+        // ── Force H264 profile-level-id uppercase to match KVS C SDK expectation ─
+        const mungedSdp = (rawOffer.sdp || '')
+          .replace(/profile-level-id=42e01f/gi, 'profile-level-id=42E01F');
+        const offer = new RTCSessionDescription({ type: rawOffer.type, sdp: mungedSdp });
+
         await pc.setLocalDescription(offer);
-        
+        console.log('[KVS] Local description set. SDP lines:', offer.sdp.split('\r\n').length);
+
         // --- SDP Offer Diagnostics ---
         const sdp = offer.sdp || '';
         const lines = sdp.split('\r\n');
-        console.log('[KVS SDP Debug] Offer SDP Length:', sdp.length, 'Total Lines:', lines.length);
+        console.log('[KVS SDP] Offer length:', sdp.length, 'lines:', lines.length);
         console.log('[KVS SDP Debug] --- FIRST 30 LINES ---');
         console.log(lines.slice(0, 30).join('\n'));
         console.log('[KVS SDP Debug] --- LAST 30 LINES ---');
