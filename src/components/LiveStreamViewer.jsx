@@ -70,6 +70,7 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
     try {
       // ── 2. Fetch channel info + viewer credentials from backend ──
       const apiBase = getApiUrl ? getApiUrl('') : '';
+      console.log('[KVS Debug] Fetching channel info & viewer credentials...');
       const [streamInfo, creds] = await Promise.all([
         fetch(`${apiBase}/streams/${droneId}`, {
           headers: {
@@ -90,10 +91,16 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
       ]);
 
       if (!mountedRef.current) return;
+      console.log('[KVS Debug] Credentials & channel info fetched successfully!', {
+        channelArn: streamInfo.channel_arn,
+        endpointUrl: streamInfo.endpoint_url,
+        region: creds.region
+      });
 
       const { SignalingClient, Role } = window.KVSWebRTC;
 
       // ── 3. Create RTCPeerConnection with ICE servers from AWS ──
+      console.log('[KVS Debug] Initializing RTCPeerConnection with ICE servers:', streamInfo.ice_servers);
       const pc = new RTCPeerConnection({
         iceServers: streamInfo.ice_servers || [],
         iceTransportPolicy: 'all',
@@ -103,6 +110,7 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
       // When the drone's video track arrives, attach it
       pc.ontrack = (event) => {
         if (!mountedRef.current) return;
+        console.log('[KVS Debug] Received media track from Master (Jetson)!', event.streams);
         if (videoRef.current && event.streams[0]) {
           videoRef.current.srcObject = event.streams[0];
           setStatus('live');
@@ -113,7 +121,7 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
       pc.oniceconnectionstatechange = () => {
         if (!mountedRef.current) return;
         const state = pc.iceConnectionState;
-        console.log('[KVS] ICE state:', state);
+        console.log('[KVS Debug] PeerConnection ICE state changed to:', state);
         if (state === 'disconnected' || state === 'failed' || state === 'closed') {
           setStatus('reconnecting');
           cleanup();
@@ -123,6 +131,7 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
 
       // ── 4. Create KVS Signaling Client as VIEWER ──────────────
       const region = creds.region || streamInfo.region || 'ap-south-1';
+      console.log('[KVS Debug] Creating KVS SignalingClient for VIEWER role...');
       const signalingClient = new SignalingClient({
         channelARN: streamInfo.channel_arn,
         channelEndpoint: streamInfo.endpoint_url,
@@ -140,32 +149,42 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
 
       signalingClient.on('open', async () => {
         if (!mountedRef.current) return;
-        console.log('[KVS] Signaling open — creating offer…');
+        console.log('[KVS Debug] Signaling connection opened successfully! Generating SDP offer...');
         pc.addTransceiver('video', { direction: 'recvonly' });
         pc.addTransceiver('audio', { direction: 'recvonly' });
+        
         const offer = await pc.createOffer();
+        console.log('[KVS Debug] Created local SDP Offer. Setting local description...');
         await pc.setLocalDescription(offer);
+        
+        console.log('[KVS Debug] Sending SDP offer to KVS signaling channel...');
         signalingClient.sendSdpOffer(pc.localDescription);
       });
 
       signalingClient.on('sdpAnswer', async (answer) => {
         if (!mountedRef.current) return;
-        console.log('[KVS] SDP answer received.');
+        console.log('[KVS Debug] Received SDP Answer from Master (Jetson). Setting remote description...');
         await pc.setRemoteDescription(answer);
       });
 
       signalingClient.on('iceCandidate', (candidate) => {
         if (!mountedRef.current) return;
-        pc.addIceCandidate(candidate).catch(console.warn);
+        console.log('[KVS Debug] Received ICE Candidate from Master (Jetson). Adding candidate...');
+        pc.addIceCandidate(candidate).catch(err => {
+          console.warn('[KVS Debug] Error adding remote ICE candidate:', err);
+        });
       });
 
       pc.onicecandidate = ({ candidate }) => {
-        if (candidate) signalingClient.sendIceCandidate(candidate);
+        if (candidate) {
+          console.log('[KVS Debug] Generated local ICE candidate. Sending to Master...');
+          signalingClient.sendIceCandidate(candidate);
+        }
       };
 
       signalingClient.on('error', (err) => {
         if (!mountedRef.current) return;
-        console.error('[KVS] Signaling error:', err);
+        console.error('[KVS Debug] Signaling error:', err);
         setStatus('error');
         setErrorMsg('Signaling error. Retrying in 5s…');
         cleanup();
@@ -174,10 +193,11 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
 
       signalingClient.on('close', () => {
         if (!mountedRef.current) return;
-        console.warn('[KVS] Signaling closed. Will auto-reconnect.');
+        console.warn('[KVS Debug] Signaling connection closed. Scheduling auto-reconnect...');
         if (status !== 'reconnecting') scheduleReconnect();
       });
 
+      console.log('[KVS Debug] Activating signalingClient.open() link...');
       signalingClient.open();
     } catch (err) {
       if (!mountedRef.current) return;
