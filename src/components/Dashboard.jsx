@@ -100,6 +100,7 @@ function Dashboard({ onLogout }) {
   };
 
   const { isConnected: wsConnected, latest, history: detHistory, stats: detStats } = useDetections(getApiUrl(''));
+  const isJetsonActive = wsConnected && latest && (Date.now() - latest.receivedAt < 10000);
 
   // Detect if the browser will block the request due to HTTPS mixed content.
   // Browsers CANNOT upgrade HTTP→HTTPS when the target host is a raw IP address.
@@ -1951,16 +1952,22 @@ function Dashboard({ onLogout }) {
                 {/* ── LIVE JETSON AI FEED PANEL ── */}
                 <div className={`rounded-2xl border-2 p-5 transition-all duration-500 ${
                   wsConnected
-                    ? latest && latest.person_count > 0
-                      ? 'bg-red-50 dark:bg-red-950/20 border-red-300 dark:border-red-900/60 shadow-lg shadow-red-100 dark:shadow-none'
-                      : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-900/60'
+                    ? isJetsonActive
+                      ? latest && latest.person_count > 0
+                        ? 'bg-red-50 dark:bg-red-950/20 border-red-300 dark:border-red-900/60 shadow-lg shadow-red-100 dark:shadow-none'
+                        : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-900/60'
+                      : 'bg-amber-50 dark:bg-amber-950/10 border-amber-300 dark:border-amber-900/40'
                     : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800'
                 }`}>
                   {/* Header */}
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-xl flex items-center justify-center ${
-                        wsConnected ? 'bg-emerald-500 text-white' : 'bg-slate-400 text-white'
+                        wsConnected 
+                          ? isJetsonActive 
+                            ? 'bg-emerald-500 text-white' 
+                            : 'bg-amber-500 text-white animate-pulse' 
+                          : 'bg-slate-400 text-white'
                       }`}>
                         <span className="material-symbols-outlined text-xl">
                           {wsConnected ? 'wifi' : 'wifi_off'}
@@ -1969,22 +1976,32 @@ function Dashboard({ onLogout }) {
                       <div className="text-left">
                         <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-sm">Jetson Live AI Feed</h3>
                         <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                          {wsConnected ? 'Real-time detections via WebSocket' : 'Connecting to /ws/detections…'}
+                          {wsConnected 
+                            ? isJetsonActive 
+                              ? 'Real-time detections active' 
+                              : 'Connected to backend — waiting for edge device feed' 
+                            : 'Connecting to /ws/detections…'}
                         </p>
                       </div>
                     </div>
                     <div className={`flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wide ${
                       wsConnected
-                        ? latest && latest.person_count > 0
-                          ? 'bg-red-500 text-white'
-                          : 'bg-emerald-500 text-white'
+                        ? isJetsonActive
+                          ? latest && latest.person_count > 0
+                            ? 'bg-red-500 text-white'
+                            : 'bg-emerald-500 text-white'
+                          : 'bg-amber-500 text-white'
                         : 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                     }`}>
                       <span className={`w-1.5 h-1.5 rounded-full bg-white/80 ${
                         wsConnected ? 'animate-pulse' : ''
                       }`} />
                       {wsConnected
-                        ? latest && latest.person_count > 0 ? '⚠️ Alert — Person Detected' : 'Connected'
+                        ? isJetsonActive
+                          ? latest && latest.person_count > 0 
+                            ? '⚠️ Alert — Person Detected' 
+                            : 'Live'
+                          : 'Standby'
                         : 'Offline'
                       }
                     </div>
