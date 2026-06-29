@@ -120,7 +120,7 @@ function mungeSDPForKVSCSDK(sdpString) {
         const paramsStr = line.substring(spaceIdx + 1);
         const params = paramsStr.split(';').map(p => p.trim());
         
-        let profileLevelId = '42E01F';
+        let profileLevelId = '42e01f';
         let levelAsymmetryAllowed = '1';
         let packetizationMode = '1';
         
@@ -130,7 +130,7 @@ function mungeSDPForKVSCSDK(sdpString) {
             const key = parts[0].trim().toLowerCase();
             const val = parts[1].trim();
             if (key === 'profile-level-id') {
-              profileLevelId = val.toUpperCase();
+              profileLevelId = val.toLowerCase();
             } else if (key === 'level-asymmetry-allowed') {
               levelAsymmetryAllowed = val;
             } else if (key === 'packetization-mode') {
