@@ -53,7 +53,7 @@ function Dashboard({ onLogout }) {
   const { state: appState, actions } = useAppState();
 
   const [customBackendUrl, setCustomBackendUrl] = useState(() => {
-    return localStorage.getItem('z_drone_backend_url') || import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+    return localStorage.getItem('z_drone_backend_url') || import.meta.env.VITE_API_URL || 'http://13.200.250.121:8000';
   });
   const [backendSettingsOpen, setBackendSettingsOpen] = useState(false);
 
