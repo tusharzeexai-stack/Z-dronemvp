@@ -22,12 +22,15 @@ function filterSDP(sdpString) {
   const lines = sdpString.split('\r\n');
   const newLines = [];
   
-  let videoPayloadsToKeep = [];
-  let audioPayloadsToKeep = [];
+  let targetVideoPayload = null;
+  let targetAudioPayload = null;
+  
   let inVideoSection = false;
   let inAudioSection = false;
   
-  for (const line of lines) {
+  // First pass: scan for the exact H264 profile and Opus payload types
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     if (line.startsWith('m=video ')) {
       inVideoSection = true;
       inAudioSection = false;
@@ -42,21 +45,38 @@ function filterSDP(sdpString) {
         const payloadType = match[1];
         const codec = match[2].toUpperCase();
         if (codec === 'H264') {
-          videoPayloadsToKeep.push(payloadType);
+          // Check subsequent lines to find fmtp for 42e01f and packetization-mode=1
+          for (let j = i + 1; j < Math.min(i + 15, lines.length); j++) {
+            const fmtpLine = lines[j];
+            if (fmtpLine.startsWith(`a=fmtp:${payloadType} `)) {
+              if (fmtpLine.includes('profile-level-id=42e01f') && fmtpLine.includes('packetization-mode=1')) {
+                targetVideoPayload = payloadType;
+                break;
+              }
+            }
+          }
         }
       }
     }
+    
     if (inAudioSection && line.startsWith('a=rtpmap:')) {
       const match = line.match(/^a=rtpmap:(\d+)\s+(\w+)\//);
       if (match) {
         const payloadType = match[1];
         const codec = match[2].toUpperCase();
-        if (codec === 'OPUS' || codec === 'PCMU' || codec === 'PCMA') {
-          audioPayloadsToKeep.push(payloadType);
+        if (codec === 'OPUS') {
+          targetAudioPayload = payloadType;
         }
       }
     }
   }
+  
+  // Fallbacks if not detected
+  if (!targetVideoPayload) targetVideoPayload = '109';
+  if (!targetAudioPayload) targetAudioPayload = '111';
+  
+  console.log('[KVS SDP Debug] Selected target H264 payload:', targetVideoPayload);
+  console.log('[KVS SDP Debug] Selected target Opus payload:', targetAudioPayload);
   
   inVideoSection = false;
   inAudioSection = false;
@@ -72,14 +92,14 @@ function filterSDP(sdpString) {
       inAudioSection = false;
       const parts = line.split(' ');
       const protocol = parts[2];
-      newLines.push(`m=video 9 ${protocol} ${videoPayloadsToKeep.join(' ')}`);
+      newLines.push(`m=video 9 ${protocol} ${targetVideoPayload}`);
       continue;
     } else if (line.startsWith('m=audio ')) {
       inAudioSection = true;
       inVideoSection = false;
       const parts = line.split(' ');
       const protocol = parts[2];
-      newLines.push(`m=audio 9 ${protocol} ${audioPayloadsToKeep.join(' ')}`);
+      newLines.push(`m=audio 9 ${protocol} ${targetAudioPayload}`);
       continue;
     }
     
@@ -88,7 +108,7 @@ function filterSDP(sdpString) {
         const match = line.match(/^a=\w+:(\d+)/);
         if (match) {
           const payloadType = match[1];
-          if (!videoPayloadsToKeep.includes(payloadType)) {
+          if (payloadType !== targetVideoPayload) {
             continue;
           }
         }
@@ -100,7 +120,7 @@ function filterSDP(sdpString) {
         const match = line.match(/^a=\w+:(\d+)/);
         if (match) {
           const payloadType = match[1];
-          if (!audioPayloadsToKeep.includes(payloadType)) {
+          if (payloadType !== targetAudioPayload) {
             continue;
           }
         }
@@ -248,9 +268,10 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
 
       signalingClient.on('open', async () => {
         if (!mountedRef.current) return;
-        console.log('[KVS Debug] Signaling connection opened successfully! Adding video transceiver...');
+        console.log('[KVS Debug] Signaling connection opened successfully! Adding video & audio transceivers...');
         
         pc.addTransceiver('video', { direction: 'recvonly' });
+        pc.addTransceiver('audio', { direction: 'recvonly' });
         
         // --- Codec & Transceiver Diagnostics ---
         try {
