@@ -32,7 +32,7 @@ const MOCK_DETECTIONS = [
 
 export default function AnalyticsCenter({ appState, actions, getApiUrl }) {
   // ── Live Detection WebSocket ───────────────────────────────────
-  const detectionApiBase = getApiUrl ? getApiUrl('') : 'https://b7688cf4a6231c.lhr.life';
+  const detectionApiBase = getApiUrl ? getApiUrl('') : 'https://33b26c65a275f8.lhr.life';
   const { isConnected: wsConnected, latest, history: detHistory, stats: detStats } = useDetections(detectionApiBase);
 
   // ── STATE MANAGEMENT ───────────────────────────────────────

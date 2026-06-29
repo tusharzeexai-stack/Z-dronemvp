@@ -53,7 +53,7 @@ function Dashboard({ onLogout }) {
   const { state: appState, actions } = useAppState();
 
   const [customBackendUrl, setCustomBackendUrl] = useState(() => {
-    return localStorage.getItem('z_drone_backend_url') || import.meta.env.VITE_API_URL || 'https://b7688cf4a6231c.lhr.life';
+    return localStorage.getItem('z_drone_backend_url') || import.meta.env.VITE_API_URL || 'https://33b26c65a275f8.lhr.life';
   });
   const [backendSettingsOpen, setBackendSettingsOpen] = useState(false);
 
@@ -1902,7 +1902,7 @@ function Dashboard({ onLogout }) {
                     <div className="col-span-12 lg:col-span-4 flex flex-col gap-4">
                       <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block text-left">Select Drone Camera Feed</span>
                       <div className="space-y-3 overflow-y-auto max-h-[400px] pr-1">
-                        {appState.drones.map((drone) => {
+                        {appState.drones.filter(d => d.id === 'drone01').map((drone) => {
                           const isSelected = selectedLiveDroneId === drone.id;
                           return (
                             <div

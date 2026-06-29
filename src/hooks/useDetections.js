@@ -16,12 +16,12 @@ const MAX_HISTORY = 100;
 
 function buildWsUrl(apiBaseUrl) {
   try {
-    const base = (apiBaseUrl || 'https://b7688cf4a6231c.lhr.life').replace(/\/$/, '');
+    const base = (apiBaseUrl || 'https://33b26c65a275f8.lhr.life').replace(/\/$/, '');
     const url = new URL(base);
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${wsProtocol}//${url.host}/ws/detections`;
   } catch {
-    return 'wss://b7688cf4a6231c.lhr.life/ws/detections';
+    return 'wss://33b26c65a275f8.lhr.life/ws/detections';
   }
 }
 

@@ -132,4 +132,14 @@ async def stats_feed(request: Request):
             yield f"data: {json.dumps(data)}\n\n"
             await asyncio.sleep(0.33)
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET",
+            "Access-Control-Allow-Headers": "*",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive"
+        }
+    )
