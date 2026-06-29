@@ -152,14 +152,55 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
 
       signalingClient.on('open', async () => {
         if (!mountedRef.current) return;
-        console.log('[KVS Debug] Signaling connection opened successfully! Generating SDP offer...');
+        console.log('[KVS Debug] Signaling connection opened successfully! Adding transceivers...');
+        
         pc.addTransceiver('video', { direction: 'recvonly' });
         pc.addTransceiver('audio', { direction: 'recvonly' });
         
+        // --- Codec & Transceiver Diagnostics ---
+        try {
+          console.log('[KVS Debug] RTCPeerConnection Transceivers configured:');
+          pc.getTransceivers().forEach((t, idx) => {
+            const kind = t.receiver?.track?.kind || t.sender?.track?.kind || 'unknown';
+            console.log(`  [Transceiver #${idx}] Kind: ${kind}, Direction: ${t.direction}`);
+            
+            // Log supported video/audio codecs if capability API is available
+            if (RTCRtpReceiver && RTCRtpReceiver.getCapabilities) {
+              const caps = RTCRtpReceiver.getCapabilities(kind);
+              if (caps && caps.codecs) {
+                console.log(`    Available Codecs for ${kind}:`, caps.codecs.map(c => `${c.mimeType} (${c.sdpFmtpLine || 'no parameters'})`));
+              }
+            }
+          });
+        } catch (e) {
+          console.warn('[KVS Debug] Failed to read transceiver capabilities:', e);
+        }
+
+        console.log('[KVS Debug] Generating SDP Offer...');
         const offer = await pc.createOffer();
         console.log('[KVS Debug] Created local SDP Offer. Setting local description...');
         await pc.setLocalDescription(offer);
         
+        // --- SDP Offer Diagnostics ---
+        const sdp = offer.sdp || '';
+        const lines = sdp.split('\r\n');
+        console.log('[KVS SDP Debug] Offer SDP Length:', sdp.length, 'Total Lines:', lines.length);
+        console.log('[KVS SDP Debug] --- FIRST 30 LINES ---');
+        console.log(lines.slice(0, 30).join('\n'));
+        console.log('[KVS SDP Debug] --- LAST 30 LINES ---');
+        console.log(lines.slice(-30).join('\n'));
+        
+        console.log('[KVS SDP Debug] --- CRITICAL KEYS CHECKLIST ---');
+        console.log('  - m=video present:', sdp.includes('m=video'));
+        console.log('  - H264 codec listed:', sdp.toLowerCase().includes('h264'));
+        console.log('  - a=ice-ufrag present:', sdp.includes('a=ice-ufrag'));
+        console.log('  - a=ice-pwd present:', sdp.includes('a=ice-pwd'));
+        console.log('  - a=fingerprint present:', sdp.includes('a=fingerprint'));
+        console.log('  - a=setup:actpass present:', sdp.includes('a=setup:actpass'));
+        
+        const h264Specs = lines.filter(l => l.toLowerCase().includes('h264'));
+        console.log('[KVS SDP Debug] H.264 specific lines:', h264Specs);
+
         console.log('[KVS Debug] Sending SDP offer to KVS signaling channel...');
         signalingClient.sendSdpOffer(pc.localDescription);
       });
