@@ -45,3 +45,4 @@ class ConnectionManager:
 # Singleton managers — imported by routers and websocket handlers
 telemetry_manager = ConnectionManager("telemetry")
 alert_manager = ConnectionManager("alerts")
+detection_manager = ConnectionManager("detections")

@@ -182,8 +182,23 @@ class BoundingBox(BaseModel):
 
 class DetectionPayload(BaseModel):
     device_id: str
-    timestamp: int
-    fps: int
+    frame_id: int = 0           # incrementing frame counter from Jetson
+    timestamp: int              # unix ms
+    fps: float
     person_count: int
     detections: List[BoundingBox]
+
+
+class DetectionEventResponse(BaseModel):
+    id: int
+    device_id: str
+    frame_id: int
+    timestamp: int
+    fps: float
+    person_count: int
+    detections: List[Dict[str, Any]]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 

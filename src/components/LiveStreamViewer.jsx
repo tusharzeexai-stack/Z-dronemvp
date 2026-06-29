@@ -1,88 +1,146 @@
 /**
- * Live Stream Viewer Component
- * Connects to AWS Kinesis Video Streams via WebRTC to display
- * a live drone camera feed directly in the browser.
+ * Live Stream Viewer — AWS Kinesis Video Streams WebRTC (VIEWER role)
  *
- * Uses the Amazon KVS WebRTC JavaScript SDK (loaded via CDN).
- * Add to index.html: <script src="https://unpkg.com/amazon-kinesis-video-streams-webrtc/dist/kvs-webrtc.min.js"></script>
+ * Connects to the KVS signaling channel for a given drone and displays
+ * the live H.264 stream in a <video> element.
+ *
+ * Requires the Amazon KVS WebRTC JS SDK loaded via CDN in index.html:
+ *   <script src="https://unpkg.com/amazon-kinesis-video-streams-webrtc/dist/kvs-webrtc.min.js"></script>
+ *
+ * Props:
+ *   droneId      — drone DB id (e.g. "drone01")
+ *   droneName    — display label
+ *   getApiUrl    — function(path) → full URL (from Dashboard context)
+ *   className    — extra Tailwind classes
  */
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { streamsApi } from '../services/api';
 
-export default function LiveStreamViewer({ droneId, droneName, className = '' }) {
+const AUTO_RECONNECT_DELAY_MS = 5_000;
+
+export default function LiveStreamViewer({ droneId, droneName, getApiUrl, className = '' }) {
   const videoRef = useRef(null);
   const signalingClientRef = useRef(null);
   const peerConnectionRef = useRef(null);
-  const [status, setStatus] = useState('idle'); // idle | connecting | live | error | no_stream
+  const reconnectTimerRef = useRef(null);
+  const mountedRef = useRef(true);
+
+  // status: 'idle' | 'connecting' | 'live' | 'error' | 'reconnecting'
+  const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [reconnectCountdown, setReconnectCountdown] = useState(0);
 
   const cleanup = useCallback(() => {
-    try {
-      signalingClientRef.current?.close();
-      peerConnectionRef.current?.close();
-    } catch { /* ignore */ }
+    try { signalingClientRef.current?.close(); } catch { /* ignore */ }
+    try { peerConnectionRef.current?.close(); } catch { /* ignore */ }
     signalingClientRef.current = null;
     peerConnectionRef.current = null;
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
+    if (videoRef.current) videoRef.current.srcObject = null;
   }, []);
 
+  const scheduleReconnect = useCallback(() => {
+    if (!mountedRef.current) return;
+    setStatus('reconnecting');
+    let remaining = Math.ceil(AUTO_RECONNECT_DELAY_MS / 1000);
+    setReconnectCountdown(remaining);
+    const tick = setInterval(() => {
+      remaining -= 1;
+      setReconnectCountdown(remaining);
+      if (remaining <= 0) clearInterval(tick);
+    }, 1000);
+    reconnectTimerRef.current = setTimeout(() => {
+      clearInterval(tick);
+      if (mountedRef.current) startStream();
+    }, AUTO_RECONNECT_DELAY_MS);
+  }, []); // startStream added via closure below
+
   const startStream = useCallback(async () => {
-    if (!droneId) return;
+    if (!droneId || !mountedRef.current) return;
     cleanup();
+    clearTimeout(reconnectTimerRef.current);
     setStatus('connecting');
     setErrorMsg('');
 
-    // Check if KVS WebRTC SDK is loaded
+    // ── 1. Check SDK is loaded ──────────────────────────────
     if (typeof window.KVSWebRTC === 'undefined') {
       setStatus('error');
-      setErrorMsg('KVS WebRTC SDK not loaded. Add the SDK script to index.html.');
+      setErrorMsg('KVS WebRTC SDK not loaded. Add <script src="https://unpkg.com/amazon-kinesis-video-streams-webrtc/dist/kvs-webrtc.min.js"> to index.html');
       return;
     }
 
     try {
-      // 1. Get signaling channel info from our backend
-      const streamInfo = await streamsApi.getStreamInfo(droneId);
+      // ── 2. Fetch channel info + viewer credentials from backend ──
+      const apiBase = getApiUrl ? getApiUrl('') : '';
+      const [streamInfo, creds] = await Promise.all([
+        fetch(`${apiBase}/streams/${droneId}`, {
+          headers: {
+            Authorization: `Bearer ${(() => {
+              try { return JSON.parse(localStorage.getItem('z_drone_user') || '{}').token || ''; }
+              catch { return ''; }
+            })()}`
+          }
+        }).then(r => { if (!r.ok) throw new Error(`streams API: ${r.status}`); return r.json(); }),
+        fetch(`${apiBase}/streams/${droneId}/viewer-credentials`, {
+          headers: {
+            Authorization: `Bearer ${(() => {
+              try { return JSON.parse(localStorage.getItem('z_drone_user') || '{}').token || ''; }
+              catch { return ''; }
+            })()}`
+          }
+        }).then(r => { if (!r.ok) throw new Error(`credentials API: ${r.status}`); return r.json(); }),
+      ]);
 
-      const {
-        KinesisVideoSignalingChannels,
-        SignalingClient,
-        Role,
-        QueryParamsBuilder,
-      } = window.KVSWebRTC;
+      if (!mountedRef.current) return;
 
-      // 2. Create WebRTC peer connection
+      const { SignalingClient, Role } = window.KVSWebRTC;
+
+      // ── 3. Create RTCPeerConnection with ICE servers from AWS ──
       const pc = new RTCPeerConnection({
         iceServers: streamInfo.ice_servers || [],
+        iceTransportPolicy: 'all',
       });
       peerConnectionRef.current = pc;
 
-      // When drone's video track arrives, attach to video element
+      // When the drone's video track arrives, attach it
       pc.ontrack = (event) => {
+        if (!mountedRef.current) return;
         if (videoRef.current && event.streams[0]) {
           videoRef.current.srcObject = event.streams[0];
           setStatus('live');
         }
       };
 
-      // 3. Create KVS Signaling Client (VIEWER role)
+      // ICE connection state monitoring
+      pc.oniceconnectionstatechange = () => {
+        if (!mountedRef.current) return;
+        const state = pc.iceConnectionState;
+        console.log('[KVS] ICE state:', state);
+        if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+          setStatus('reconnecting');
+          cleanup();
+          scheduleReconnect();
+        }
+      };
+
+      // ── 4. Create KVS Signaling Client as VIEWER ──────────────
+      const region = creds.region || streamInfo.region || 'ap-south-1';
       const signalingClient = new SignalingClient({
         channelARN: streamInfo.channel_arn,
         channelEndpoint: streamInfo.endpoint_url,
         role: Role.VIEWER,
-        region: streamInfo.region || import.meta.env.VITE_AWS_REGION || 'ap-south-1',
+        region,
         credentials: {
-          // These are fetched from your backend, not exposed directly
-          // The backend already did the signaling handshake
+          accessKeyId: creds.accessKeyId,
+          secretAccessKey: creds.secretAccessKey,
+          ...(creds.sessionToken ? { sessionToken: creds.sessionToken } : {}),
         },
-        clientId: `viewer-${Date.now()}`,
-        requestSigner: null,
+        clientId: `zdash-viewer-${Date.now()}`,
+        systemClockOffset: 0,
       });
       signalingClientRef.current = signalingClient;
 
       signalingClient.on('open', async () => {
-        console.log('[KVS] Signaling channel open. Creating offer...');
+        if (!mountedRef.current) return;
+        console.log('[KVS] Signaling open — creating offer…');
         pc.addTransceiver('video', { direction: 'recvonly' });
         pc.addTransceiver('audio', { direction: 'recvonly' });
         const offer = await pc.createOffer();
@@ -91,42 +149,89 @@ export default function LiveStreamViewer({ droneId, droneName, className = '' })
       });
 
       signalingClient.on('sdpAnswer', async (answer) => {
+        if (!mountedRef.current) return;
         console.log('[KVS] SDP answer received.');
         await pc.setRemoteDescription(answer);
       });
 
       signalingClient.on('iceCandidate', (candidate) => {
-        pc.addIceCandidate(candidate);
+        if (!mountedRef.current) return;
+        pc.addIceCandidate(candidate).catch(console.warn);
       });
 
       pc.onicecandidate = ({ candidate }) => {
-        if (candidate) {
-          signalingClient.sendIceCandidate(candidate);
-        }
+        if (candidate) signalingClient.sendIceCandidate(candidate);
       };
 
       signalingClient.on('error', (err) => {
+        if (!mountedRef.current) return;
         console.error('[KVS] Signaling error:', err);
         setStatus('error');
-        setErrorMsg('Signaling channel error. Check drone is streaming.');
+        setErrorMsg('Signaling error. Retrying in 5s…');
+        cleanup();
+        scheduleReconnect();
+      });
+
+      signalingClient.on('close', () => {
+        if (!mountedRef.current) return;
+        console.warn('[KVS] Signaling closed. Will auto-reconnect.');
+        if (status !== 'reconnecting') scheduleReconnect();
       });
 
       signalingClient.open();
     } catch (err) {
+      if (!mountedRef.current) return;
       console.error('[KVS] Stream setup failed:', err);
       setStatus('error');
-      setErrorMsg(err.message || 'Failed to connect to drone camera.');
+      setErrorMsg(err.message || 'Failed to connect. Retrying…');
+      scheduleReconnect();
     }
-  }, [droneId, cleanup]);
+  }, [droneId, cleanup, getApiUrl]);
+
+  // Patch scheduleReconnect to call startStream (closure workaround)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const scheduleReconnectFull = useCallback(() => {
+    if (!mountedRef.current) return;
+    setStatus('reconnecting');
+    let remaining = Math.ceil(AUTO_RECONNECT_DELAY_MS / 1000);
+    setReconnectCountdown(remaining);
+    const tick = setInterval(() => {
+      remaining -= 1;
+      setReconnectCountdown(remaining);
+      if (remaining <= 0) clearInterval(tick);
+    }, 1000);
+    reconnectTimerRef.current = setTimeout(() => {
+      clearInterval(tick);
+      if (mountedRef.current) startStream();
+    }, AUTO_RECONNECT_DELAY_MS);
+  }, [startStream]);
 
   useEffect(() => {
+    mountedRef.current = true;
     if (droneId) startStream();
-    return cleanup;
+    return () => {
+      mountedRef.current = false;
+      clearTimeout(reconnectTimerRef.current);
+      cleanup();
+    };
   }, [droneId]);
 
+  // ── Status badge config ──────────────────────────────────────
+  const statusConfig = {
+    idle:         { color: 'bg-slate-600',           dot: '',                        label: 'Idle' },
+    connecting:   { color: 'bg-amber-500/90',         dot: 'animate-pulse',           label: 'Connecting…' },
+    live:         { color: 'bg-red-600/90',           dot: 'animate-pulse',           label: 'LIVE' },
+    error:        { color: 'bg-red-800/90',           dot: '',                        label: 'Error' },
+    reconnecting: { color: 'bg-orange-600/90',        dot: 'animate-ping',            label: `Reconnecting in ${reconnectCountdown}s` },
+  };
+  const badge = statusConfig[status] || statusConfig.idle;
+
   return (
-    <div className={`relative bg-slate-900 rounded-xl overflow-hidden ${className}`} style={{ minHeight: 240 }}>
-      {/* Video Element */}
+    <div
+      className={`relative bg-slate-900 rounded-xl overflow-hidden ${className}`}
+      style={{ minHeight: 260 }}
+    >
+      {/* ── Video element ── */}
       <video
         ref={videoRef}
         autoPlay
@@ -136,76 +241,85 @@ export default function LiveStreamViewer({ droneId, droneName, className = '' })
         style={{ display: status === 'live' ? 'block' : 'none' }}
       />
 
-      {/* Overlay States */}
+      {/* ── Overlay for non-live states ── */}
       {status !== 'live' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center p-4">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center p-6 bg-slate-900/90">
           {status === 'idle' && (
             <>
-              <span className="material-symbols-outlined text-4xl text-slate-500">videocam_off</span>
+              <span className="material-symbols-outlined text-5xl text-slate-600">videocam_off</span>
               <p className="text-slate-400 text-sm">Select a drone to view its live feed</p>
             </>
           )}
           {status === 'connecting' && (
             <>
-              <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
-              <p className="text-sky-400 text-sm font-semibold">Connecting to {droneName || droneId} camera...</p>
-              <p className="text-slate-500 text-xs">Establishing WebRTC connection via AWS Kinesis</p>
+              <div className="relative">
+                <div className="w-14 h-14 border-2 border-sky-500/30 rounded-full" />
+                <div className="absolute inset-0 w-14 h-14 border-t-2 border-sky-400 rounded-full animate-spin" />
+              </div>
+              <div>
+                <p className="text-sky-300 text-sm font-semibold">Connecting to {droneName || droneId}</p>
+                <p className="text-slate-500 text-xs mt-1">Establishing WebRTC via AWS Kinesis Video Streams</p>
+              </div>
             </>
           )}
-          {status === 'error' && (
+          {(status === 'error' || status === 'reconnecting') && (
             <>
-              <span className="material-symbols-outlined text-4xl text-red-400">signal_disconnected</span>
-              <p className="text-red-400 text-sm font-semibold">Camera Unavailable</p>
-              <p className="text-slate-500 text-xs max-w-48">{errorMsg}</p>
+              <span className="material-symbols-outlined text-4xl text-orange-400">
+                {status === 'error' ? 'signal_disconnected' : 'sync'}
+              </span>
+              <div>
+                <p className="text-orange-300 text-sm font-semibold">
+                  {status === 'reconnecting' ? `Auto-reconnecting…` : 'Connection Error'}
+                </p>
+                <p className="text-slate-500 text-xs mt-1 max-w-56 mx-auto">{errorMsg}</p>
+                {status === 'reconnecting' && (
+                  <p className="text-slate-400 text-xs mt-1">Retrying in {reconnectCountdown}s</p>
+                )}
+              </div>
               <button
                 onClick={startStream}
-                className="mt-2 px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-slate-800 text-xs rounded-lg transition-colors"
+                className="mt-1 px-5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-lg transition-colors"
               >
-                Retry Connection
+                Retry Now
               </button>
             </>
           )}
         </div>
       )}
 
-      {/* Live badge */}
-      {status === 'live' && (
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-600/90 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-          <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-          LIVE
-        </div>
-      )}
+      {/* ── Status badge (top-left) ── */}
+      <div className={`absolute top-3 left-3 flex items-center gap-1.5 ${badge.color} text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide backdrop-blur-sm shadow`}>
+        <span className={`w-1.5 h-1.5 bg-white rounded-full ${badge.dot}`} />
+        {badge.label}
+      </div>
 
-      {/* Drone label */}
-      {droneId && status === 'live' && (
-        <div className="absolute bottom-3 left-3 bg-slate-900/70 backdrop-blur-sm text-slate-800 text-xs font-semibold px-2 py-1 rounded-lg">
-          📡 {droneName || droneId} — AWS Kinesis WebRTC
-        </div>
-      )}
-
-      {/* Controls when live */}
+      {/* ── Controls (top-right, only when live) ── */}
       {status === 'live' && (
         <div className="absolute top-3 right-3 flex gap-2">
           <button
-            onClick={cleanup}
-            className="bg-slate-800/80 hover:bg-slate-700 text-slate-800 p-1.5 rounded-lg transition-colors"
+            onClick={scheduleReconnectFull}
+            className="bg-slate-800/80 hover:bg-slate-700 text-white p-1.5 rounded-lg transition-colors backdrop-blur-sm"
+            title="Reconnect stream"
+          >
+            <span className="material-symbols-outlined text-sm">refresh</span>
+          </button>
+          <button
+            onClick={() => { cleanup(); setStatus('idle'); }}
+            className="bg-slate-800/80 hover:bg-slate-700 text-white p-1.5 rounded-lg transition-colors backdrop-blur-sm"
             title="Stop stream"
           >
             <span className="material-symbols-outlined text-sm">stop</span>
           </button>
-          <button
-            onClick={startStream}
-            className="bg-slate-800/80 hover:bg-slate-700 text-slate-800 p-1.5 rounded-lg transition-colors"
-            title="Reconnect"
-          >
-            <span className="material-symbols-outlined text-sm">refresh</span>
-          </button>
+        </div>
+      )}
+
+      {/* ── Drone label (bottom-left, only when live) ── */}
+      {droneId && status === 'live' && (
+        <div className="absolute bottom-3 left-3 bg-slate-900/75 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-lg flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 bg-sky-400 rounded-full" />
+          {droneName || droneId} — AWS KVS WebRTC
         </div>
       )}
     </div>
   );
 }
-
-
-
-

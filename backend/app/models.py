@@ -112,3 +112,17 @@ class TelemetryLog(Base):
     logged_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     drone_rel = relationship("Drone", back_populates="telemetry_logs")
+
+
+class DetectionEvent(Base):
+    """Persisted AI detection payload from Jetson edge device."""
+    __tablename__ = "detection_events"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    device_id = Column(String, nullable=False, index=True)  # e.g. "drone01"
+    frame_id = Column(Integer, nullable=False)               # incrementing frame counter
+    timestamp = Column(Integer, nullable=False)              # unix ms from Jetson
+    fps = Column(Float, nullable=False)
+    person_count = Column(Integer, nullable=False, default=0)
+    detections = Column(JSON, nullable=False, default=list)  # list of bounding-box dicts
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

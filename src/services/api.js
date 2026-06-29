@@ -80,6 +80,14 @@ export const alertsApi = {
 export const streamsApi = {
   getStreamInfo: (droneId) => request('GET', `/streams/${droneId}`, null, getToken()),
   createStream: (droneId) => request('POST', `/streams/${droneId}/create`, null, getToken()),
+  getViewerCredentials: (droneId) => request('GET', `/streams/${droneId}/viewer-credentials`, null, getToken()),
+};
+
+// ── Detections (Jetson AI inference) ──────────────────────────
+export const detectionsApi = {
+  post: (payload) => request('POST', '/api/v1/detections', payload, getToken()),
+  getStats: (deviceId) => request('GET', `/api/v1/detections/stats/${deviceId}`, null, getToken()),
+  getRecent: (deviceId, limit = 50) => request('GET', `/api/v1/detections/recent/${deviceId}?limit=${limit}`, null, getToken()),
 };
 
 // ── Health ───────────────────────────────────────────────────

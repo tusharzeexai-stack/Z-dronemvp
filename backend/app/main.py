@@ -35,7 +35,7 @@ from app.database import init_db, AsyncSessionLocal
 from app.models import User, Drone, Flight, Alert
 from app.routers import auth, drones, flights, alerts, streams, detections
 from app.routers import autopilot
-from app.ws_manager import telemetry_manager, alert_manager
+from app.ws_manager import telemetry_manager, alert_manager, detection_manager
 from app.services.mavlink_bridge import get_bridge
 
 settings = get_settings()
@@ -214,6 +214,27 @@ async def ws_alerts(ws: WebSocket):
                 await ws.send_text(json.dumps({"type": "pong"}))
     except WebSocketDisconnect:
         alert_manager.disconnect(ws)
+
+
+# ── WebSocket: Live Detections ───────────────────────────────
+@app.websocket("/ws/detections")
+async def ws_detections(ws: WebSocket):
+    """
+    Live Jetson detection WebSocket.
+    Clients connect here and receive real-time detection payloads whenever
+    the Jetson posts to POST /api/v1/detections.
+    Message format:
+      { "type": "detection", "device_id": "drone01", "person_count": 2, "fps": 28.5,
+        "frame_id": 4821, "timestamp": 1719628537528, "detections": [...] }
+    """
+    await detection_manager.connect(ws)
+    try:
+        while True:
+            text = await ws.receive_text()
+            if text == "ping":
+                await ws.send_text(json.dumps({"type": "pong"}))
+    except WebSocketDisconnect:
+        detection_manager.disconnect(ws)
 
 
 # ── Health Check ─────────────────────────────────────────────

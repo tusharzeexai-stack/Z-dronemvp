@@ -111,7 +111,7 @@ function Dashboard({ onLogout }) {
   };
 
   const [activeTab, setActiveTab] = useState('overview'); // Mapped to Zeex AI sections
-  const [selectedLiveDroneId, setSelectedLiveDroneId] = useState('');
+  const [selectedLiveDroneId, setSelectedLiveDroneId] = useState('drone01'); // default to Jetson device
   const [activeDroneSimId, setActiveDroneSimId] = useState('ZD-109');
 
   // Show warning when page is HTTPS but backend URL is HTTP+IP (browser will block it)
@@ -1887,6 +1887,7 @@ function Dashboard({ onLogout }) {
                         <LiveStreamViewer
                           droneId={selectedLiveDroneId}
                           droneName={appState.drones.find(d => d.id === selectedLiveDroneId)?.model || selectedLiveDroneId}
+                          getApiUrl={getApiUrl}
                           className="w-full aspect-video shadow-2xl border border-sky-400/40 rounded-xl overflow-hidden"
                         />
                       ) : (

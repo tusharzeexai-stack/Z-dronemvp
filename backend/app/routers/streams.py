@@ -90,8 +90,9 @@ async def get_stream_info(drone_id: str, db: AsyncSession = Depends(get_db)):
         {"urls": s["Uris"], "username": s.get("Username", ""), "credential": s.get("Password", "")}
         for s in ice_response.get("IceServerList", [])
     ]
-    # Always include Google STUN as fallback
-    ice_servers.insert(0, {"urls": ["stun:stun.kinesisvideo.us-east-1.amazonaws.com:443"]})
+    # Always include a STUN server as fallback (region-matched)
+    stun_region = settings.aws_region
+    ice_servers.insert(0, {"urls": [f"stun:stun.kinesisvideo.{stun_region}.amazonaws.com:443"]})
 
     return StreamInfo(
         drone_id=drone_id,
@@ -128,3 +129,28 @@ async def create_stream_channel(drone_id: str, db: AsyncSession = Depends(get_db
         if "ResourceAlreadyExists" in str(e):
             return {"stream_name": stream_name, "status": "already_exists"}
         raise HTTPException(status_code=502, detail=str(e))
+
+
+@router.get("/{drone_id}/viewer-credentials")
+async def get_viewer_credentials(drone_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Returns AWS credentials for the frontend KVS WebRTC SDK to sign the viewer
+    WebSocket connection via AWS Signature V4.
+
+    For a fixed IAM user deployment this returns the long-lived access key directly.
+    For production, swap this out for STS AssumeRole with a short TTL and
+    scoped kinesisvideo:ConnectAsViewer permission.
+    """
+    # Validate drone exists
+    result = await db.execute(select(Drone).where(Drone.id == drone_id))
+    drone = result.scalar_one_or_none()
+    if not drone:
+        raise HTTPException(status_code=404, detail="Drone not found")
+
+    return {
+        "accessKeyId": settings.aws_access_key_id,
+        "secretAccessKey": settings.aws_secret_access_key,
+        "sessionToken": None,   # None for long-lived IAM user keys
+        "region": settings.aws_region,
+        "channelName": drone.stream_name or f"{settings.kvs_stream_name_prefix}-{drone_id.lower()}-cam",
+    }
