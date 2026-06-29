@@ -105,11 +105,14 @@ function filterSDP(sdpString) {
     
     if (inVideoSection) {
       if (line.startsWith('a=rtpmap:') || line.startsWith('a=rtcp-fb:') || line.startsWith('a=fmtp:')) {
-        const match = line.match(/^a=\w+:(\d+)/);
-        if (match) {
-          const payloadType = match[1];
-          if (payloadType !== targetVideoPayload) {
-            continue;
+        const parts = line.split(':');
+        if (parts.length > 1) {
+          const payloadMatch = parts[1].match(/^(\d+)/);
+          if (payloadMatch) {
+            const payloadType = payloadMatch[1];
+            if (payloadType !== targetVideoPayload) {
+              continue;
+            }
           }
         }
       }
@@ -117,11 +120,14 @@ function filterSDP(sdpString) {
     
     if (inAudioSection) {
       if (line.startsWith('a=rtpmap:') || line.startsWith('a=rtcp-fb:') || line.startsWith('a=fmtp:')) {
-        const match = line.match(/^a=\w+:(\d+)/);
-        if (match) {
-          const payloadType = match[1];
-          if (payloadType !== targetAudioPayload) {
-            continue;
+        const parts = line.split(':');
+        if (parts.length > 1) {
+          const payloadMatch = parts[1].match(/^(\d+)/);
+          if (payloadMatch) {
+            const payloadType = payloadMatch[1];
+            if (payloadType !== targetAudioPayload) {
+              continue;
+            }
           }
         }
       }
