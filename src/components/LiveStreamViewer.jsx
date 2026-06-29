@@ -104,9 +104,44 @@ function mungeSDPForKVSCSDK(sdpString) {
     }
 
     // ── Inside video: keep only lines belonging to our payload type ───────────
-    if (!inAudio && (line.startsWith('a=rtpmap:') || line.startsWith('a=rtcp-fb:') || line.startsWith('a=fmtp:'))) {
-      const m = line.match(/^a=(?:rtpmap|rtcp-fb|fmtp):(\d+)/);
+    if (!inAudio && (line.startsWith('a=rtpmap:') || line.startsWith('a=rtcp-fb:'))) {
+      const m = line.match(/^a=(?:rtpmap|rtcp-fb):(\d+)/);
       if (m && m[1] !== targetVideoPayload) continue; // drop other codecs
+    }
+
+    // ── Dynamic a=fmtp parsing and reordering (KVS C SDK compliance) ─────────
+    if (line.startsWith('a=fmtp:')) {
+      const m = line.match(/^a=fmtp:(\d+)/);
+      if (m && m[1] !== targetVideoPayload) continue; // drop other codecs
+      
+      const spaceIdx = line.indexOf(' ');
+      if (spaceIdx !== -1) {
+        const prefix = line.substring(0, spaceIdx); // e.g. "a=fmtp:109"
+        const paramsStr = line.substring(spaceIdx + 1);
+        const params = paramsStr.split(';').map(p => p.trim());
+        
+        let profileLevelId = '42E01F';
+        let levelAsymmetryAllowed = '1';
+        let packetizationMode = '1';
+        
+        for (const param of params) {
+          const parts = param.split('=');
+          if (parts.length === 2) {
+            const key = parts[0].trim().toLowerCase();
+            const val = parts[1].trim();
+            if (key === 'profile-level-id') {
+              profileLevelId = val.toUpperCase();
+            } else if (key === 'level-asymmetry-allowed') {
+              levelAsymmetryAllowed = val;
+            } else if (key === 'packetization-mode') {
+              packetizationMode = val;
+            }
+          }
+        }
+        // Force profile-level-id FIRST, then level-asymmetry-allowed, then packetization-mode
+        out.push(`${prefix} profile-level-id=${profileLevelId};level-asymmetry-allowed=${levelAsymmetryAllowed};packetization-mode=${packetizationMode}`);
+        continue;
+      }
     }
 
     // ── Strip extmap to keep SDP small ───────────────────────────────────────
@@ -121,18 +156,7 @@ function mungeSDPForKVSCSDK(sdpString) {
     out.push(line);
   }
 
-  // ── Step 4: Fix fmtp param order + uppercase profile-level-id ───────────────
-  // The KVS C SDK's setPayloadTypesFromOffer (0x40100001) matches the codec enum
-  // RTC_CODEC_H264_PROFILE_42E01F_LEVEL_ASYMMETRY_ALLOWED_PACKETIZATION_MODE
-  // by parsing fmtp. Chrome emits: level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=...
-  // KVS C SDK may need profile-level-id FIRST to match correctly.
-  const joined = out.join('\r\n');
-  return joined
-    .replace(/profile-level-id=42e01f/gi, 'profile-level-id=42E01F')
-    .replace(
-      /a=fmtp:(\d+) level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42E01F/g,
-      'a=fmtp:$1 profile-level-id=42E01F;level-asymmetry-allowed=1;packetization-mode=1'
-    );
+  return out.join('\r\n');
 }
 
 export default function LiveStreamViewer({ droneId, droneName, getApiUrl, className = '' }) {
