@@ -314,7 +314,7 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
 
         console.log('[KVS SDP] Final munged offer — length:', finalSdp.length, '| lines:', finalSdp.split('\r\n').length);
         console.log('[KVS SDP] Audio stripped:', !finalSdp.includes('m=audio'));
-        console.log('[KVS SDP] H264 42E01F present:', finalSdp.includes('profile-level-id=42E01F'));
+        console.log('[KVS SDP] H264 42e01f present:', finalSdp.includes('profile-level-id=42e01f'));
         console.log('[KVS SDP] Sending to Jetson master...');
 
         signalingClient.sendSdpOffer(offer);
