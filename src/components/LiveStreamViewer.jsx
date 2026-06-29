@@ -49,7 +49,7 @@ function filterSDP(sdpString) {
           for (let j = i + 1; j < Math.min(i + 15, lines.length); j++) {
             const fmtpLine = lines[j];
             if (fmtpLine.startsWith(`a=fmtp:${payloadType} `)) {
-              if (fmtpLine.includes('profile-level-id=42e01f') && fmtpLine.includes('packetization-mode=1')) {
+              if (fmtpLine.toLowerCase().includes('profile-level-id=42e01f') && fmtpLine.includes('packetization-mode=1')) {
                 targetVideoPayload = payloadType;
                 break;
               }
@@ -136,7 +136,8 @@ function filterSDP(sdpString) {
     newLines.push(line);
   }
   
-  return newLines.join('\r\n');
+  const sdpResult = newLines.join('\r\n');
+  return sdpResult.replace(/profile-level-id=42e01f/gi, 'profile-level-id=42E01F');
 }
 
 export default function LiveStreamViewer({ droneId, droneName, getApiUrl, className = '' }) {
