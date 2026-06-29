@@ -121,8 +121,18 @@ function mungeSDPForKVSCSDK(sdpString) {
     out.push(line);
   }
 
-  // ── Step 4: Uppercase H264 profile-level-id (KVS C SDK is case-sensitive) ─
-  return out.join('\r\n').replace(/profile-level-id=42e01f/gi, 'profile-level-id=42E01F');
+  // ── Step 4: Fix fmtp param order + uppercase profile-level-id ───────────────
+  // The KVS C SDK's setPayloadTypesFromOffer (0x40100001) matches the codec enum
+  // RTC_CODEC_H264_PROFILE_42E01F_LEVEL_ASYMMETRY_ALLOWED_PACKETIZATION_MODE
+  // by parsing fmtp. Chrome emits: level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=...
+  // KVS C SDK may need profile-level-id FIRST to match correctly.
+  const joined = out.join('\r\n');
+  return joined
+    .replace(/profile-level-id=42e01f/gi, 'profile-level-id=42E01F')
+    .replace(
+      /a=fmtp:(\d+) level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42E01F/g,
+      'a=fmtp:$1 profile-level-id=42E01F;level-asymmetry-allowed=1;packetization-mode=1'
+    );
 }
 
 export default function LiveStreamViewer({ droneId, droneName, getApiUrl, className = '' }) {
