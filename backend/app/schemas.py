@@ -173,20 +173,25 @@ class AlertMessage(BaseModel):
 
 # ── Detections ────────────────────────────────────────────────
 class BoundingBox(BaseModel):
-    id: int
-    confidence: float
-    x: int
-    y: int
-    w: int
-    h: int
+    model_config = {"extra": "allow"}  # Accept any extra fields from Jetson
+    id: Optional[int] = None
+    confidence: float = 0.0
+    x: Optional[int] = None
+    y: Optional[int] = None
+    w: Optional[int] = None
+    h: Optional[int] = None
+    cls: Optional[str] = None          # class name e.g. "person"
+    class_id: Optional[int] = None
+    bbox: Optional[List[float]] = None  # alternative [x,y,w,h] format
 
 class DetectionPayload(BaseModel):
+    model_config = {"extra": "allow"}  # Accept any extra fields without crashing
     device_id: str
-    frame_id: int = 0           # incrementing frame counter from Jetson
-    timestamp: int              # unix ms
-    fps: float
-    person_count: int
-    detections: List[BoundingBox]
+    frame_id: int = 0
+    timestamp: int = 0
+    fps: float = 0.0
+    person_count: int = 0
+    detections: List[BoundingBox] = []
 
 
 class DetectionEventResponse(BaseModel):

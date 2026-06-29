@@ -22,7 +22,7 @@ from app.ws_manager import detection_manager, alert_manager
 router = APIRouter(prefix="/api/v1/detections", tags=["Detections"])
 
 
-@router.post("", status_code=status.HTTP_200_OK, dependencies=[Depends(get_current_user)])
+@router.post("", status_code=status.HTTP_200_OK)
 async def process_detections(payload: DetectionPayload, db: AsyncSession = Depends(get_db)):
     """
     Ingest real-time AI detections from the Jetson edge device.
