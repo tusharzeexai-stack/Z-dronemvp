@@ -3,7 +3,7 @@
  * Manages persistent WebSocket connections to the backend with auto-reconnect.
  */
 
-const BASE_WS_URL = (import.meta.env.VITE_API_URL || 'http://13.200.250.121:8000')
+const BASE_WS_URL = (import.meta.env.VITE_API_URL || 'https://b7688cf4a6231c.lhr.life')
   .replace('https://', 'wss://')
   .replace('http://', 'ws://');
 

@@ -16,12 +16,12 @@ const MAX_HISTORY = 100;
 
 function buildWsUrl(apiBaseUrl) {
   try {
-    const base = (apiBaseUrl || 'http://13.200.250.121:8000').replace(/\/$/, '');
+    const base = (apiBaseUrl || 'https://b7688cf4a6231c.lhr.life').replace(/\/$/, '');
     const url = new URL(base);
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${wsProtocol}//${url.host}/ws/detections`;
   } catch {
-    return 'ws://13.200.250.121:8000/ws/detections';
+    return 'wss://b7688cf4a6231c.lhr.life/ws/detections';
   }
 }
 
