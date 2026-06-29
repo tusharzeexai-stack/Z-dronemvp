@@ -23,6 +23,7 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
   const peerConnectionRef = useRef(null);
   const reconnectTimerRef = useRef(null);
   const mountedRef = useRef(true);
+  const startStreamRef = useRef(null);
 
   // status: 'idle' | 'connecting' | 'live' | 'error' | 'reconnecting'
   const [status, setStatus] = useState('idle');
@@ -49,9 +50,11 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
     }, 1000);
     reconnectTimerRef.current = setTimeout(() => {
       clearInterval(tick);
-      if (mountedRef.current) startStream();
+      if (mountedRef.current && startStreamRef.current) {
+        startStreamRef.current();
+      }
     }, AUTO_RECONNECT_DELAY_MS);
-  }, []); // startStream added via closure below
+  }, []);
 
   const startStream = useCallback(async () => {
     if (!droneId || !mountedRef.current) return;
@@ -208,23 +211,8 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
     }
   }, [droneId, cleanup, getApiUrl]);
 
-  // Patch scheduleReconnect to call startStream (closure workaround)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const scheduleReconnectFull = useCallback(() => {
-    if (!mountedRef.current) return;
-    setStatus('reconnecting');
-    let remaining = Math.ceil(AUTO_RECONNECT_DELAY_MS / 1000);
-    setReconnectCountdown(remaining);
-    const tick = setInterval(() => {
-      remaining -= 1;
-      setReconnectCountdown(remaining);
-      if (remaining <= 0) clearInterval(tick);
-    }, 1000);
-    reconnectTimerRef.current = setTimeout(() => {
-      clearInterval(tick);
-      if (mountedRef.current) startStream();
-    }, AUTO_RECONNECT_DELAY_MS);
-  }, [startStream]);
+  // Keep startStreamRef up to date on each render
+  startStreamRef.current = startStream;
 
   useEffect(() => {
     mountedRef.current = true;
@@ -317,7 +305,7 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
       {status === 'live' && (
         <div className="absolute top-3 right-3 flex gap-2">
           <button
-            onClick={scheduleReconnectFull}
+            onClick={scheduleReconnect}
             className="bg-slate-800/80 hover:bg-slate-700 text-white p-1.5 rounded-lg transition-colors backdrop-blur-sm"
             title="Reconnect stream"
           >
