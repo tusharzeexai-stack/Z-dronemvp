@@ -91,7 +91,7 @@ async def get_stream_info(drone_id: str, db: AsyncSession = Depends(get_db)):
     ice_servers = []
     try:
         signaling_client = boto3.client(
-            "kinesis-video-signaling-channels",
+            "kinesis-video-signaling",
             region_name=settings.aws_region,
             aws_access_key_id=settings.aws_access_key_id,
             aws_secret_access_key=settings.aws_secret_access_key,
