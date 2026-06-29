@@ -15,13 +15,15 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 const MAX_HISTORY = 100;
 
 function buildWsUrl(apiBaseUrl) {
+  const raw = apiBaseUrl || '';
+  if (!raw) return null; // No backend URL configured — skip connection
   try {
-    const base = (apiBaseUrl || 'https://33b26c65a275f8.lhr.life').replace(/\/$/, '');
+    const base = raw.replace(/\/$/, '');
     const url = new URL(base);
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${wsProtocol}//${url.host}/ws/detections`;
   } catch {
-    return 'wss://33b26c65a275f8.lhr.life/ws/detections';
+    return null;
   }
 }
 
@@ -56,6 +58,10 @@ export function useDetections(apiBaseUrl) {
     }
 
     const wsUrl = buildWsUrl(apiBaseUrl);
+    if (!wsUrl) {
+      console.warn('[useDetections] No backend URL configured. Set it in Dashboard → Backend Settings.');
+      return;
+    }
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 

@@ -7,7 +7,7 @@
  *   VITE_API_URL=https://api.z-drone.com (production on AWS)
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://33b26c65a275f8.lhr.life';
+const BASE_URL = import.meta.env.VITE_API_URL || localStorage.getItem('z_drone_backend_url') || '';
 
 class ApiError extends Error {
   constructor(message, status) {

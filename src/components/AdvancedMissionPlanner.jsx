@@ -122,7 +122,7 @@ const DRAWING_MODES = [
 class ArduPilotService {
   constructor(getApiUrl) {
     this.getApiUrl = getApiUrl;
-    this.baseUrl = getApiUrl ? getApiUrl() : 'https://33b26c65a275f8.lhr.life';
+    this.baseUrl = getApiUrl ? getApiUrl() : (import.meta.env.VITE_API_URL || localStorage.getItem('z_drone_backend_url') || '');
   }
 
   async connect(connectionString) {
@@ -378,7 +378,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
       return;
     }
 
-    const base = (getApiUrl ? getApiUrl() : 'https://33b26c65a275f8.lhr.life')
+    const base = (getApiUrl ? getApiUrl() : (import.meta.env.VITE_API_URL || localStorage.getItem('z_drone_backend_url') || ''))
       .replace('https://', 'wss://')
       .replace('http://', 'ws://');
     const wsUrl = `${base}/ws/telemetry`;

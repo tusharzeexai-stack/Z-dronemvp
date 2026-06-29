@@ -3,13 +3,18 @@
  * Manages persistent WebSocket connections to the backend with auto-reconnect.
  */
 
-const BASE_WS_URL = (import.meta.env.VITE_API_URL || 'https://33b26c65a275f8.lhr.life')
-  .replace('https://', 'wss://')
-  .replace('http://', 'ws://');
+function getBaseWsUrl() {
+  const httpUrl = import.meta.env.VITE_API_URL
+    || localStorage.getItem('z_drone_backend_url')
+    || '';
+  if (!httpUrl) return '';
+  return httpUrl.replace('https://', 'wss://').replace('http://', 'ws://');
+}
 
 class ZDroneWebSocket {
   constructor(path, onMessage, options = {}) {
-    this.url = `${BASE_WS_URL}${path}`;
+    const baseUrl = getBaseWsUrl();
+    this.url = baseUrl ? `${baseUrl}${path}` : null;
     this.onMessage = onMessage;
     this.reconnectDelay = options.reconnectDelay || 3000;
     this.maxRetries = options.maxRetries || 20;
@@ -17,7 +22,11 @@ class ZDroneWebSocket {
     this.ws = null;
     this.pingInterval = null;
     this.shouldReconnect = true;
-    this.connect();
+    if (this.url) {
+      this.connect();
+    } else {
+      console.warn('[WS] No backend URL configured. Set it in Dashboard → Backend Settings.');
+    }
   }
 
   connect() {

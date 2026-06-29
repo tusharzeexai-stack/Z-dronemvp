@@ -158,12 +158,16 @@ app = FastAPI(
 )
 
 # ── CORS ─────────────────────────────────────────────────────
+# Allow all origins so that the app works regardless of the tunnel URL
+# (lhr.life, ngrok, etc.) or Vercel preview URLs.
+# The API is JWT-protected, so broad CORS is safe here.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,   # Must be False when allow_origins=["*"]
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # ── REST Routers ─────────────────────────────────────────────
