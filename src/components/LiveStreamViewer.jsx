@@ -17,6 +17,102 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 const AUTO_RECONNECT_DELAY_MS = 5_000;
 
+// Helper to filter and reduce SDP size for embedded WebRTC device limits (KVS C++ SDK)
+function filterSDP(sdpString) {
+  const lines = sdpString.split('\r\n');
+  const newLines = [];
+  
+  let videoPayloadsToKeep = [];
+  let audioPayloadsToKeep = [];
+  let inVideoSection = false;
+  let inAudioSection = false;
+  
+  for (const line of lines) {
+    if (line.startsWith('m=video ')) {
+      inVideoSection = true;
+      inAudioSection = false;
+    } else if (line.startsWith('m=audio ')) {
+      inAudioSection = true;
+      inVideoSection = false;
+    }
+    
+    if (inVideoSection && line.startsWith('a=rtpmap:')) {
+      const match = line.match(/^a=rtpmap:(\d+)\s+(\w+)\//);
+      if (match) {
+        const payloadType = match[1];
+        const codec = match[2].toUpperCase();
+        if (codec === 'H264') {
+          videoPayloadsToKeep.push(payloadType);
+        }
+      }
+    }
+    if (inAudioSection && line.startsWith('a=rtpmap:')) {
+      const match = line.match(/^a=rtpmap:(\d+)\s+(\w+)\//);
+      if (match) {
+        const payloadType = match[1];
+        const codec = match[2].toUpperCase();
+        if (codec === 'OPUS' || codec === 'PCMU' || codec === 'PCMA') {
+          audioPayloadsToKeep.push(payloadType);
+        }
+      }
+    }
+  }
+  
+  inVideoSection = false;
+  inAudioSection = false;
+  
+  for (const line of lines) {
+    // Skip all extmap lines to reduce SDP payload size
+    if (line.startsWith('a=extmap:')) {
+      continue;
+    }
+    
+    if (line.startsWith('m=video ')) {
+      inVideoSection = true;
+      inAudioSection = false;
+      const parts = line.split(' ');
+      const protocol = parts[2];
+      newLines.push(`m=video 9 ${protocol} ${videoPayloadsToKeep.join(' ')}`);
+      continue;
+    } else if (line.startsWith('m=audio ')) {
+      inAudioSection = true;
+      inVideoSection = false;
+      const parts = line.split(' ');
+      const protocol = parts[2];
+      newLines.push(`m=audio 9 ${protocol} ${audioPayloadsToKeep.join(' ')}`);
+      continue;
+    }
+    
+    if (inVideoSection) {
+      if (line.startsWith('a=rtpmap:') || line.startsWith('a=rtcp-fb:') || line.startsWith('a=fmtp:')) {
+        const match = line.match(/^a=\w+:(\d+)/);
+        if (match) {
+          const payloadType = match[1];
+          if (!videoPayloadsToKeep.includes(payloadType)) {
+            continue;
+          }
+        }
+      }
+    }
+    
+    if (inAudioSection) {
+      if (line.startsWith('a=rtpmap:') || line.startsWith('a=rtcp-fb:') || line.startsWith('a=fmtp:')) {
+        const match = line.match(/^a=\w+:(\d+)/);
+        if (match) {
+          const payloadType = match[1];
+          if (!audioPayloadsToKeep.includes(payloadType)) {
+            continue;
+          }
+        }
+      }
+    }
+    
+    newLines.push(line);
+  }
+  
+  return newLines.join('\r\n');
+}
+
 export default function LiveStreamViewer({ droneId, droneName, getApiUrl, className = '' }) {
   const videoRef = useRef(null);
   const signalingClientRef = useRef(null);
@@ -201,8 +297,14 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
         const h264Specs = lines.filter(l => l.toLowerCase().includes('h264'));
         console.log('[KVS SDP Debug] H.264 specific lines:', h264Specs);
 
-        console.log('[KVS Debug] Sending SDP offer to KVS signaling channel...');
-        signalingClient.sendSdpOffer(pc.localDescription);
+        const filteredSdpString = filterSDP(sdp);
+        console.log('[KVS SDP Debug] Filtered SDP Length:', filteredSdpString.length, 'Total Lines:', filteredSdpString.split('\r\n').length);
+        console.log('[KVS SDP Debug] Filtered SDP:\n', filteredSdpString);
+        console.log('[KVS Debug] Sending filtered SDP offer to KVS signaling channel...');
+        signalingClient.sendSdpOffer(new RTCSessionDescription({
+          type: 'offer',
+          sdp: filteredSdpString
+        }));
       });
 
       signalingClient.on('sdpAnswer', async (answer) => {
