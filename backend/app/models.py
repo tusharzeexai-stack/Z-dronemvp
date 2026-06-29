@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Float, Integer, Boolean, DateTime, JSON, ForeignKey, Enum as SAEnum
+from sqlalchemy import Column, String, Float, Integer, BigInteger, Boolean, DateTime, JSON, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from app.database import Base
@@ -121,7 +121,7 @@ class DetectionEvent(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     device_id = Column(String, nullable=False, index=True)  # e.g. "drone01"
     frame_id = Column(Integer, nullable=False)               # incrementing frame counter
-    timestamp = Column(Integer, nullable=False)              # unix ms from Jetson
+    timestamp = Column(BigInteger, nullable=False)              # unix ms from Jetson
     fps = Column(Float, nullable=False)
     person_count = Column(Integer, nullable=False, default=0)
     detections = Column(JSON, nullable=False, default=list)  # list of bounding-box dicts
