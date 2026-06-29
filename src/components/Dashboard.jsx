@@ -12,6 +12,7 @@ import WeatherWidget from './WeatherWidget';
 import LiveStreamViewer from './LiveStreamViewer';
 import AnalyticsCenter from './AnalyticsCenter';
 import AdvancedMissionPlanner from './AdvancedMissionPlanner';
+import { useDetections } from '../hooks/useDetections';
 
 // Maruti Suzuki IMT Kharkhoda flight path interpolation
 const FLIGHT_PATH = [
@@ -97,6 +98,8 @@ function Dashboard({ onLogout }) {
     const base = customBackendUrl.replace(/\/$/, '');
     return base + path;
   };
+
+  const { isConnected: wsConnected, latest, history: detHistory, stats: detStats } = useDetections(getApiUrl(''));
 
   // Detect if the browser will block the request due to HTTPS mixed content.
   // Browsers CANNOT upgrade HTTP→HTTPS when the target host is a raw IP address.
@@ -1944,6 +1947,206 @@ function Dashboard({ onLogout }) {
                     </div>
                   </div>
                 </section>
+
+                {/* ── LIVE JETSON AI FEED PANEL ── */}
+                <div className={`rounded-2xl border-2 p-5 transition-all duration-500 ${
+                  wsConnected
+                    ? latest && latest.person_count > 0
+                      ? 'bg-red-50 dark:bg-red-950/20 border-red-300 dark:border-red-900/60 shadow-lg shadow-red-100 dark:shadow-none'
+                      : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-900/60'
+                    : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800'
+                }`}>
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-xl flex items-center justify-center ${
+                        wsConnected ? 'bg-emerald-500 text-white' : 'bg-slate-400 text-white'
+                      }`}>
+                        <span className="material-symbols-outlined text-xl">
+                          {wsConnected ? 'wifi' : 'wifi_off'}
+                        </span>
+                      </div>
+                      <div className="text-left">
+                        <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-sm">Jetson Live AI Feed</h3>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                          {wsConnected ? 'Real-time detections via WebSocket' : 'Connecting to /ws/detections…'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className={`flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wide ${
+                      wsConnected
+                        ? latest && latest.person_count > 0
+                          ? 'bg-red-500 text-white'
+                          : 'bg-emerald-500 text-white'
+                        : 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full bg-white/80 ${
+                        wsConnected ? 'animate-pulse' : ''
+                      }`} />
+                      {wsConnected
+                        ? latest && latest.person_count > 0 ? '⚠️ Alert — Person Detected' : 'Connected'
+                        : 'Offline'
+                      }
+                    </div>
+                  </div>
+
+                  {/* KPI Row */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3 mb-5">
+                    {/* Live Person Count */}
+                    <div className={`rounded-xl p-4 flex flex-col justify-between col-span-1 sm:col-span-2 text-left ${
+                      latest && latest.person_count > 0
+                        ? 'bg-red-500 text-white'
+                        : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100'
+                    }`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="material-symbols-outlined text-lg">group</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-80">Live Person Count</span>
+                      </div>
+                      <div className="text-5xl font-black leading-none">
+                        {wsConnected && latest ? latest.person_count : '—'}
+                      </div>
+                      <div className="text-[10px] mt-2 opacity-70">
+                        {wsConnected && latest
+                          ? `Frame #${latest.frame_id} • ${new Date(latest.timestamp).toLocaleTimeString()}`
+                          : 'No live data'}
+                      </div>
+                    </div>
+
+                    {/* FPS */}
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex flex-col justify-between text-left">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="material-symbols-outlined text-lg text-amber-500">bolt</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Inference FPS</span>
+                      </div>
+                      <div className="text-2xl font-black text-slate-800 dark:text-slate-100">
+                        {wsConnected && latest ? `${latest.fps.toFixed(1)}` : '—'}
+                      </div>
+                      <div className="text-[10px] text-slate-400">Jetson TensorRT</div>
+                    </div>
+
+                    {/* Total Events */}
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex flex-col justify-between text-left">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="material-symbols-outlined text-lg text-sky-500">bar_chart</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Total Events</span>
+                      </div>
+                      <div className="text-2xl font-black text-slate-800 dark:text-slate-100">
+                        {detStats.globalTotalEvents.toLocaleString()}
+                      </div>
+                      <div className="text-[10px] text-slate-400">This session</div>
+                    </div>
+
+                    {/* Total Persons */}
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex flex-col justify-between text-left">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="material-symbols-outlined text-lg text-purple-500">track_changes</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Persons Seen</span>
+                      </div>
+                      <div className="text-2xl font-black text-slate-800 dark:text-slate-100">
+                        {detStats.globalTotalPersons.toLocaleString()}
+                      </div>
+                      <div className="text-[10px] text-slate-400">Cumulative</div>
+                    </div>
+                  </div>
+
+                  {/* Per-device stats + Real-time event feed */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* Per-device breakdown */}
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-left">
+                      <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-base">memory</span> Camera Analytics
+                      </h4>
+                      {Object.keys(detStats.byDevice).length === 0 ? (
+                        <p className="text-xs text-slate-400 text-center py-6">
+                          {wsConnected ? 'Waiting for first detection…' : 'WebSocket offline'}
+                        </p>
+                      ) : (
+                        <div className="space-y-3">
+                          {Object.entries(detStats.byDevice).map(([deviceId, d]) => (
+                            <div key={deviceId} className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg p-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-slate-800 dark:text-slate-205">{deviceId}</span>
+                                <span className="text-[10px] bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-350 font-bold px-1.5 py-0.5 rounded">
+                                  {d.avgFps} FPS
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-3 gap-2 text-center">
+                                <div>
+                                  <div className="text-xs font-black text-slate-800 dark:text-slate-100">{d.totalEvents}</div>
+                                  <div className="text-[9px] text-slate-400">Events</div>
+                                </div>
+                                <div>
+                                  <div className="text-xs font-black text-slate-800 dark:text-slate-100">{d.totalPersons}</div>
+                                  <div className="text-[9px] text-slate-400">Persons</div>
+                                </div>
+                                <div>
+                                  <div className="text-xs font-black text-red-500">{d.peakCount}</div>
+                                  <div className="text-[9px] text-slate-400">Peak</div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Real-time event feed */}
+                    <div className="lg:col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex flex-col text-left">
+                      <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-base">monitoring</span> Real-Time Event Feed
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-normal">
+                          Last {Math.min(detHistory.length, 20)} of {detHistory.length} events
+                        </span>
+                      </h4>
+                      <div className="flex-1 overflow-y-auto max-h-52 space-y-1.5 pr-1">
+                        {detHistory.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center py-8 gap-2">
+                            <span className="material-symbols-outlined text-3xl text-slate-300">monitoring</span>
+                            <p className="text-xs text-slate-400">
+                              {wsConnected ? 'Waiting for events from Jetson…' : 'WebSocket disconnected'}
+                            </p>
+                          </div>
+                        ) : (
+                          detHistory.slice(0, 20).map((evt, idx) => (
+                            <div
+                              key={`${evt.frame_id}-${idx}`}
+                              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all ${
+                                evt.person_count > 0
+                                  ? 'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/40'
+                                  : 'bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800'
+                              }`}
+                            >
+                              <span className={`w-2 h-2 rounded-full shrink-0 ${
+                                evt.person_count > 0 ? 'bg-red-500 animate-pulse' : 'bg-slate-300'
+                              }`} />
+                              <div className="flex-1 min-w-0">
+                                <span className="font-bold text-slate-700 dark:text-slate-200">{evt.device_id}</span>
+                                <span className="text-slate-400 ml-1.5">
+                                  {evt.person_count > 0
+                                    ? `📊 ${evt.person_count} person${evt.person_count !== 1 ? 's' : ''} detected`
+                                    : 'No persons'}
+                                </span>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <div className="text-[10px] font-bold text-slate-600 dark:text-slate-400">{evt.fps?.toFixed(1)} fps</div>
+                                <div className="text-[9px] text-slate-500 dark:text-slate-400">
+                                  {new Date(evt.receivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                </div>
+                              </div>
+                              {evt.person_count > 0 && evt.detections?.length > 0 && (
+                                <div className="text-[10px] text-red-500 font-bold shrink-0">
+                                  {(Math.max(...evt.detections.map(d => d.confidence)) * 100).toFixed(0)}%
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
