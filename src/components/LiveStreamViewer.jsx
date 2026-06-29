@@ -248,10 +248,9 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
 
       signalingClient.on('open', async () => {
         if (!mountedRef.current) return;
-        console.log('[KVS Debug] Signaling connection opened successfully! Adding transceivers...');
+        console.log('[KVS Debug] Signaling connection opened successfully! Adding video transceiver...');
         
         pc.addTransceiver('video', { direction: 'recvonly' });
-        pc.addTransceiver('audio', { direction: 'recvonly' });
         
         // --- Codec & Transceiver Diagnostics ---
         try {
