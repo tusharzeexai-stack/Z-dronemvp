@@ -33,7 +33,7 @@ from sqlalchemy import select
 from app.config import get_settings
 from app.database import init_db, AsyncSessionLocal
 from app.models import User, Drone, Flight, Alert
-from app.routers import auth, drones, flights, alerts, streams, detections
+from app.routers import auth, drones, flights, alerts, streams, detections, inference
 from app.routers import autopilot
 from app.ws_manager import telemetry_manager, alert_manager, detection_manager
 from app.services.mavlink_bridge import get_bridge
@@ -174,6 +174,7 @@ app.include_router(alerts.router)
 app.include_router(streams.router)
 app.include_router(autopilot.router)   # ArduPilot / MAVLink GCS control
 app.include_router(detections.router)
+app.include_router(inference.router)
 
 # ── WebSocket: Live Telemetry ─────────────────────────────────
 @app.websocket("/ws/telemetry")
