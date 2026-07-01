@@ -326,6 +326,13 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
         await pc.setRemoteDescription(answer);
       });
 
+      signalingClient.on('close', () => {
+        console.log('[KVS Debug] Signaling WebSocket CLOSED');
+      });
+      signalingClient.on('error', (err) => {
+        console.log('[KVS Debug] Signaling WebSocket ERROR', err);
+      });
+
       signalingClient.on('iceCandidate', (candidate) => {
         if (!mountedRef.current) return;
         console.log('[KVS Debug] Received ICE Candidate from Master (Jetson). Adding candidate...');
