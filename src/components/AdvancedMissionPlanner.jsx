@@ -352,6 +352,7 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
 
   // Live WebSocket to backend telemetry (/ws/telemetry)
   const liveWsRef = useRef(null);
+  const loadedMissionIdRef = useRef('');
 
   // API Service abstraction
   const apiService = useMemo(() => new ArduPilotService(getApiUrl), [getApiUrl]);
@@ -484,13 +485,20 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
   useEffect(() => {
     const selected = (appState.missions || []).find(m => m.id === selectedMissionId);
     if (selected && selected.waypointsList) {
-      setWaypoints(selected.waypointsList);
-      setActiveWaypointIndex(0);
-      if (mapInstanceRef.current && selected.waypointsList.length > 0) {
-        mapInstanceRef.current.setView([selected.waypointsList[0].lat, selected.waypointsList[0].lng], 15);
+      const isDifferentId = loadedMissionIdRef.current !== selectedMissionId;
+      const isDifferentWps = JSON.stringify(waypoints) !== JSON.stringify(selected.waypointsList);
+      
+      if (isDifferentId || isDifferentWps) {
+        loadedMissionIdRef.current = selectedMissionId;
+        setWaypoints(selected.waypointsList);
+        setActiveWaypointIndex(0);
+        if (mapInstanceRef.current && selected.waypointsList.length > 0) {
+          mapInstanceRef.current.setView([selected.waypointsList[0].lat, selected.waypointsList[0].lng], 15);
+        }
+        logEvent('INFO', `Loaded mission: ${selected.name}`);
       }
-      logEvent('INFO', `Loaded mission: ${selected.name}`);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedMissionId, appState.missions]);
 
   // Auto-sync waypoints to global state
