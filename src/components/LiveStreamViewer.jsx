@@ -296,6 +296,40 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
         if (!mountedRef.current) return;
         console.log('[KVS] Signaling open — building KVS-C-SDK-compatible offer...');
 
+        // Monkey-patch underlying WebSocket to strip null bytes from KVS C SDK payload
+        try {
+          const ws = signalingClient.websocket;
+          if (ws && !ws._patchedForNullBytes) {
+            ws._patchedForNullBytes = true;
+            const origOnMsg = ws.onmessage;
+            if (origOnMsg) {
+              ws.onmessage = (event) => {
+                if (typeof event.data === 'string' && event.data.includes('messagePayload')) {
+                  const fixedData = event.data.replace(/"messagePayload"\s*:\s*"([^"]+)"/g, (_, b64) => {
+                    try {
+                      const decoded = atob(b64).replace(/\0/g, '');
+                      return `"messagePayload":"${btoa(decoded)}"`;
+                    } catch (e) {
+                      return _;
+                    }
+                  });
+                  origOnMsg.call(ws, new MessageEvent('message', {
+                    data: fixedData,
+                    origin: event.origin,
+                    lastEventId: event.lastEventId,
+                    source: event.source,
+                    ports: event.ports
+                  }));
+                  return;
+                }
+                origOnMsg.call(ws, event);
+              };
+            }
+          }
+        } catch (e) {
+          console.warn('[KVS Debug] Failed to apply websocket null-byte patch:', e);
+        }
+
         // Video-only transceiver. No audio — the Jetson adds audio SENDRECV which
         // conflicts with browser recvonly; KVS C SDK rejects it (0x40100001).
         pc.addTransceiver('video', { direction: 'recvonly' });
