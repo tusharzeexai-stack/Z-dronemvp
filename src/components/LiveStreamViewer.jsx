@@ -172,6 +172,9 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
   const [errorMsg, setErrorMsg] = useState('');
   const [reconnectCountdown, setReconnectCountdown] = useState(0);
 
+  const statusRef = useRef('idle');
+  statusRef.current = status;
+
   const cleanup = useCallback(() => {
     try { signalingClientRef.current?.close(); } catch { /* ignore */ }
     try { peerConnectionRef.current?.close(); } catch { /* ignore */ }
@@ -385,16 +388,21 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
       signalingClient.on('error', (err) => {
         if (!mountedRef.current) return;
         console.error('[KVS Debug] Signaling error:', err);
-        setStatus('error');
-        setErrorMsg('Signaling error. Retrying in 5s…');
-        cleanup();
-        scheduleReconnect();
+        if (statusRef.current !== 'live' && statusRef.current !== 'reconnecting') {
+          setStatus('error');
+          setErrorMsg('Signaling error. Retrying in 5s…');
+          cleanup();
+          scheduleReconnect();
+        }
       });
 
       signalingClient.on('close', () => {
         if (!mountedRef.current) return;
-        console.warn('[KVS Debug] Signaling connection closed. Scheduling auto-reconnect...');
-        if (status !== 'reconnecting') scheduleReconnect();
+        console.warn('[KVS Debug] Signaling connection closed.');
+        if (statusRef.current !== 'live' && statusRef.current !== 'reconnecting') {
+          console.log('[KVS Debug] Scheduling auto-reconnect...');
+          scheduleReconnect();
+        }
       });
 
       console.log('[KVS Debug] Activating signalingClient.open() link...');
