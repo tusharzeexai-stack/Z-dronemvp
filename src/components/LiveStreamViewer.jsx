@@ -262,6 +262,9 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
         if (videoRef.current && event.streams[0]) {
           videoRef.current.srcObject = event.streams[0];
           setStatus('live');
+          videoRef.current.play()
+            .then(() => console.log('[KVS Debug] Video play() started successfully.'))
+            .catch(err => console.warn('[KVS Debug] Video play() was blocked or failed:', err));
         }
       };
 
@@ -452,6 +455,15 @@ export default function LiveStreamViewer({ droneId, droneName, getApiUrl, classN
         playsInline
         className="w-full h-full object-cover"
         style={{ display: status === 'live' ? 'block' : 'none' }}
+        onPlay={() => console.log('[KVS Debug] HTML5 <video> play event fired!')}
+        onPlaying={() => console.log('[KVS Debug] HTML5 <video> playing event fired! Video is active.')}
+        onWaiting={() => console.warn('[KVS Debug] HTML5 <video> is waiting/buffering...')}
+        onError={(e) => console.error('[KVS Debug] HTML5 <video> error event:', e)}
+        onLoadedMetadata={() => {
+          if (videoRef.current) {
+            console.log(`[KVS Debug] HTML5 <video> loadedmetadata. Dimensions: ${videoRef.current.videoWidth}x${videoRef.current.videoHeight}`);
+          }
+        }}
       />
 
       {/* ── Overlay for non-live states ── */}
