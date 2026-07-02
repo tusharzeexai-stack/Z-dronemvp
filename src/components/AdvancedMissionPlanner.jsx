@@ -334,6 +334,8 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
 
   // Simulation / Flight controls
   const [simulating, setSimulating] = useState(false);
+  const [sitlRunning, setSitlRunning] = useState(false);
+  const [sitlLoading, setSitlLoading] = useState(false);
   const [simStep, setSimStep] = useState(0);
   const [timelineEvents, setTimelineEvents] = useState([
     { id: 1, time: '10:00:00 AM', type: 'SYSTEM', message: 'MAVLink stream listener armed.' },
@@ -603,6 +605,69 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
     setFlightMode('RTL');
     logEvent('EMERGENCY', 'Mission aborted! Performing safety return RTL.');
   };
+
+  const fetchSitlStatus = async () => {
+    try {
+      const base = getApiUrl ? getApiUrl() : (import.meta.env.VITE_API_URL || localStorage.getItem('z_drone_backend_url') || '');
+      const response = await fetch(`${base}/api/drone/sitl/status`);
+      const data = await response.json();
+      if (data.status === 'success') {
+        setSitlRunning(data.running);
+      }
+    } catch (e) {
+      console.warn("Could not fetch SITL status:", e);
+    }
+  };
+
+  const handleStartSitl = async () => {
+    setSitlLoading(true);
+    logEvent('INFO', "Requesting Cloud SITL Simulator startup...");
+    try {
+      const base = getApiUrl ? getApiUrl() : (import.meta.env.VITE_API_URL || localStorage.getItem('z_drone_backend_url') || '');
+      const response = await fetch(`${base}/api/drone/sitl/start`, { method: 'POST' });
+      const data = await response.json();
+      if (data.status === 'success') {
+        logEvent('SUCCESS', "Cloud SITL start sequence initialized.");
+        setTimeout(() => {
+          fetchSitlStatus();
+          handleConnect();
+          setSitlLoading(false);
+        }, 6000);
+      } else {
+        logEvent('ERROR', `SITL Startup failed: ${data.message}`);
+        setSitlLoading(false);
+      }
+    } catch (e) {
+      logEvent('ERROR', "Failed to connect to SITL controller.");
+      setSitlLoading(false);
+    }
+  };
+
+  const handleStopSitl = async () => {
+    setSitlLoading(true);
+    logEvent('WARNING', "Requesting Cloud SITL termination...");
+    try {
+      const base = getApiUrl ? getApiUrl() : (import.meta.env.VITE_API_URL || localStorage.getItem('z_drone_backend_url') || '');
+      const response = await fetch(`${base}/api/drone/sitl/stop`, { method: 'POST' });
+      const data = await response.json();
+      if (data.status === 'success') {
+        logEvent('SUCCESS', "Cloud SITL stopped.");
+        setSitlRunning(false);
+        handleDisconnect();
+      } else {
+        logEvent('ERROR', `SITL shutdown failed: ${data.message}`);
+      }
+    } catch (e) {
+      logEvent('ERROR', "Failed to stop SITL.");
+    } finally {
+      setSitlLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSitlStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // --- LOG HELPER ---
   const logEvent = (type, message) => {
@@ -1224,6 +1289,32 @@ export default function AdvancedMissionPlanner({ appState, actions, getApiUrl })
                       <Link2Off className="w-3.5 h-3.5" /> Disconnect
                     </button>
                   )}
+                </div>
+
+                <div className="border-t border-slate-200/50 mt-2 pt-2">
+                  <div className="flex justify-between items-center text-[10px] text-slate-500 font-bold uppercase mb-1.5">
+                    <span>Cloud SITL Simulator</span>
+                    <span className={`w-2 h-2 rounded-full ${sitlRunning ? 'bg-emerald-400 animate-pulse' : 'bg-slate-300'}`}></span>
+                  </div>
+                  <div className="flex gap-2">
+                    {!sitlRunning ? (
+                      <button 
+                        onClick={handleStartSitl}
+                        disabled={sitlLoading}
+                        className="flex-1 bg-sky-900 hover:bg-sky-850 text-white font-bold py-1.5 rounded-lg text-[10px] transition-all flex items-center justify-center gap-1 shadow disabled:opacity-50"
+                      >
+                        {sitlLoading ? 'Starting...' : 'Start Cloud SITL'}
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={handleStopSitl}
+                        disabled={sitlLoading}
+                        className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-all flex items-center justify-center gap-1 shadow disabled:opacity-50"
+                      >
+                        {sitlLoading ? 'Stopping...' : 'Stop Cloud SITL'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 

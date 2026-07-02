@@ -12,6 +12,8 @@ WebSocket:    /ws/telemetry  (see main.py — telemetry pushed via bridge callba
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from typing import List, Optional
+import subprocess
+import os
 
 from app.services.mavlink_bridge import get_bridge
 
@@ -70,6 +72,46 @@ async def connect_autopilot(req: ConnectRequest):
 async def disconnect_autopilot():
     result = await get_bridge().disconnect()
     return result
+
+
+# ── SITL Simulation Control ───────────────────────────────────────────────────
+
+@router.get("/drone/sitl/status", summary="Get local SITL status")
+async def get_sitl_status():
+    try:
+        script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "manage-sitl.sh"))
+        if os.path.exists(script_path):
+            res = subprocess.run(["bash", script_path, "status"], capture_output=True, text=True)
+            is_running = "SITL* RUNNING" in res.stdout
+            return {"status": "success", "running": is_running}
+        return {"status": "error", "message": f"manage-sitl.sh script not found at {script_path}."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@router.post("/drone/sitl/start", summary="Start cloud SITL simulation")
+async def start_sitl():
+    try:
+        script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "manage-sitl.sh"))
+        if os.path.exists(script_path):
+            # Run in background via Popen so it doesn't block the API response
+            subprocess.Popen(["bash", script_path, "start"], start_new_session=True)
+            return {"status": "success", "message": "SITL startup sequence initialized in background."}
+        return {"status": "error", "message": f"manage-sitl.sh script not found at {script_path}."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@router.post("/drone/sitl/stop", summary="Stop cloud SITL simulation")
+async def stop_sitl():
+    try:
+        script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "manage-sitl.sh"))
+        if os.path.exists(script_path):
+            res = subprocess.run(["bash", script_path, "stop"], capture_output=True, text=True)
+            return {"status": "success", "message": "SITL stop sequence executed.", "output": res.stdout}
+        return {"status": "error", "message": f"manage-sitl.sh script not found at {script_path}."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 # ── Flight Controls ────────────────────────────────────────────────────────────
