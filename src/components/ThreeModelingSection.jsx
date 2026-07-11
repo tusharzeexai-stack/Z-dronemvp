@@ -57,7 +57,7 @@ function ThreeModelingSection() {
     scene.fog = new THREE.FogExp2(isDark ? 0x0B0F19 : 0xF8FAFC, 0.007);
 
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    camera.position.set(35, 30, 45);
+    camera.position.set(55, 42, 60);
     cameraRef.current = camera;
 
     // Create Renderer
@@ -82,18 +82,18 @@ function ThreeModelingSection() {
     controlsRef.current = controls;
 
     // Add Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
     scene.add(ambientLight);
     ambientLightRef.current = ambientLight;
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-    dirLight.position.set(40, 60, 20);
+    const dirLight = new THREE.DirectionalLight(0xfff5e0, 1.6);
+    dirLight.position.set(40, 80, 20);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 1024;
-    dirLight.shadow.mapSize.height = 1024;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
     dirLight.shadow.camera.near = 0.5;
-    dirLight.shadow.camera.far = 200;
-    const d = 50;
+    dirLight.shadow.camera.far = 300;
+    const d = 80;
     dirLight.shadow.camera.left = -d;
     dirLight.shadow.camera.right = d;
     dirLight.shadow.camera.top = d;
@@ -101,27 +101,47 @@ function ThreeModelingSection() {
     scene.add(dirLight);
     dirLightRef.current = dirLight;
 
+    // Fill light from below (pit glow)
+    const pitGlow = new THREE.PointLight(0x00d4ff, 0.8, 50);
+    pitGlow.position.set(0, -2, 0);
+    scene.add(pitGlow);
+
     // Add Helpers
-    const gridHelper = new THREE.GridHelper(100, 50, 0x0ea5e9, isDark ? 0x1e293b : 0xe2e8f0);
+    const gridHelper = new THREE.GridHelper(140, 70, 0x0ea5e9, isDark ? 0x1e293b : 0xe2e8f0);
     gridHelper.position.y = -0.5;
     scene.add(gridHelper);
 
-    // 2. Generate surveyed terrain mesh (16:9 aspect ratio for orthomosaic)
-    const terrainWidth = 106.6; 
+    // 2. Generate surveyed terrain mesh — high-res 3D construction site with circular pit
+    const terrainWidth = 106.6;
     const terrainHeight = 60;
-    const terrainSegmentsW = 64;
-    const terrainSegmentsH = 36;
+    const terrainSegmentsW = 120;
+    const terrainSegmentsH = 68;
     const terrainGeo = new THREE.PlaneGeometry(terrainWidth, terrainHeight, terrainSegmentsW, terrainSegmentsH);
-    
+
     const posAttr = terrainGeo.attributes.position;
     const count = posAttr.count;
 
     for (let i = 0; i < count; i++) {
       const x = posAttr.getX(i);
       const y = posAttr.getY(i);
-      
-      // Extremely subtle unevenness (looks like a slightly uneven construction site dirt)
-      const z = (Math.sin(x * 0.15) * Math.cos(y * 0.15) * 0.3) + (Math.sin(x * 0.05) * 0.2);
+      const r = Math.sqrt(x * x + y * y);
+
+      // Circular foundation pit (deep in the center, raised at edges)
+      let z = 0;
+      const pitR = 22; // radius of the circular pit
+      if (r < pitR) {
+        // Inside the pit — smooth bowl going down to -4
+        z = -4.0 * (1 - (r / pitR) * (r / pitR));
+      } else if (r < pitR + 8) {
+        // Raised lip / spoil mound around the pit
+        const t = (r - pitR) / 8;
+        z = 3.5 * Math.sin(t * Math.PI) + Math.sin(x * 0.18 + 0.5) * 0.5;
+      } else {
+        // Outer terrain — gentle uneven ground
+        z = Math.sin(x * 0.08 + 0.5) * Math.cos(y * 0.09) * 1.5
+          + Math.sin(x * 0.03) * 2.0
+          + Math.cos(y * 0.04 + 1) * 1.2;
+      }
       posAttr.setZ(i, z);
     }
     terrainGeo.computeVertexNormals();
@@ -129,14 +149,15 @@ function ThreeModelingSection() {
     // Rotate and position flat
     terrainGeo.rotateX(-Math.PI / 2);
 
-    const terrainTexture = new THREE.TextureLoader().load('/digital_twin/frames/frame_00.jpg');
-    terrainTexture.colorSpace = THREE.SRGBColorSpace; // Professional color mapping
-    
+    const terrainTexture = new THREE.TextureLoader().load('/digital_twin/frames2/frame_0001.jpg');
+    terrainTexture.colorSpace = THREE.SRGBColorSpace;
+    terrainTexture.wrapS = terrainTexture.wrapT = THREE.ClampToEdgeWrapping;
+
     const terrainMat = new THREE.MeshStandardMaterial({
-      roughness: 0.9, // Dirt is rough
-      metalness: 0.0,
+      roughness: 0.88,
+      metalness: 0.02,
       map: terrainTexture,
-      shadowSide: THREE.DoubleSide
+      shadowSide: THREE.DoubleSide,
     });
 
     const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
@@ -144,6 +165,48 @@ function ThreeModelingSection() {
     terrainMesh.castShadow = true;
     scene.add(terrainMesh);
     terrainMeshRef.current = terrainMesh;
+
+    // ── Concrete pit wall ring ─────────────────────────────────────────────
+    const pitWallMat = new THREE.MeshStandardMaterial({ color: 0x5a5a5a, roughness: 0.95, metalness: 0.05 });
+    const pitWall = new THREE.Mesh(
+      new THREE.CylinderGeometry(22.5, 22.0, 4.0, 64, 1, true),
+      pitWallMat
+    );
+    pitWall.position.set(0, -2.0, 0);
+    pitWall.castShadow = true;
+    scene.add(pitWall);
+
+    // ── Rebar grid in the foundation pit ─────────────────────────────────
+    const rebarMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.65 });
+    for (let r2 = -20; r2 <= 20; r2 += 2.2) {
+      const halfLen = Math.sqrt(Math.max(0, 20 * 20 - r2 * r2));
+      if (halfLen < 0.5) continue;
+      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(-halfLen, -3.85, r2), new THREE.Vector3(halfLen, -3.85, r2)
+      ]), rebarMat));
+      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(r2, -3.85, -halfLen), new THREE.Vector3(r2, -3.85, halfLen)
+      ]), rebarMat));
+    }
+
+    // ── Rebar vertical standees ────────────────────────────────────────────
+    const standMat = new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x00d4ff, emissiveIntensity: 0.3, roughness: 0.4, metalness: 0.6 });
+    for (let a = 0; a < Math.PI * 2; a += Math.PI / 10) {
+      const rx = Math.cos(a) * 16, rz = Math.sin(a) * 16;
+      const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 5.0, 6), standMat);
+      rod.position.set(rx, -1.5, rz);
+      scene.add(rod);
+    }
+
+    // ── Concrete pour pillars ──────────────────────────────────────────────
+    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x7a7a7a, roughness: 0.9, metalness: 0.0 });
+    [[18, 18], [-18, 18], [18, -18], [-18, -18]].forEach(([px, pz]) => {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 6.5, 12), pillarMat);
+      pillar.position.set(px, 3.25, pz);
+      pillar.castShadow = true;
+      scene.add(pillar);
+    });
+
 
     // 3. Create a detailed Drone Model Mesh
     const droneGroup = new THREE.Group();

@@ -183,13 +183,16 @@ export default function DigitalTwinSectionLargeArea() {
 
     // ── Orthomosaic terrain (real frame as texture) ─────────────────────────
     const TW = 160, TH = 90;
-    const terrainGeo = new THREE.PlaneGeometry(TW, TH, 80, 45);
+    const terrainGeo = new THREE.PlaneGeometry(TW, TH, 128, 72);
 
-    // Mild topographic noise
+    // Realistic topographic displacement — rebar pit in center, mounds at edges
     const posArr = terrainGeo.attributes.position;
     for (let i = 0; i < posArr.count; i++) {
       const x = posArr.getX(i), y = posArr.getY(i);
-      const z = Math.sin(x * 0.12) * Math.cos(y * 0.11) * 2.0 + Math.sin(x * 0.04) * 3.0;
+      const d = Math.sqrt(x * x + y * y) / 80;
+      const z = Math.sin(x * 0.10) * Math.cos(y * 0.09) * 2.5
+              + Math.sin(x * 0.03 + 0.8) * 4.5
+              + d * 3.0;
       posArr.setZ(i, Math.max(0, z));
     }
     terrainGeo.computeVertexNormals();
@@ -252,6 +255,175 @@ export default function DigitalTwinSectionLargeArea() {
       sprite.scale.set(7, 1.0, 1);
       scene.add(sprite);
     });
+
+    // ── 3D Construction Machinery Models ────────────────────────────────────
+    // Factory function for an excavator
+    const mkExcavator = (x, z, rotY, primaryColor) => {
+      const grp = new THREE.Group();
+      grp.position.set(x, 0, z);
+      grp.rotation.y = rotY;
+      const col = new THREE.Color(primaryColor);
+      const eMat = (emI = 0.4) => new THREE.MeshStandardMaterial({
+        color: col, emissive: col, emissiveIntensity: emI, roughness: 0.35, metalness: 0.4,
+      });
+      const darkMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6, metalness: 0.5 });
+
+      // Tracks
+      const trackL = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.9, 1.6), eMat(0.3));
+      trackL.position.set(0, 0.45, 0.9); trackL.castShadow = true; grp.add(trackL);
+      const trackR = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.9, 1.6), eMat(0.3));
+      trackR.position.set(0, 0.45, -0.9); trackR.castShadow = true; grp.add(trackR);
+
+      // Undercarriage
+      const under = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.55, 1.6), darkMat);
+      under.position.set(0, 0.95, 0); under.castShadow = true; grp.add(under);
+
+      // Cab / upper body
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.6, 1.7), eMat(0.5));
+      cab.position.set(-0.3, 2.1, 0); cab.castShadow = true; grp.add(cab);
+
+      // Cab glass
+      const glass = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.8, 1.1),
+        new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x00d4ff, emissiveIntensity: 0.3, transparent: true, opacity: 0.6 }));
+      glass.position.set(0.85, 2.25, 0); grp.add(glass);
+
+      // Boom arm
+      const boomGrp = new THREE.Group();
+      boomGrp.position.set(1.0, 2.7, 0);
+      const boom = new THREE.Mesh(new THREE.BoxGeometry(0.35, 4.2, 0.35), eMat(0.6));
+      boom.position.set(0, 2.1, 0);
+      boom.rotation.z = -Math.PI / 6;
+      boom.castShadow = true;
+      boomGrp.add(boom);
+
+      // Stick
+      const stick = new THREE.Mesh(new THREE.BoxGeometry(0.25, 2.8, 0.25), eMat(0.6));
+      stick.position.set(1.5, 3.8, 0);
+      stick.rotation.z = Math.PI / 5;
+      stick.castShadow = true;
+      boomGrp.add(stick);
+
+      // Bucket
+      const bucket = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.65, 1.1), eMat(0.7));
+      bucket.position.set(2.8, 2.1, 0);
+      bucket.castShadow = true;
+      boomGrp.add(bucket);
+      grp.add(boomGrp);
+
+      // Exhaust pipe
+      const exhaust = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.0, 8), darkMat);
+      exhaust.position.set(-0.8, 3.0, -0.5); grp.add(exhaust);
+
+      // Glow point light
+      const pl = new THREE.PointLight(col, 0.5, 14);
+      pl.position.set(x, 3, z);
+      scene.add(pl);
+
+      scene.add(grp);
+      return grp;
+    };
+
+    // Place excavators at positions matching the v3_x_1 footage
+    mkExcavator(-22, -18, 0.6,  '#eab308'); // Bulldozer zone Z1
+    mkExcavator(  8, -12, -0.4, '#f59e0b'); // Backhoe zone Z1
+    mkExcavator( 30, -5,  1.2,  '#eab308'); // Equipment laydown Z3
+
+    // ── Construction Crane ──────────────────────────────────────────────────
+    const mkCrane = (x, z) => {
+      const grp = new THREE.Group();
+      grp.position.set(x, 0, z);
+      const steelMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.4, metalness: 0.8 });
+      const yellowMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xf59e0b, emissiveIntensity: 0.3, roughness: 0.4 });
+
+      // Mast tower
+      const mast = new THREE.Mesh(new THREE.BoxGeometry(1.0, 22, 1.0), steelMat);
+      mast.position.y = 11; mast.castShadow = true; grp.add(mast);
+
+      // Jib (horizontal arm)
+      const jib = new THREE.Mesh(new THREE.BoxGeometry(18, 0.5, 0.5), yellowMat);
+      jib.position.set(4, 22, 0); jib.castShadow = true; grp.add(jib);
+
+      // Counter jib
+      const cjib = new THREE.Mesh(new THREE.BoxGeometry(6, 0.5, 0.5), yellowMat);
+      cjib.position.set(-4, 22, 0); cjib.castShadow = true; grp.add(cjib);
+
+      // Cable from tip
+      const cableGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(13, 22, 0), new THREE.Vector3(13, 3, 0)
+      ]);
+      grp.add(new THREE.Line(cableGeo, new THREE.LineBasicMaterial({ color: 0xaaaaaa })));
+
+      // Hook block
+      const hook = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), steelMat);
+      hook.position.set(13, 2.5, 0); grp.add(hook);
+
+      const pl = new THREE.PointLight(0xf59e0b, 0.4, 30);
+      pl.position.set(x, 22, z); scene.add(pl);
+
+      scene.add(grp);
+      return grp;
+    };
+    mkCrane(-50, -30);
+    mkCrane( 45,  20);
+
+    // ── Dump Truck ──────────────────────────────────────────────────────────
+    const mkTruck = (x, z, rotY) => {
+      const grp = new THREE.Group();
+      grp.position.set(x, 0, z);
+      grp.rotation.y = rotY;
+      const truckMat = new THREE.MeshStandardMaterial({ color: 0xa855f7, emissive: 0xa855f7, emissiveIntensity: 0.3, roughness: 0.4 });
+
+      // Body
+      const body = new THREE.Mesh(new THREE.BoxGeometry(5.5, 2.5, 2.5), truckMat);
+      body.position.y = 1.25; body.castShadow = true; grp.add(body);
+
+      // Cab
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.0, 2.3),
+        new THREE.MeshStandardMaterial({ color: 0x7e22ce, roughness: 0.3, metalness: 0.5 }));
+      cab.position.set(-2.5, 2.0, 0); cab.castShadow = true; grp.add(cab);
+
+      // Wheels (4)
+      [[-2, -1.4], [-2, 1.4], [1.5, -1.4], [1.5, 1.4]].forEach(([wx, wz]) => {
+        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.5, 12),
+          new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8 }));
+        wheel.rotation.x = Math.PI / 2;
+        wheel.position.set(wx, 0.7, wz); grp.add(wheel);
+      });
+
+      const pl = new THREE.PointLight(0xa855f7, 0.4, 12);
+      pl.position.set(x, 2, z); scene.add(pl);
+
+      scene.add(grp);
+      return grp;
+    };
+    mkTruck(20, 8,  0.3);
+    mkTruck(-10, 22, -0.8);
+
+    // ── Concrete Foundation Structure (rebar slab in center) ───────────────
+    (() => {
+      const rebarMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.7 });
+      for (let i = -28; i <= 28; i += 2.5) {
+        const h = Math.sqrt(28 * 28 - Math.min(i * i, 28 * 28));
+        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(-h, 0.15, i), new THREE.Vector3(h, 0.15, i)
+        ]), rebarMat));
+        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(i, 0.15, -h), new THREE.Vector3(i, 0.15, h)
+        ]), rebarMat));
+      }
+      // Low wall sections
+      const wallMat = new THREE.MeshStandardMaterial({
+        color: 0x001a28, emissive: 0x00e5ff, emissiveIntensity: 0.1, transparent: true, opacity: 0.7, roughness: 0.9,
+      });
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+        const wx = Math.cos(a) * 30, wz = Math.sin(a) * 30;
+        const wall = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.2, 0.4), wallMat);
+        wall.position.set(wx, 0.6, wz);
+        wall.rotation.y = a;
+        wall.castShadow = true;
+        scene.add(wall);
+      }
+    })();
 
     // ── Workers (simple glowing capsule figures) ────────────────────────────
     const workerPositions = [
