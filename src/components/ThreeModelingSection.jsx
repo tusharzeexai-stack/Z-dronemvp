@@ -208,6 +208,50 @@ function ThreeModelingSection() {
       rotorPropellers.push(propeller);
     });
 
+    // ── Excavator models (to give it true 3D presence) ─────────
+    const mkExcavator = (x, z, rot, color) => {
+      const grp = new THREE.Group();
+      grp.position.set(x, 0, z);
+      grp.rotation.y = rot;
+      const bodyC = new THREE.Color(color);
+      const eMat  = (em = 0.5) => new THREE.MeshStandardMaterial({
+        color: bodyC, emissive: bodyC, emissiveIntensity: em,
+        roughness: 0.3, metalness: 0.3,
+      });
+
+      // Lower body / tracks
+      const tracks = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.8, 1.8), eMat(0.3));
+      tracks.position.y = 0.4;
+      grp.add(tracks);
+      // Upper body cab
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(2.1, 1.35, 1.5), eMat(0.5));
+      cab.position.set(-0.15, 1.5, 0);
+      grp.add(cab);
+      // Boom arm
+      const boom = new THREE.Mesh(new THREE.BoxGeometry(0.27, 3.3, 0.27), eMat(0.6));
+      boom.position.set(1.05, 2.7, 0);
+      boom.rotation.z = -Math.PI / 5;
+      grp.add(boom);
+      // Stick arm
+      const stick = new THREE.Mesh(new THREE.BoxGeometry(0.18, 2.1, 0.18), eMat(0.6));
+      stick.position.set(2.4, 1.8, 0);
+      stick.rotation.z = Math.PI / 4;
+      grp.add(stick);
+      // Bucket
+      const bucket = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.52, 0.9), eMat(0.7));
+      bucket.position.set(3.3, 0.75, 0);
+      grp.add(bucket);
+
+      scene.add(grp);
+      return grp;
+    };
+
+    // Positioned to match the excavators seen in frame_00.jpg
+    const exc1 = mkExcavator(-16, -9, 0.8, '#eab308');
+    const exc2 = mkExcavator( 5,  -5, -0.3, '#f59e0b');
+    const exc3 = mkExcavator( 14, -8, Math.PI / 3, '#eab308');
+
+
     // 4. Create visual 3D Hotspot Spheres
     const hotspotGroup = new THREE.Group();
     scene.add(hotspotGroup);
