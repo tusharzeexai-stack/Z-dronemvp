@@ -110,36 +110,17 @@ function ThreeModelingSection() {
     const terrainSegments = 60;
     const terrainGeo = new THREE.PlaneGeometry(terrainSize, terrainSize, terrainSegments, terrainSegments);
     
-    // Displace vertices to simulate mountain hills
     const posAttr = terrainGeo.attributes.position;
-    const colorArray = [];
     const count = posAttr.count;
 
     for (let i = 0; i < count; i++) {
       const x = posAttr.getX(i);
       const y = posAttr.getY(i);
       
-      // Multi-frequency noise displacement
-      const z = Math.sin(x * 0.08) * Math.cos(y * 0.08) * 6 + 
-                Math.sin(x * 0.2) * Math.sin(y * 0.2) * 1.5 + 
-                Math.cos(x * 0.03) * 3;
-      
+      // Subtle displacement to simulate photogrammetry mesh noise
+      const z = Math.sin(x * 0.3) * Math.cos(y * 0.3) * 0.4 + Math.sin(x * 0.1) * 0.5;
       posAttr.setZ(i, z);
-
-      // Height coloring for contour and points options
-      const heightRatio = (z + 10) / 20; // 0 to 1
-      const color = new THREE.Color();
-      // Gradient: Blue (low) -> Green -> Yellow -> Red (high)
-      if (heightRatio < 0.3) {
-        color.setHSL(0.6 + (0.3 - heightRatio) * 0.5, 0.8, 0.4);
-      } else if (heightRatio < 0.7) {
-        color.setHSL(0.3 + (0.7 - heightRatio) * 0.5, 0.8, 0.4);
-      } else {
-        color.setHSL(0.0 + (1.0 - heightRatio) * 0.3, 0.8, 0.45);
-      }
-      colorArray.push(color.r, color.g, color.b);
     }
-    terrainGeo.setAttribute('color', new THREE.Float32BufferAttribute(colorArray, 3));
     terrainGeo.computeVertexNormals();
 
     // Rotate and position flat
@@ -148,8 +129,7 @@ function ThreeModelingSection() {
     const terrainMat = new THREE.MeshStandardMaterial({
       roughness: 0.85,
       metalness: 0.05,
-      flatShading: true,
-      vertexColors: true,
+      map: new THREE.TextureLoader().load('/digital_twin/frames2/frame_0150.jpg'),
       shadowSide: THREE.DoubleSide
     });
 
@@ -463,6 +443,9 @@ function ThreeModelingSection() {
     } else if (displayMode === 'wireframe') {
       terrain.visible = true;
       terrain.material.wireframe = true;
+      terrain.material.opacity = 1;
+      terrain.material.transparent = false;
+      terrain.material.map = null; // Hide texture in wireframe
       terrain.material.needsUpdate = true;
       particles.visible = false;
     } else if (displayMode === 'points') {
@@ -471,7 +454,12 @@ function ThreeModelingSection() {
     } else if (displayMode === 'contour') {
       terrain.visible = true;
       terrain.material.wireframe = false;
-      terrain.material.flatShading = false; // Smooth contour look
+      terrain.material.flatShading = false;
+      terrain.material.opacity = 1;
+      terrain.material.transparent = false;
+      if (!terrain.material.map) {
+        terrain.material.map = new THREE.TextureLoader().load('/digital_twin/frames2/frame_0150.jpg');
+      }
       terrain.material.needsUpdate = true;
       particles.visible = false;
     }
