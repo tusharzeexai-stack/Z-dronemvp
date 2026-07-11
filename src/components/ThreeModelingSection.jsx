@@ -21,6 +21,7 @@ function ThreeModelingSection() {
   const terrainMeshRef = useRef(null);
   const droneGroupRef = useRef(null);
   const particleSystemRef = useRef(null);
+  const wifiSkeletonsRef = useRef([]);
 
   // States
   const [displayMode, setDisplayMode] = useState('shaded'); // shaded, wireframe, points, contour
@@ -260,6 +261,52 @@ function ThreeModelingSection() {
     const exc2 = mkExcavator( 5,  -5, -0.3, '#f59e0b');
     const exc3 = mkExcavator( 14, -8, Math.PI / 3, '#eab308');
 
+    // ── RuView WiFi DensePose Skeletons ─────────
+    const mkWiFiSkeleton = (x, z, colorStr) => {
+      const grp = new THREE.Group();
+      grp.position.set(x, 0, z);
+      
+      const pColor = new THREE.Color(colorStr);
+      const jointMat = new THREE.MeshBasicMaterial({ color: pColor, wireframe: true, transparent: true, opacity: 0.8 });
+      const boneMat = new THREE.LineBasicMaterial({ color: pColor, transparent: true, opacity: 0.5 });
+      
+      const jointGeo = new THREE.SphereGeometry(0.15, 8, 8);
+      
+      // 17 keypoints (head, shoulders, elbows, wrists, hips, knees, ankles)
+      const joints = [];
+      for (let i=0; i<17; i++) {
+        const j = new THREE.Mesh(jointGeo, jointMat);
+        grp.add(j);
+        joints.push(j);
+      }
+      
+      // Lines connecting the joints
+      const lineGeo = new THREE.BufferGeometry();
+      // COCO Connections
+      const connections = [
+        [0,1], [0,2], [1,2], // Head to shoulders
+        [1,3], [3,5],        // Left arm
+        [2,4], [4,6],        // Right arm
+        [1,7], [2,8], [7,8], // Torso
+        [7,9], [9,11],       // Left leg
+        [8,10], [10,12]      // Right leg
+      ];
+      // Create empty line segment positions array (2 vertices per connection, 3 coords per vertex)
+      const positions = new Float32Array(connections.length * 2 * 3);
+      lineGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      
+      const skeletonLines = new THREE.LineSegments(lineGeo, boneMat);
+      grp.add(skeletonLines);
+      
+      scene.add(grp);
+      wifiSkeletonsRef.current.push({ grp, joints, skeletonLines, connections, baseX: x, baseZ: z, phase: Math.random() * Math.PI * 2 });
+      return grp;
+    };
+
+    mkWiFiSkeleton(-10, -5, '#0ea5e9'); // Worker 1
+    mkWiFiSkeleton(10, 0, '#ec4899');  // Worker 2
+    mkWiFiSkeleton(0, -15, '#10b981'); // Worker 3
+
 
 
     // 4. Create visual 3D Hotspot Spheres
@@ -372,6 +419,57 @@ function ThreeModelingSection() {
           prop.rotation.y += 0.7; // Speed of spin
         });
       }
+
+      // Animate RuView WiFi Skeletons
+      wifiSkeletonsRef.current.forEach((skel, i) => {
+        const t = elapsed * 2.0 + skel.phase;
+        
+        // Simulating walking motion in 3D
+        skel.grp.position.x = skel.baseX + Math.sin(t * 0.2) * 5;
+        skel.grp.position.z = skel.baseZ + Math.cos(t * 0.2) * 5;
+        
+        // Base height calculation depending on terrain
+        const py = (Math.sin(skel.grp.position.x * 0.15) * Math.cos(skel.grp.position.z * 0.15) * 0.3) + (Math.sin(skel.grp.position.x * 0.05) * 0.2);
+        skel.grp.position.y = py;
+
+        const joints = skel.joints;
+        // Head
+        joints[0].position.set(0, 3.8 + Math.sin(t*2)*0.1, 0);
+        // Shoulders
+        joints[1].position.set(-0.6, 3.0 + Math.sin(t*2)*0.1, 0);
+        joints[2].position.set(0.6, 3.0 + Math.sin(t*2)*0.1, 0);
+        // Elbows (swinging opposite to legs)
+        joints[3].position.set(-0.7, 2.0, Math.sin(t)*0.5);
+        joints[4].position.set(0.7, 2.0, -Math.sin(t)*0.5);
+        // Wrists
+        joints[5].position.set(-0.8, 1.0, Math.sin(t)*0.8);
+        joints[6].position.set(0.8, 1.0, -Math.sin(t)*0.8);
+        // Hips
+        joints[7].position.set(-0.3, 1.8, 0);
+        joints[8].position.set(0.3, 1.8, 0);
+        // Knees (walking)
+        joints[9].position.set(-0.3, 1.0, -Math.sin(t)*0.6);
+        joints[10].position.set(0.3, 1.0, Math.sin(t)*0.6);
+        // Ankles
+        joints[11].position.set(-0.3, 0.2, -Math.sin(t)*0.8 + Math.max(0, Math.cos(t)*0.4));
+        joints[12].position.set(0.3, 0.2, Math.sin(t)*0.8 + Math.max(0, -Math.cos(t)*0.4));
+        
+        // Add random jitter for the other 4 points (simulate noisy WiFi detection points)
+        for (let j=13; j<17; j++) {
+           joints[j].position.set(Math.random()-0.5, Math.random()*4, Math.random()-0.5);
+        }
+
+        // Update lines
+        const posAttr = skel.skeletonLines.geometry.attributes.position;
+        skel.connections.forEach((conn, idx) => {
+          const ptA = joints[conn[0]].position;
+          const ptB = joints[conn[1]].position;
+          
+          posAttr.setXYZ(idx * 2, ptA.x, ptA.y, ptA.z);
+          posAttr.setXYZ(idx * 2 + 1, ptB.x, ptB.y, ptB.z);
+        });
+        posAttr.needsUpdate = true;
+      });
 
       // Hover movement for drone
       if (!flythroughActive && droneGroup) {
@@ -603,6 +701,21 @@ function ThreeModelingSection() {
           <div>Cam Position: [X: {currentCameraPos.x}, Y: {currentCameraPos.y}, Z: {currentCameraPos.z}]</div>
           <div>Target Focus: {activeHotspot ? activeHotspot.name : 'Origin Center'}</div>
           <div>Render Frame: 60.0 FPS / WebGL v2.0</div>
+        </div>
+
+        {/* RuView WiFi DensePose HUD */}
+        <div className="absolute top-16 left-8 bg-slate-900/80 backdrop-blur-md px-3 py-2 rounded-lg border border-emerald-800/50 text-[10px] space-y-1 text-slate-300 z-20 pointer-events-none shadow-md">
+          <div className="font-bold text-emerald-400 flex items-center gap-1">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            RUVIEW WIFI DENSEPOSE
+          </div>
+          <div>ESP32 Edge Nodes: 4 Active</div>
+          <div>RF Coherence: 99.4% (Channel 6)</div>
+          <div>Workers Tracked (3D Pose): 3</div>
+          <div className="text-emerald-500/80 mt-1">✓ Privacy-safe sensing active</div>
         </div>
 
         {/* Quick Mode Bar */}
