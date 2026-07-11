@@ -105,38 +105,68 @@ function ThreeModelingSection() {
     gridHelper.position.y = -0.5;
     scene.add(gridHelper);
 
-    // 2. Generate surveyed terrain mesh (16:9 aspect ratio for orthomosaic)
-    const terrainWidth = 106.6; // 16:9 ratio
+    // 2. Generate 3D photogrammetry mesh from image luminance
+    const terrainWidth = 106.6; 
     const terrainHeight = 60;
-    const terrainSegmentsW = 64;
-    const terrainSegmentsH = 36;
+    const terrainSegmentsW = 128; // High density for 3D mesh
+    const terrainSegmentsH = 72;
     const terrainGeo = new THREE.PlaneGeometry(terrainWidth, terrainHeight, terrainSegmentsW, terrainSegmentsH);
     
-    const posAttr = terrainGeo.attributes.position;
-    const count = posAttr.count;
+    const terrainTexture = new THREE.TextureLoader().load('/digital_twin/frames/frame_00.jpg', (texture) => {
+      // Once texture loads, create a heightmap from it
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 144;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(texture.image, 0, 0, canvas.width, canvas.height);
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
-    for (let i = 0; i < count; i++) {
-      const x = posAttr.getX(i);
-      const y = posAttr.getY(i);
+      const posAttr = terrainGeo.attributes.position;
+      const count = posAttr.count;
+
+      for (let i = 0; i < count; i++) {
+        const u = i % (terrainSegmentsW + 1);
+        const v = Math.floor(i / (terrainSegmentsW + 1));
+        
+        // Map vertex to canvas pixel
+        const px = Math.floor((u / terrainSegmentsW) * (canvas.width - 1));
+        // v goes from top to bottom in PlaneGeometry, but image data is top-left origin.
+        const py = Math.floor(((terrainSegmentsH - v) / terrainSegmentsH) * (canvas.height - 1));
+        
+        const idx = (py * canvas.width + px) * 4;
+        const r = imgData[idx];
+        const g = imgData[idx + 1];
+        const b = imgData[idx + 2];
+        
+        // Luminance calculation
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        
+        // Displace Z based on luminance to create true 3D geometry
+        // Invert luminance if needed, or adjust scale
+        const height = luminance * 12.0; 
+        
+        // Additional noise to make dirt look rough
+        const noise = Math.sin(u * 0.5) * Math.cos(v * 0.5) * 0.2;
+        
+        posAttr.setZ(i, height + noise - 4.0); // Center height a bit
+      }
       
-      // Extremely subtle unevenness (looks like a slightly uneven construction site dirt)
-      const z = (Math.sin(x * 0.15) * Math.cos(y * 0.15) * 0.3) + (Math.sin(x * 0.05) * 0.2);
-      posAttr.setZ(i, z);
-    }
-    terrainGeo.computeVertexNormals();
+      terrainGeo.computeVertexNormals();
+      terrainGeo.attributes.position.needsUpdate = true;
+    });
+
+    terrainTexture.colorSpace = THREE.SRGBColorSpace;
+    
+    const terrainMat = new THREE.MeshStandardMaterial({
+      roughness: 0.95, 
+      metalness: 0.05,
+      map: terrainTexture,
+      wireframe: false,
+      side: THREE.DoubleSide
+    });
 
     // Rotate and position flat
     terrainGeo.rotateX(-Math.PI / 2);
-
-    const terrainTexture = new THREE.TextureLoader().load('/digital_twin/frames/frame_00.jpg');
-    terrainTexture.colorSpace = THREE.SRGBColorSpace; // Professional color mapping
-    
-    const terrainMat = new THREE.MeshStandardMaterial({
-      roughness: 0.9, // Dirt is rough
-      metalness: 0.0,
-      map: terrainTexture,
-      shadowSide: THREE.DoubleSide
-    });
 
     const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
     terrainMesh.receiveShadow = true;
@@ -208,48 +238,7 @@ function ThreeModelingSection() {
       rotorPropellers.push(propeller);
     });
 
-    // ── Excavator models (to give it true 3D presence) ─────────
-    const mkExcavator = (x, z, rot, color) => {
-      const grp = new THREE.Group();
-      grp.position.set(x, 0, z);
-      grp.rotation.y = rot;
-      const bodyC = new THREE.Color(color);
-      const eMat  = (em = 0.5) => new THREE.MeshStandardMaterial({
-        color: bodyC, emissive: bodyC, emissiveIntensity: em,
-        roughness: 0.3, metalness: 0.3,
-      });
-
-      // Lower body / tracks
-      const tracks = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.8, 1.8), eMat(0.3));
-      tracks.position.y = 0.4;
-      grp.add(tracks);
-      // Upper body cab
-      const cab = new THREE.Mesh(new THREE.BoxGeometry(2.1, 1.35, 1.5), eMat(0.5));
-      cab.position.set(-0.15, 1.5, 0);
-      grp.add(cab);
-      // Boom arm
-      const boom = new THREE.Mesh(new THREE.BoxGeometry(0.27, 3.3, 0.27), eMat(0.6));
-      boom.position.set(1.05, 2.7, 0);
-      boom.rotation.z = -Math.PI / 5;
-      grp.add(boom);
-      // Stick arm
-      const stick = new THREE.Mesh(new THREE.BoxGeometry(0.18, 2.1, 0.18), eMat(0.6));
-      stick.position.set(2.4, 1.8, 0);
-      stick.rotation.z = Math.PI / 4;
-      grp.add(stick);
-      // Bucket
-      const bucket = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.52, 0.9), eMat(0.7));
-      bucket.position.set(3.3, 0.75, 0);
-      grp.add(bucket);
-
-      scene.add(grp);
-      return grp;
-    };
-
-    // Positioned to match the excavators seen in frame_00.jpg
-    const exc1 = mkExcavator(-16, -9, 0.8, '#eab308');
-    const exc2 = mkExcavator( 5,  -5, -0.3, '#f59e0b');
-    const exc3 = mkExcavator( 14, -8, Math.PI / 3, '#eab308');
+    // Fake excavators removed for true photogrammetry model
 
 
     // 4. Create visual 3D Hotspot Spheres
