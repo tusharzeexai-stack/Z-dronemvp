@@ -280,20 +280,58 @@ function DigitalTwinSection() {
       core.position.set(rc.x + offsetX, 0.05, rc.z + offsetZ);
       scene.add(core);
 
-      // Person cylinder marker (standing figure)
-      const figGeo = new THREE.CapsuleGeometry(0.18, 1.0, 4, 8);
-      const figMat = new THREE.MeshStandardMaterial({
+      // ── Human-shaped figure (head + torso + arms + legs) ────
+      const fig = new THREE.Group();
+      fig.position.set(rc.x + offsetX, 0, rc.z + offsetZ);
+      scene.add(fig);
+
+      const hMat = new THREE.MeshStandardMaterial({
         color: new THREE.Color(person.color),
         emissive: new THREE.Color(person.color),
-        emissiveIntensity: 0.8,
+        emissiveIntensity: 0.9,
         transparent: true,
-        opacity: 0.85,
-        roughness: 0.3,
+        opacity: 0.88,
+        roughness: 0.25,
+        metalness: 0.1,
       });
-      const fig = new THREE.Mesh(figGeo, figMat);
-      fig.position.set(rc.x + offsetX, 0.8, rc.z + offsetZ);
-      fig.castShadow = true;
-      scene.add(fig);
+
+      const addPart = (geo, px, py, pz, rx = 0, ry = 0, rz = 0) => {
+        const m = new THREE.Mesh(geo, hMat.clone());
+        m.position.set(px, py, pz);
+        m.rotation.set(rx, ry, rz);
+        m.castShadow = true;
+        fig.add(m);
+        return m;
+      };
+
+      // Head
+      addPart(new THREE.SphereGeometry(0.16, 10, 10), 0, 1.72, 0);
+      // Neck
+      addPart(new THREE.CylinderGeometry(0.065, 0.07, 0.15, 8), 0, 1.52, 0);
+      // Torso
+      addPart(new THREE.BoxGeometry(0.36, 0.52, 0.18), 0, 1.18, 0);
+      // Hips
+      addPart(new THREE.BoxGeometry(0.30, 0.18, 0.16), 0, 0.88, 0);
+      // Left upper arm
+      addPart(new THREE.CylinderGeometry(0.055, 0.048, 0.32, 8), -0.26, 1.18, 0, 0, 0, Math.PI / 10);
+      // Left lower arm
+      addPart(new THREE.CylinderGeometry(0.044, 0.038, 0.30, 8), -0.30, 0.86, 0, 0, 0, Math.PI / 12);
+      // Right upper arm
+      addPart(new THREE.CylinderGeometry(0.055, 0.048, 0.32, 8),  0.26, 1.18, 0, 0, 0, -Math.PI / 10);
+      // Right lower arm
+      addPart(new THREE.CylinderGeometry(0.044, 0.038, 0.30, 8),  0.30, 0.86, 0, 0, 0, -Math.PI / 12);
+      // Left upper leg
+      addPart(new THREE.CylinderGeometry(0.075, 0.065, 0.40, 8), -0.10, 0.59, 0);
+      // Left lower leg
+      addPart(new THREE.CylinderGeometry(0.060, 0.050, 0.38, 8), -0.10, 0.18, 0);
+      // Right upper leg
+      addPart(new THREE.CylinderGeometry(0.075, 0.065, 0.40, 8),  0.10, 0.59, 0);
+      // Right lower leg
+      addPart(new THREE.CylinderGeometry(0.060, 0.050, 0.38, 8),  0.10, 0.18, 0);
+      // Left foot
+      addPart(new THREE.BoxGeometry(0.12, 0.06, 0.22), -0.10, 0.03, 0.04);
+      // Right foot
+      addPart(new THREE.BoxGeometry(0.12, 0.06, 0.22),  0.10, 0.03, 0.04);
 
       // Glowing ring at feet
       const ringGeo = new THREE.RingGeometry(0.25, 0.38, 24);
