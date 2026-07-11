@@ -266,6 +266,7 @@ export default function DigitalTwinSectionV3() {
     const mkWorker = (x, z, color, phase) => {
       const grp = new THREE.Group();
       grp.position.set(x, 0, z);
+      grp.scale.set(1.5, 1.5, 1.5); // Make workers larger (1.5x)
       const c = new THREE.Color(color);
       const wMat = (em = 0.8) => new THREE.MeshStandardMaterial({
         color: c, emissive: c, emissiveIntensity: em,
@@ -668,10 +669,9 @@ export default function DigitalTwinSectionV3() {
         </div>
 
       {/* ── TIMELINE SCRUBBER ────────────────────────────────────── */}
-      <div className="absolute bottom-[60px] left-0 right-0 px-5 py-2 z-30 pointer-events-auto">
-        <div className="flex items-center gap-4 bg-[#010d1a]/85 backdrop-blur border border-[#003344] px-4 py-1.5 rounded-full shadow-lg max-w-3xl mx-auto">
-            <button className="text-[#00e5ff] opacity-70 hover:opacity-100 text-xs tracking-widest font-bold">▶</button>
-            <span className="text-[#00e5ff] text-[9px] font-bold tracking-wider w-16 text-right">
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-[80%] max-w-[500px] z-30 pointer-events-auto">
+        <div className="flex items-center gap-4 bg-[#010d1a]/85 backdrop-blur border border-[#003344] px-4 py-1.5 rounded-full shadow-lg">
+            <span className="text-[#00e5ff] text-[9px] font-bold tracking-wider w-12 text-right">
                {((currentFrame / 30).toFixed(1))}s
             </span>
             <input 
