@@ -13,6 +13,10 @@ import LiveStreamViewer from './LiveStreamViewer';
 import AnalyticsCenter from './AnalyticsCenter';
 import AdvancedMissionPlanner from './AdvancedMissionPlanner';
 import { useDetections } from '../hooks/useDetections';
+import GeospatialSection from './GeospatialSection';
+import ThreeModelingSection from './ThreeModelingSection';
+import DigitalTwinSection from './DigitalTwinSection';
+import CapabilitiesSection from './CapabilitiesSection';
 
 // Maruti Suzuki IMT Kharkhoda flight path interpolation
 const FLIGHT_PATH = [
@@ -901,6 +905,10 @@ function Dashboard({ onLogout }) {
     { id: 'reports', label: 'Flights', icon: 'route' },
     { id: 'mission_planner', label: 'Mission Planner', icon: 'explore' },
     { id: 'live_mon', label: 'Live Monitoring', icon: 'sensors' },
+    { id: 'geospatial', label: 'Geo-Spatial Data', icon: 'layers' },
+    { id: 'threed_modeling', label: '3D Modeling', icon: '3d_rotation' },
+    { id: 'digital_twin', label: 'Digital Twin', icon: 'hub' },
+    { id: 'capabilities', label: 'Capabilities', icon: 'verified' },
     { id: 'analytics', label: 'Analytics', icon: 'analytics' },
     { id: 'safety', label: 'Alerts', icon: 'notifications', badge: activeAlerts.length },
     { id: 'maintenance', label: 'Maintenance', icon: 'build' },
@@ -2165,6 +2173,26 @@ function Dashboard({ onLogout }) {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* TAB: GEO-SPATIAL DATA */}
+            {activeTab === 'geospatial' && (
+              <GeospatialSection />
+            )}
+
+            {/* TAB: 3D MODELING */}
+            {activeTab === 'threed_modeling' && (
+              <ThreeModelingSection />
+            )}
+
+            {/* TAB: DIGITAL TWIN */}
+            {activeTab === 'digital_twin' && (
+              <DigitalTwinSection />
+            )}
+
+            {/* TAB: CAPABILITIES */}
+            {activeTab === 'capabilities' && (
+              <CapabilitiesSection />
             )}
 
             {/* TAB 3: ZONE ANALYTICS */}
