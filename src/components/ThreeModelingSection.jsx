@@ -270,13 +270,11 @@ function ThreeModelingSection() {
 
     for (let i = 0; i < pointCount; i++) {
       // Distribute randomly in terrain bounds
-      const px = (Math.random() - 0.5) * terrainSize;
-      const pz = (Math.random() - 0.5) * terrainSize;
+      const px = (Math.random() - 0.5) * 106.6; // terrainWidth
+      const pz = (Math.random() - 0.5) * 60; // terrainHeight
       
       // Calculate elevation
-      const py = Math.sin(px * 0.08) * Math.cos(pz * 0.08) * 6 + 
-                 Math.sin(px * 0.2) * Math.sin(pz * 0.2) * 1.5 + 
-                 Math.cos(px * 0.03) * 3;
+      const py = (Math.sin(px * 0.15) * Math.cos(pz * 0.15) * 0.3) + (Math.sin(px * 0.05) * 0.2);
 
       positionsArr[i * 3] = px;
       positionsArr[i * 3 + 1] = py;
