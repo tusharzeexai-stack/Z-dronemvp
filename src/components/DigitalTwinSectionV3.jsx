@@ -67,6 +67,8 @@ export default function DigitalTwinSectionV3() {
   ]);
   const [activeZone, setActiveZone] = useState(null);
   const [camPos, setCamPos] = useState({ x: 0, y: 0, z: 0 });
+  const [currentFrame, setCurrentFrame] = useState(0);
+  const MAX_FRAMES = 350;
 
   const addLog = useCallback((msg) => {
     setLogs(p => { const n = [...p, `> ${msg}`]; return n.length > 50 ? n.slice(-50) : n; });
@@ -412,7 +414,10 @@ export default function DigitalTwinSectionV3() {
       rafRef.current = requestAnimationFrame(animate);
       const t = clockRef.current.getElapsedTime();
 
-      // Worker animations
+      // Get current frame from a ref to sync with state without dependency array issues
+      const frameIndex = parseInt(document.getElementById('twin-timeline')?.value || 0);
+
+      // Worker animations (synced to timeline + subtle idle breathing)
       objectsRef.current.forEach(item => {
         const pulse = 0.65 + Math.sin(t * 2.5 + item.phase) * 0.32;
         if (item.blob)     item.blob.material.opacity = pulse * 0.65;
@@ -420,17 +425,22 @@ export default function DigitalTwinSectionV3() {
         if (item.ring)     item.ring.material.opacity = pulse * 0.7;
         if (item.pLight)   item.pLight.intensity = 0.5 + Math.sin(t * 3 + item.phase) * 0.45;
         
-        item.grp.position.x = item.baseX + Math.sin(t * 0.7 + item.phase) * 0.05;
-        item.grp.position.z = item.baseZ + Math.cos(t * 0.7 + item.phase) * 0.03;
-        item.grp.rotation.y = Math.sin(t * 0.2 + item.phase) * 0.15;
+        // Sync position to the timeline frame! (Moves them across their paths)
+        const frameOffset = (frameIndex / 350) * 12; // move up to 12 units
+        item.grp.position.x = item.baseX + Math.sin(item.phase) * frameOffset + Math.sin(t * 0.7 + item.phase) * 0.05;
+        item.grp.position.z = item.baseZ + Math.cos(item.phase) * frameOffset + Math.cos(t * 0.7 + item.phase) * 0.03;
+        
+        // Rotate them to face where they are walking
+        item.grp.rotation.y = Math.atan2(Math.sin(item.phase), Math.cos(item.phase)) + Math.sin(t * 0.2 + item.phase) * 0.15;
       });
 
-      // Drone hover + circular patrol
+      // Drone hover + circular patrol (synced to timeline)
       if (droneRef.current) {
-        droneRef.current.position.x = ZONES[0].x + ZONES[0].w/2 + Math.cos(t * 0.2) * 10;
+        const droneT = (frameIndex / 350) * Math.PI * 2 + t * 0.2;
+        droneRef.current.position.x = ZONES[0].x + ZONES[0].w/2 + Math.cos(droneT) * 10;
         droneRef.current.position.y = 18 + Math.sin(t * 1.5) * 0.5;
-        droneRef.current.position.z = ZONES[0].z + ZONES[0].d/2 + Math.sin(t * 0.2) * 10;
-        droneRef.current.rotation.y = -t * 0.2;
+        droneRef.current.position.z = ZONES[0].z + ZONES[0].d/2 + Math.sin(droneT) * 10;
+        droneRef.current.rotation.y = -droneT;
         rotors.forEach((r, i) => { r.rotation.y += (i % 2 === 0 ? 1 : -1) * 0.9; });
       }
 
@@ -603,7 +613,7 @@ export default function DigitalTwinSectionV3() {
 
         {/* ── Detection badges (bottom-left) ───────────────────── */}
         {detCount > 0 && (
-          <div className="absolute bottom-4 left-4 z-20 flex gap-1.5 flex-wrap max-w-[200px]">
+          <div className="absolute bottom-20 left-4 z-20 flex gap-1.5 flex-wrap max-w-[200px]">
             {TRACKED.slice(0, detCount).map(t => (
               <div key={t.id} className="bg-[#010d1a]/90 backdrop-blur border rounded px-2 py-1 text-[7px]"
                 style={{ borderColor: t.color + '55' }}>
@@ -613,6 +623,23 @@ export default function DigitalTwinSectionV3() {
             ))}
           </div>
         )}
+
+        {/* ── LIVE VIDEO FEED HUD (Synced to frames) ────────────────── */}
+        <div className="absolute top-14 left-44 z-20 w-[180px] rounded overflow-hidden border border-[#00e5ff] shadow-[0_0_15px_rgba(0,229,255,0.2)] bg-[#010d1a]/80 backdrop-blur">
+            <div className="px-2 py-1 text-[7px] text-[#00e5ff] font-bold tracking-widest border-b border-[#00e5ff]/30 flex justify-between">
+                <span>DRONE FEED</span>
+                <span className="opacity-60">FRM {currentFrame.toString().padStart(4, '0')}</span>
+            </div>
+            <div className="relative aspect-video">
+                <img 
+                    src={`/digital_twin/frames2/frame_${currentFrame.toString().padStart(4, '0')}.jpg`} 
+                    alt="Drone Feed"
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 border-[0.5px] border-[#ff2d78] pointer-events-none opacity-40 m-[2px]" />
+                <div className="absolute top-1 right-1 h-1 w-1 rounded-full bg-[#ff2d78] animate-pulse" />
+            </div>
+        </div>
 
         {/* ── System Console ────────────────────────────────────── */}
         <div className="absolute bottom-4 right-4 z-20 w-72 bg-[#010d1a]/92 backdrop-blur border border-[#003344] rounded overflow-hidden"
@@ -639,6 +666,31 @@ export default function DigitalTwinSectionV3() {
             <div ref={consoleEnd} />
           </div>
         </div>
+
+      {/* ── TIMELINE SCRUBBER ────────────────────────────────────── */}
+      <div className="absolute bottom-[60px] left-0 right-0 px-5 py-2 z-30 pointer-events-auto">
+        <div className="flex items-center gap-4 bg-[#010d1a]/85 backdrop-blur border border-[#003344] px-4 py-1.5 rounded-full shadow-lg max-w-3xl mx-auto">
+            <button className="text-[#00e5ff] opacity-70 hover:opacity-100 text-xs tracking-widest font-bold">▶</button>
+            <span className="text-[#00e5ff] text-[9px] font-bold tracking-wider w-16 text-right">
+               {((currentFrame / 30).toFixed(1))}s
+            </span>
+            <input 
+                id="twin-timeline"
+                type="range" 
+                min="0" 
+                max={MAX_FRAMES - 1} 
+                value={currentFrame}
+                onChange={e => setCurrentFrame(parseInt(e.target.value))}
+                className="flex-1 h-1 bg-[#002233] rounded-lg appearance-none cursor-pointer outline-none"
+                style={{
+                   background: `linear-gradient(to right, #00e5ff ${(currentFrame / (MAX_FRAMES - 1)) * 100}%, #002233 ${(currentFrame / (MAX_FRAMES - 1)) * 100}%)`
+                }}
+            />
+            <span className="text-[#00e5ff] text-[9px] opacity-60 tracking-wider">
+               FRM {currentFrame.toString().padStart(4, '0')} / {MAX_FRAMES - 1}
+            </span>
+        </div>
+      </div>
 
       {/* ── BOTTOM CONTROLS (Positioned absolutely or as part of the wrapper) ────────────────────────────────────── */}
       <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-5 py-3 border-t border-[#003344] bg-[#010d1a] gap-4 flex-wrap z-30 translate-y-full">
