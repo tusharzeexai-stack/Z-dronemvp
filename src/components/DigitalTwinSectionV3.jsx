@@ -150,10 +150,10 @@ export default function DigitalTwinSectionV3() {
 
     // ── Circular Tank Construction (Z1) ───────────────────────
     const tankMat = new THREE.MeshStandardMaterial({
-      color: 0x001a28, emissive: 0x004466, emissiveIntensity: 0.3,
-      transparent: true, opacity: 0.7, roughness: 0.9, side: THREE.DoubleSide
+      color: 0x001a28, emissive: 0x00e5ff, emissiveIntensity: 0.15,
+      transparent: true, opacity: 0.65, roughness: 0.9, side: THREE.DoubleSide
     });
-    const tankEdge = new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.8 });
+    const tankEdge = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.9 });
 
     const tankGrp = new THREE.Group();
     tankGrp.position.set(ZONES[0].x + ZONES[0].w/2, 0, ZONES[0].z + ZONES[0].d/2);
@@ -173,15 +173,15 @@ export default function DigitalTwinSectionV3() {
     // Floor rebar pattern (grid on a circle)
     const floorGeo = new THREE.CircleGeometry(11.8, 64);
     const floor = new THREE.Mesh(floorGeo, new THREE.MeshStandardMaterial({
-      color: 0x001122, emissive: 0x002244, emissiveIntensity: 0.4,
-      transparent: true, opacity: 0.6
+      color: 0x001122, emissive: 0x00e5ff, emissiveIntensity: 0.1,
+      transparent: true, opacity: 0.5
     }));
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = 0.05;
     tankGrp.add(floor);
 
     // Add some rebar lines
-    const rebarMat = new THREE.LineBasicMaterial({ color: 0x00aacc, transparent: true, opacity: 0.3 });
+    const rebarMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.7 });
     for (let i = -11; i <= 11; i += 1.5) {
       const h = Math.sqrt(11.8 * 11.8 - i * i);
       tankGrp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-h, 0.06, i), new THREE.Vector3(h, 0.06, i)]), rebarMat));
@@ -196,15 +196,15 @@ export default function DigitalTwinSectionV3() {
     
     const roadGeo = new THREE.PlaneGeometry(ZONES[1].w, ZONES[1].d);
     const road = new THREE.Mesh(roadGeo, new THREE.MeshStandardMaterial({
-      color: 0x000a12, emissive: 0x001a33, emissiveIntensity: 0.4,
-      transparent: true, opacity: 0.8
+      color: 0x000a12, emissive: 0x00e5ff, emissiveIntensity: 0.08,
+      transparent: true, opacity: 0.75
     }));
     road.rotation.x = -Math.PI / 2;
     road.position.y = 0.02;
     roadGrp.add(road);
 
     const roadLineGeo = new THREE.PlaneGeometry(0.2, ZONES[1].d);
-    const roadLineMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.5 });
+    const roadLineMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.85 });
     for (let i = -12; i < 15; i += 3) {
       const rl = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 1.5), roadLineMat);
       rl.rotation.x = -Math.PI / 2;
@@ -235,7 +235,7 @@ export default function DigitalTwinSectionV3() {
       scene.add(mound);
       const edges = new THREE.EdgesGeometry(mound.geometry);
       const el2 = new THREE.LineSegments(edges,
-        new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.2 })
+        new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.6 })
       );
       el2.position.copy(mound.position);
       el2.scale.copy(mound.scale);
