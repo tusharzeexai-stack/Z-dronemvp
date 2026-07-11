@@ -111,12 +111,23 @@ function ThreeModelingSection() {
     gridHelper.position.y = -0.5;
     scene.add(gridHelper);
 
-    // 2. Generate surveyed terrain mesh — high-res 3D construction site with circular pit
+    // 2. Generate surveyed terrain mesh — High-res 3D construction site
     const terrainWidth = 106.6;
     const terrainHeight = 60;
     const terrainSegmentsW = 120;
     const terrainSegmentsH = 68;
     const terrainGeo = new THREE.PlaneGeometry(terrainWidth, terrainHeight, terrainSegmentsW, terrainSegmentsH);
+
+    // Unified height function to ensure all objects sit perfectly on the ground
+    const getTerrainHeight = (x, y) => {
+      // Create a more realistic construction site: mostly flat with some dirt mounds and a slight slope
+      const mound1 = Math.max(0, 3.5 - Math.sqrt((x + 15)**2 + (y + 10)**2) * 0.4);
+      const mound2 = Math.max(0, 2.5 - Math.sqrt((x - 20)**2 + (y - 5)**2) * 0.3);
+      const trench = Math.min(0, Math.sqrt(x**2 + (y - 15)**2) * 0.2 - 2.0);
+      
+      const noise = (Math.sin(x * 0.15) * Math.cos(y * 0.15) * 0.4) + (Math.sin(x * 0.05) * 0.3);
+      return mound1 + mound2 + trench + noise - 0.5;
+    };
 
     const posAttr = terrainGeo.attributes.position;
     const count = posAttr.count;
@@ -124,32 +135,14 @@ function ThreeModelingSection() {
     for (let i = 0; i < count; i++) {
       const x = posAttr.getX(i);
       const y = posAttr.getY(i);
-      const r = Math.sqrt(x * x + y * y);
-
-      // Circular foundation pit (deep in the center, raised at edges)
-      let z = 0;
-      const pitR = 22; // radius of the circular pit
-      if (r < pitR) {
-        // Inside the pit — smooth bowl going down to -4
-        z = -4.0 * (1 - (r / pitR) * (r / pitR));
-      } else if (r < pitR + 8) {
-        // Raised lip / spoil mound around the pit
-        const t = (r - pitR) / 8;
-        z = 3.5 * Math.sin(t * Math.PI) + Math.sin(x * 0.18 + 0.5) * 0.5;
-      } else {
-        // Outer terrain — gentle uneven ground
-        z = Math.sin(x * 0.08 + 0.5) * Math.cos(y * 0.09) * 1.5
-          + Math.sin(x * 0.03) * 2.0
-          + Math.cos(y * 0.04 + 1) * 1.2;
-      }
-      posAttr.setZ(i, z);
+      posAttr.setZ(i, getTerrainHeight(x, y));
     }
     terrainGeo.computeVertexNormals();
 
     // Rotate and position flat
     terrainGeo.rotateX(-Math.PI / 2);
 
-    const terrainTexture = new THREE.TextureLoader().load('/digital_twin/frames2/frame_0001.jpg');
+    const terrainTexture = new THREE.TextureLoader().load('/digital_twin/frames/frame_00.jpg');
     terrainTexture.colorSpace = THREE.SRGBColorSpace;
     terrainTexture.wrapS = terrainTexture.wrapT = THREE.ClampToEdgeWrapping;
 
@@ -165,48 +158,6 @@ function ThreeModelingSection() {
     terrainMesh.castShadow = true;
     scene.add(terrainMesh);
     terrainMeshRef.current = terrainMesh;
-
-    // ── Concrete pit wall ring ─────────────────────────────────────────────
-    const pitWallMat = new THREE.MeshStandardMaterial({ color: 0x5a5a5a, roughness: 0.95, metalness: 0.05 });
-    const pitWall = new THREE.Mesh(
-      new THREE.CylinderGeometry(22.5, 22.0, 4.0, 64, 1, true),
-      pitWallMat
-    );
-    pitWall.position.set(0, -2.0, 0);
-    pitWall.castShadow = true;
-    scene.add(pitWall);
-
-    // ── Rebar grid in the foundation pit ─────────────────────────────────
-    const rebarMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.65 });
-    for (let r2 = -20; r2 <= 20; r2 += 2.2) {
-      const halfLen = Math.sqrt(Math.max(0, 20 * 20 - r2 * r2));
-      if (halfLen < 0.5) continue;
-      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(-halfLen, -3.85, r2), new THREE.Vector3(halfLen, -3.85, r2)
-      ]), rebarMat));
-      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(r2, -3.85, -halfLen), new THREE.Vector3(r2, -3.85, halfLen)
-      ]), rebarMat));
-    }
-
-    // ── Rebar vertical standees ────────────────────────────────────────────
-    const standMat = new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x00d4ff, emissiveIntensity: 0.3, roughness: 0.4, metalness: 0.6 });
-    for (let a = 0; a < Math.PI * 2; a += Math.PI / 10) {
-      const rx = Math.cos(a) * 16, rz = Math.sin(a) * 16;
-      const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 5.0, 6), standMat);
-      rod.position.set(rx, -1.5, rz);
-      scene.add(rod);
-    }
-
-    // ── Concrete pour pillars ──────────────────────────────────────────────
-    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x7a7a7a, roughness: 0.9, metalness: 0.0 });
-    [[18, 18], [-18, 18], [18, -18], [-18, -18]].forEach(([px, pz]) => {
-      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 6.5, 12), pillarMat);
-      pillar.position.set(px, 3.25, pz);
-      pillar.castShadow = true;
-      scene.add(pillar);
-    });
-
 
     // 3. Create a detailed Drone Model Mesh
     const droneGroup = new THREE.Group();
@@ -275,7 +226,8 @@ function ThreeModelingSection() {
     // ── Excavator models (to give it true 3D presence) ─────────
     const mkExcavator = (x, z, rot, color) => {
       const grp = new THREE.Group();
-      grp.position.set(x, 0, z);
+      // Set the excavator perfectly on the terrain
+      grp.position.set(x, getTerrainHeight(x, -z), z);
       grp.rotation.y = rot;
       const bodyC = new THREE.Color(color);
       const eMat  = (em = 0.5) => new THREE.MeshStandardMaterial({
@@ -327,7 +279,8 @@ function ThreeModelingSection() {
     // ── RuView WiFi DensePose Skeletons ─────────
     const mkWiFiSkeleton = (x, z, colorStr) => {
       const grp = new THREE.Group();
-      grp.position.set(x, 0, z);
+      // Align base of skeleton to the new terrain height
+      grp.position.set(x, getTerrainHeight(x, -z), z);
       
       const pColor = new THREE.Color(colorStr);
       const jointMat = new THREE.MeshBasicMaterial({ color: pColor, wireframe: true, transparent: true, opacity: 0.8 });
@@ -377,6 +330,12 @@ function ThreeModelingSection() {
     scene.add(hotspotGroup);
 
     HOTSPOTS.forEach(hot => {
+      const hx = hot.pos[0];
+      const hz = hot.pos[2];
+      // Align hotspot relative to terrain ground
+      const groundY = getTerrainHeight(hx, -hz);
+      const hy = Math.max(hot.pos[1], groundY + 1.0); // Make sure it's above ground
+
       // Outer glow
       const glowGeo = new THREE.SphereGeometry(1.2, 16, 16);
       const glowMat = new THREE.MeshBasicMaterial({
@@ -386,7 +345,7 @@ function ThreeModelingSection() {
         wireframe: true
       });
       const glow = new THREE.Mesh(glowGeo, glowMat);
-      glow.position.set(hot.pos[0], hot.pos[1], hot.pos[2]);
+      glow.position.set(hx, hy, hz);
       hotspotGroup.add(glow);
 
       // Inner sphere
@@ -395,12 +354,13 @@ function ThreeModelingSection() {
         color: hot.severity === 'Critical' ? 0xef4444 : hot.severity === 'Warning' ? 0xf59e0b : 0x10b981
       });
       const core = new THREE.Mesh(coreGeo, coreMat);
-      core.position.set(hot.pos[0], hot.pos[1], hot.pos[2]);
+      core.position.set(hx, hy, hz);
       hotspotGroup.add(core);
 
       // Store references in mesh
-      core.userData = { id: hot.id };
+      core.userData = { id: hot.id, actualPos: [hx, hy, hz] };
     });
+
 
     // Raycast listener for hotspot clicking
     const raycaster = new THREE.Raycaster();
@@ -438,7 +398,7 @@ function ThreeModelingSection() {
       const pz = (Math.random() - 0.5) * 60; // terrainHeight
       
       // Calculate elevation
-      const py = (Math.sin(px * 0.15) * Math.cos(pz * 0.15) * 0.3) + (Math.sin(px * 0.05) * 0.2);
+      const py = getTerrainHeight(px, -pz);
 
       positionsArr[i * 3] = px;
       positionsArr[i * 3 + 1] = py;
@@ -492,8 +452,7 @@ function ThreeModelingSection() {
         skel.grp.position.z = skel.baseZ + Math.cos(t * 0.2) * 5;
         
         // Base height calculation depending on terrain
-        const py = (Math.sin(skel.grp.position.x * 0.15) * Math.cos(skel.grp.position.z * 0.15) * 0.3) + (Math.sin(skel.grp.position.x * 0.05) * 0.2);
-        skel.grp.position.y = py;
+        skel.grp.position.y = getTerrainHeight(skel.grp.position.x, -skel.grp.position.z);
 
         const joints = skel.joints;
         // Head
@@ -633,11 +592,12 @@ function ThreeModelingSection() {
     if (!camera || !controls) return;
 
     // Smooth transition using simple setTimeout chain (React state friendly)
-    const targetLookAt = new THREE.Vector3(hotspot.pos[0], hotspot.pos[1], hotspot.pos[2]);
+    const hPos = hotspot.userData?.actualPos || hotspot.pos;
+    const targetLookAt = new THREE.Vector3(hPos[0], hPos[1], hPos[2]);
     const targetCamPos = new THREE.Vector3(
-      hotspot.pos[0] + 10,
-      hotspot.pos[1] + 8,
-      hotspot.pos[2] + 12
+      hPos[0] + 10,
+      hPos[1] + 8,
+      hPos[2] + 12
     );
 
     // Lerp controls target
