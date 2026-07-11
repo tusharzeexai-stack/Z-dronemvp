@@ -280,58 +280,100 @@ function DigitalTwinSection() {
       core.position.set(rc.x + offsetX, 0.05, rc.z + offsetZ);
       scene.add(core);
 
-      // ── Human-shaped figure (head + torso + arms + legs) ────
+      // ── Realistic Human Figure ───────────────────────────────
       const fig = new THREE.Group();
       fig.position.set(rc.x + offsetX, 0, rc.z + offsetZ);
       scene.add(fig);
 
-      const hMat = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(person.color),
-        emissive: new THREE.Color(person.color),
-        emissiveIntensity: 0.9,
+      const bodyColor = new THREE.Color(person.color);
+      const mkMat = (emissInt = 0.75) => new THREE.MeshStandardMaterial({
+        color: bodyColor,
+        emissive: bodyColor,
+        emissiveIntensity: emissInt,
         transparent: true,
-        opacity: 0.88,
-        roughness: 0.25,
-        metalness: 0.1,
+        opacity: 0.92,
+        roughness: 0.18,
+        metalness: 0.05,
       });
 
-      const addPart = (geo, px, py, pz, rx = 0, ry = 0, rz = 0) => {
-        const m = new THREE.Mesh(geo, hMat.clone());
-        m.position.set(px, py, pz);
+      const P = (geo, x, y, z, rx=0, ry=0, rz=0) => {
+        const m = new THREE.Mesh(geo, mkMat());
+        m.position.set(x, y, z);
         m.rotation.set(rx, ry, rz);
         m.castShadow = true;
         fig.add(m);
-        return m;
       };
 
-      // Head
-      addPart(new THREE.SphereGeometry(0.16, 10, 10), 0, 1.72, 0);
-      // Neck
-      addPart(new THREE.CylinderGeometry(0.065, 0.07, 0.15, 8), 0, 1.52, 0);
-      // Torso
-      addPart(new THREE.BoxGeometry(0.36, 0.52, 0.18), 0, 1.18, 0);
-      // Hips
-      addPart(new THREE.BoxGeometry(0.30, 0.18, 0.16), 0, 0.88, 0);
-      // Left upper arm
-      addPart(new THREE.CylinderGeometry(0.055, 0.048, 0.32, 8), -0.26, 1.18, 0, 0, 0, Math.PI / 10);
-      // Left lower arm
-      addPart(new THREE.CylinderGeometry(0.044, 0.038, 0.30, 8), -0.30, 0.86, 0, 0, 0, Math.PI / 12);
-      // Right upper arm
-      addPart(new THREE.CylinderGeometry(0.055, 0.048, 0.32, 8),  0.26, 1.18, 0, 0, 0, -Math.PI / 10);
-      // Right lower arm
-      addPart(new THREE.CylinderGeometry(0.044, 0.038, 0.30, 8),  0.30, 0.86, 0, 0, 0, -Math.PI / 12);
-      // Left upper leg
-      addPart(new THREE.CylinderGeometry(0.075, 0.065, 0.40, 8), -0.10, 0.59, 0);
-      // Left lower leg
-      addPart(new THREE.CylinderGeometry(0.060, 0.050, 0.38, 8), -0.10, 0.18, 0);
-      // Right upper leg
-      addPart(new THREE.CylinderGeometry(0.075, 0.065, 0.40, 8),  0.10, 0.59, 0);
-      // Right lower leg
-      addPart(new THREE.CylinderGeometry(0.060, 0.050, 0.38, 8),  0.10, 0.18, 0);
-      // Left foot
-      addPart(new THREE.BoxGeometry(0.12, 0.06, 0.22), -0.10, 0.03, 0.04);
-      // Right foot
-      addPart(new THREE.BoxGeometry(0.12, 0.06, 0.22),  0.10, 0.03, 0.04);
+      // ── HEAD (smooth oval, slightly taller than wide) ────────
+      const headGeo = new THREE.SphereGeometry(0.145, 20, 20);
+      headGeo.scale(1, 1.15, 0.95);
+      P(headGeo, 0, 1.70, 0);
+
+      // ── NECK ─────────────────────────────────────────────────
+      P(new THREE.CylinderGeometry(0.055, 0.072, 0.13, 14), 0, 1.555, 0);
+
+      // ── TORSO — LatheGeometry for organic taper ───────────────
+      // Points trace half-profile: hip → waist → chest → shoulder
+      const torsoProfile = [
+        new THREE.Vector2(0.155, 0),     // hip width
+        new THREE.Vector2(0.165, 0.08),  // lower hip flare
+        new THREE.Vector2(0.105, 0.26),  // waist (narrow)
+        new THREE.Vector2(0.155, 0.40),  // ribcage
+        new THREE.Vector2(0.185, 0.52),  // chest
+        new THREE.Vector2(0.175, 0.58),  // shoulder slope
+      ];
+      P(new THREE.LatheGeometry(torsoProfile, 20), 0, 0.91, 0);
+
+      // ── SHOULDER SPHERES ──────────────────────────────────────
+      P(new THREE.SphereGeometry(0.082, 14, 14), -0.225, 1.44, 0);
+      P(new THREE.SphereGeometry(0.082, 14, 14),  0.225, 1.44, 0);
+
+      // ── UPPER ARMS (slight outward angle) ────────────────────
+      P(new THREE.CylinderGeometry(0.062, 0.052, 0.36, 14), -0.255, 1.21, 0,  0, 0,  0.14);
+      P(new THREE.CylinderGeometry(0.062, 0.052, 0.36, 14),  0.255, 1.21, 0,  0, 0, -0.14);
+
+      // ── ELBOW SPHERES ─────────────────────────────────────────
+      P(new THREE.SphereGeometry(0.058, 12, 12), -0.29, 1.00, 0);
+      P(new THREE.SphereGeometry(0.058, 12, 12),  0.29, 1.00, 0);
+
+      // ── FOREARMS ─────────────────────────────────────────────
+      P(new THREE.CylinderGeometry(0.048, 0.038, 0.33, 14), -0.305, 0.79, 0,  0, 0,  0.10);
+      P(new THREE.CylinderGeometry(0.048, 0.038, 0.33, 14),  0.305, 0.79, 0,  0, 0, -0.10);
+
+      // ── WRIST + HAND (oval blob) ──────────────────────────────
+      const handGeo = new THREE.SphereGeometry(0.050, 12, 12);
+      handGeo.scale(1.1, 0.75, 0.7);
+      P(handGeo, -0.315, 0.60, 0.01);
+      P(handGeo.clone(), 0.315, 0.60, 0.01);
+
+      // ── PELVIS SPHERE (rounds the hip join) ───────────────────
+      P(new THREE.SphereGeometry(0.12, 14, 14), 0, 0.93, 0);
+
+      // ── HIP JOINT SPHERES ─────────────────────────────────────
+      P(new THREE.SphereGeometry(0.078, 12, 12), -0.12, 0.88, 0);
+      P(new THREE.SphereGeometry(0.078, 12, 12),  0.12, 0.88, 0);
+
+      // ── THIGHS (tapered, high-poly) ───────────────────────────
+      P(new THREE.CylinderGeometry(0.092, 0.072, 0.44, 16), -0.12, 0.63, 0);
+      P(new THREE.CylinderGeometry(0.092, 0.072, 0.44, 16),  0.12, 0.63, 0);
+
+      // ── KNEE SPHERES ──────────────────────────────────────────
+      P(new THREE.SphereGeometry(0.072, 12, 12), -0.12, 0.39, 0);
+      P(new THREE.SphereGeometry(0.072, 12, 12),  0.12, 0.39, 0);
+
+      // ── CALVES (slight taper) ─────────────────────────────────
+      P(new THREE.CylinderGeometry(0.065, 0.048, 0.40, 16), -0.12, 0.16, 0);
+      P(new THREE.CylinderGeometry(0.065, 0.048, 0.40, 16),  0.12, 0.16, 0);
+
+      // ── ANKLE SPHERES ─────────────────────────────────────────
+      P(new THREE.SphereGeometry(0.048, 12, 12), -0.12, -0.04, 0.01);
+      P(new THREE.SphereGeometry(0.048, 12, 12),  0.12, -0.04, 0.01);
+
+      // ── FEET (elongated box, angled forward) ──────────────────
+      const footShape = new THREE.BoxGeometry(0.095, 0.055, 0.24);
+      footShape.translate(0, 0, 0.06); // shift forward
+      P(footShape,        -0.12, -0.06, 0.0);
+      P(footShape.clone(), 0.12, -0.06, 0.0);
 
       // Glowing ring at feet
       const ringGeo = new THREE.RingGeometry(0.25, 0.38, 24);
