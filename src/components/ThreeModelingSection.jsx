@@ -105,10 +105,12 @@ function ThreeModelingSection() {
     gridHelper.position.y = -0.5;
     scene.add(gridHelper);
 
-    // 2. Generate surveyed terrain mesh
-    const terrainSize = 80;
-    const terrainSegments = 60;
-    const terrainGeo = new THREE.PlaneGeometry(terrainSize, terrainSize, terrainSegments, terrainSegments);
+    // 2. Generate surveyed terrain mesh (16:9 aspect ratio for orthomosaic)
+    const terrainWidth = 106.6; // 16:9 ratio
+    const terrainHeight = 60;
+    const terrainSegmentsW = 64;
+    const terrainSegmentsH = 36;
+    const terrainGeo = new THREE.PlaneGeometry(terrainWidth, terrainHeight, terrainSegmentsW, terrainSegmentsH);
     
     const posAttr = terrainGeo.attributes.position;
     const count = posAttr.count;
@@ -117,8 +119,8 @@ function ThreeModelingSection() {
       const x = posAttr.getX(i);
       const y = posAttr.getY(i);
       
-      // Subtle displacement to simulate photogrammetry mesh noise
-      const z = Math.sin(x * 0.3) * Math.cos(y * 0.3) * 0.4 + Math.sin(x * 0.1) * 0.5;
+      // Extremely subtle unevenness (looks like a slightly uneven construction site dirt)
+      const z = (Math.sin(x * 0.15) * Math.cos(y * 0.15) * 0.3) + (Math.sin(x * 0.05) * 0.2);
       posAttr.setZ(i, z);
     }
     terrainGeo.computeVertexNormals();
@@ -126,10 +128,13 @@ function ThreeModelingSection() {
     // Rotate and position flat
     terrainGeo.rotateX(-Math.PI / 2);
 
+    const terrainTexture = new THREE.TextureLoader().load('/digital_twin/frames/frame_00.jpg');
+    terrainTexture.colorSpace = THREE.SRGBColorSpace; // Professional color mapping
+    
     const terrainMat = new THREE.MeshStandardMaterial({
-      roughness: 0.85,
-      metalness: 0.05,
-      map: new THREE.TextureLoader().load('/digital_twin/frames2/frame_0150.jpg'),
+      roughness: 0.9, // Dirt is rough
+      metalness: 0.0,
+      map: terrainTexture,
       shadowSide: THREE.DoubleSide
     });
 
@@ -458,7 +463,9 @@ function ThreeModelingSection() {
       terrain.material.opacity = 1;
       terrain.material.transparent = false;
       if (!terrain.material.map) {
-        terrain.material.map = new THREE.TextureLoader().load('/digital_twin/frames2/frame_0150.jpg');
+        const tex = new THREE.TextureLoader().load('/digital_twin/frames/frame_00.jpg');
+        tex.colorSpace = THREE.SRGBColorSpace;
+        terrain.material.map = tex;
       }
       terrain.material.needsUpdate = true;
       particles.visible = false;
