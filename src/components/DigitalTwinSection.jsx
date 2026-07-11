@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DigitalTwinSectionTest1 from './DigitalTwinSectionTest1';
 import DigitalTwinSectionV3 from './DigitalTwinSectionV3';
+import DigitalTwinSectionLargeArea from './DigitalTwinSectionLargeArea';
 
 export default function DigitalTwinSection() {
   const [active, setActive] = useState('test1');
@@ -50,6 +51,7 @@ export default function DigitalTwinSection() {
                 >
                     <option value="test1">test1.mp4 (Construction Zone)</option>
                     <option value="v3">v3_AvatarG0008_test.mp4 (Circular Tank Base)</option>
+                    <option value="large">v3_x_1test.mp4 (Large Area Map)</option>
                 </select>
             </div>
         </div>
@@ -57,7 +59,9 @@ export default function DigitalTwinSection() {
 
       {/* Render selected Digital Twin */}
       <div className="pt-[44px]"> 
-          {active === 'test1' ? <DigitalTwinSectionTest1 key="test1" /> : <DigitalTwinSectionV3 key="v3" />}
+          {active === 'test1' && <DigitalTwinSectionTest1 key="test1" />}
+          {active === 'v3' && <DigitalTwinSectionV3 key="v3" />}
+          {active === 'large' && <DigitalTwinSectionLargeArea key="large" />}
       </div>
     </div>
   );
