@@ -1,629 +1,824 @@
 import React, { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+// Pre-defined list of extracted frames with mock keypoint metrics
+const EXTRACTED_FRAMES = Array.from({ length: 15 }, (_, i) => ({
+  index: i,
+  src: `/digital_twin/frames/frame_${String(i).padStart(2, '0')}.jpg`,
+  timeCode: `00:00:${String(Math.floor(i * 2)).padStart(2, '0')}`,
+  keypoints: 1200 + Math.floor(Math.sin(i) * 350) + Math.floor(Math.cos(i * 2) * 150),
+  reprojectionError: (0.22 + Math.abs(Math.sin(i)) * 0.15).toFixed(3),
+  status: 'PROCESSED'
+}));
 
 function DigitalTwinSection() {
-  const horizonCanvasRef = useRef(null);
-  const vibrationCanvasRef = useRef(null);
+  const containerRef = useRef(null);
+  const rendererRef = useRef(null);
+  const sceneRef = useRef(null);
+  const cameraRef = useRef(null);
+  const controlsRef = useRef(null);
+  const requestRef = useRef(null);
   const terminalEndRef = useRef(null);
+  const videoRef = useRef(null);
 
-  // States
-  const [twinStatus, setTwinStatus] = useState('NOMINAL'); // NOMINAL, WARNING, CRITICAL
-  const [isArmed, setIsArmed] = useState(false);
-  const [isTethered, setIsTethered] = useState(false);
-  const [flightState, setFlightState] = useState('Grounded'); // Grounded, Hovering, Returning, Landing
-  const [pitch, setPitch] = useState(0);
-  const [roll, setRoll] = useState(0);
-  const [yaw, setYaw] = useState(182.4);
-  const [throttle, setThrottle] = useState(0);
-  const [ledMode, setLedMode] = useState('strobe'); // strobe, solid, stealth
-  const [windSpeed, setWindSpeed] = useState(2.4); // m/s
-  const [activeFaults, setActiveFaults] = useState([]);
+  // Scene Objects
+  const scanMeshRef = useRef(null);
+  const pointCloudRef = useRef(null);
+  const laserLineRef = useRef(null);
+  const droneGroupRef = useRef(null);
+
+  // Tab State: 'video' | 'frames' | 'model'
+  const [activeTab, setActiveTab] = useState('video');
+  
+  // Pipeline State: 'idle' | 'extracting' | 'matching' | 'generating' | 'synced'
+  const [pipelineState, setPipelineState] = useState('idle');
+  const [pipelineProgress, setPipelineProgress] = useState(0);
+  const [revealedFrameCount, setRevealedFrameCount] = useState(0);
+  const [selectedFrame, setSelectedFrame] = useState(EXTRACTED_FRAMES[0]);
+  const [displayMode, setDisplayMode] = useState('shaded'); // shaded, wireframe, points
+  
+  const [currentCameraPos, setCurrentCameraPos] = useState({ x: 0, y: 0, z: 0 });
   const [logs, setLogs] = useState([
-    'System init. Loading digital twin mapping keys...',
-    'Sensors handshake: IMU, Barometer, LiDAR, Magnetometer... OK',
-    'Virtual state engine linked to simulated hardware port COM3.',
-    'Status: Nominal. Waiting for arm command.'
+    'Pipeline Status: STANDBY',
+    'Ready to load source video public/test1.mp4...',
+    'Click "START RECONSTRUCTION" to initialize the digital twin generation.'
   ]);
 
-  // Telemetry variables
-  const [motorTemp, setMotorTemp] = useState([32, 32, 33, 32]);
-  const [motorRpm, setMotorRpm] = useState([0, 0, 0, 0]);
-  const [escLoad, setEscLoad] = useState(0);
-  const [batteryVoltage, setBatteryVoltage] = useState(16.76);
-  const [currentDraw, setCurrentDraw] = useState(0.8);
+  // Timers
+  const pipelineIntervalRef = useRef(null);
 
-  // Animation ticks
-  const animationFrameRef = useRef(null);
-  const logIntervalRef = useRef(null);
+  // ── Pipeline Simulation Controller ───────────────────────────
+  const startPipeline = () => {
+    if (pipelineState !== 'idle' && pipelineState !== 'synced') return;
+    
+    setPipelineState('extracting');
+    setPipelineProgress(0);
+    setRevealedFrameCount(0);
+    setActiveTab('video');
+    
+    // Play video from start
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+    }
 
-  // Draw Attitude Horizon Indicator on Canvas
-  useEffect(() => {
-    const canvas = horizonCanvasRef.current;
-    if (!canvas) return;
+    setLogs([
+      '🚀 Initializing photogrammetry pipeline...',
+      '📂 Loaded source video: /test1.mp4 (Duration: 30.0s)',
+      '⚙️ Configured Target Decimation: 15 keyframes @ 0.5Hz',
+      '📸 Commencing frame extraction...'
+    ]);
 
-    const ctx = canvas.getContext('2d');
-    const drawHorizon = () => {
-      const w = canvas.width;
-      const h = canvas.height;
-      const r = Math.min(w, h) / 2;
+    let step = 0;
+    
+    if (pipelineIntervalRef.current) clearInterval(pipelineIntervalRef.current);
 
-      ctx.clearRect(0, 0, w, h);
-      ctx.save();
+    pipelineIntervalRef.current = setInterval(() => {
+      step += 1;
       
-      // Move to center
-      ctx.translate(w / 2, h / 2);
-      
-      // Rotate for Roll angle
-      ctx.rotate((-roll * Math.PI) / 180);
-
-      // Pitch displacement (scale factor)
-      const pitchOffset = (pitch / 90) * (r * 0.8);
-
-      // Draw Sky (blue)
-      ctx.fillStyle = '#0ea5e9';
-      ctx.beginPath();
-      ctx.arc(0, pitchOffset, r, Math.PI, 0);
-      ctx.fill();
-
-      // Draw Ground (brownish-slate)
-      ctx.fillStyle = '#475569';
-      ctx.beginPath();
-      ctx.arc(0, pitchOffset, r, 0, Math.PI);
-      ctx.fill();
-
-      // Draw Horizon dividing line
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(-r, pitchOffset);
-      ctx.lineTo(r, pitchOffset);
-      ctx.stroke();
-
-      // Pitch graduation lines
-      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-      ctx.lineWidth = 1.5;
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.font = '8px monospace';
-      ctx.textAlign = 'center';
-
-      for (let p = -30; p <= 30; p += 10) {
-        if (p === 0) continue;
-        const lineOffset = pitchOffset - (p / 90) * (r * 0.8);
-        const lineLength = p % 20 === 0 ? 30 : 15;
+      if (step <= 15) {
+        // Frame extraction phase
+        setPipelineProgress(Math.floor((step / 15) * 35));
+        setRevealedFrameCount(step);
         
-        ctx.beginPath();
-        ctx.moveTo(-lineLength, lineOffset);
-        ctx.lineTo(lineLength, lineOffset);
-        ctx.stroke();
+        // Fast scrub video forward to match frame extraction
+        if (videoRef.current) {
+          videoRef.current.currentTime = (step - 1) * 2;
+        }
+
+        const currentFrame = EXTRACTED_FRAMES[step - 1];
+        setLogs(prev => [
+          ...prev,
+          `[EXTRACTOR] Extracted keyframe ${step - 1} at ${currentFrame.timeCode} | Keypoints detected: ${currentFrame.keypoints}`
+        ]);
         
-        ctx.fillText(p.toString(), -lineLength - 10, lineOffset + 3);
-        ctx.fillText(p.toString(), lineLength + 10, lineOffset + 3);
-      }
-
-      ctx.restore();
-
-      // Fixed airplane symbol overlay (doesn't rotate/move)
-      ctx.strokeStyle = '#eab308';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      // Center dot
-      ctx.arc(w / 2, h / 2, 3, 0, Math.PI * 2);
-      ctx.stroke();
-      // Left wing line
-      ctx.moveTo(w / 2 - 40, h / 2);
-      ctx.lineTo(w / 2 - 15, h / 2);
-      ctx.lineTo(w / 2 - 15, h / 2 + 8);
-      // Right wing line
-      ctx.moveTo(w / 2 + 40, h / 2);
-      ctx.lineTo(w / 2 + 15, h / 2);
-      ctx.lineTo(w / 2 + 15, h / 2 + 8);
-      ctx.stroke();
-
-      // Outer housing ring and angle scale ticks
-      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.arc(w / 2, h / 2, r - 2, 0, Math.PI * 2);
-      ctx.stroke();
-    };
-
-    drawHorizon();
-  }, [pitch, roll]);
-
-  // Draw Vibration Spectrum Analyzer
-  useEffect(() => {
-    const canvas = vibrationCanvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    let frameId;
-    const pointsCount = 40;
-    const array = Array.from({ length: pointsCount }, () => Math.random() * 20);
-
-    const drawVibration = () => {
-      const w = canvas.width;
-      const h = canvas.height;
-
-      ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = 'rgba(14, 165, 233, 0.05)';
-      ctx.fillRect(0, 0, w, h);
-
-      // Grid lines
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < w; x += 30) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
-      }
-      for (let y = 0; y < h; y += 20) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-      }
-
-      // Draw active waveform
-      ctx.strokeStyle = twinStatus === 'CRITICAL' ? '#ef4444' : twinStatus === 'WARNING' ? '#f59e0b' : '#0ea5e9';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-
-      const step = w / pointsCount;
-      // Fluctuations based on armed state and throttle
-      const multiplier = isArmed ? 5 + (throttle / 100) * 20 : 0.8;
-      const noise = twinStatus === 'CRITICAL' ? 3.5 : 1.0;
-
-      for (let i = 0; i < pointsCount; i++) {
-        array[i] = array[i] * 0.8 + (Math.random() * multiplier * noise) * 0.2;
-        const x = i * step;
-        const y = h - 10 - array[i];
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      frameId = requestAnimationFrame(drawVibration);
-    };
-
-    drawVibration();
-    return () => cancelAnimationFrame(frameId);
-  }, [isArmed, throttle, twinStatus]);
-
-  // Live Scrolling Terminal Log Simulator (adds NMEA/raw sensor feeds)
-  useEffect(() => {
-    logIntervalRef.current = setInterval(() => {
-      const lat = 28.8300 + (Math.random() - 0.5) * 0.01;
-      const lng = 76.9300 + (Math.random() - 0.5) * 0.01;
-      const gpsTime = new Date().toISOString().split('T')[1].replace('Z', '').replace(/:/g, '').substring(0, 6) + '.00';
-
-      // NMEA strings
-      const nmeaGga = `$GNGGA,${gpsTime},${Math.abs(lat).toFixed(4)},N,${Math.abs(lng).toFixed(4)},E,1,08,1.2,45.2,M,0.0,M,,*5C`;
-      const nmeaRmc = `$GNRMC,${gpsTime},A,${Math.abs(lat).toFixed(4)},N,${Math.abs(lng).toFixed(4)},E,${(throttle * 0.15).toFixed(1)},182.4,100726,,,A*7B`;
-
-      const sensorLogs = [
-        nmeaGga,
-        nmeaRmc,
-        `[IMU] Pitch: ${pitch.toFixed(1)} | Roll: ${roll.toFixed(1)} | Yaw: ${yaw.toFixed(1)} | AccelZ: ${(1.0 + (throttle / 1500) + (Math.random() - 0.5) * 0.05).toFixed(3)}G`,
-        isTethered
-          ? `[TETHER] HV Line: 16.80V | Draw: 14.2A | Tether Temp: 38°C | Tension: 1.4kg`
-          : `[BMS] Voltage: ${batteryVoltage.toFixed(2)}V | Current: ${currentDraw.toFixed(1)}A | CellTemp: ${motorTemp[0]}°C`
-      ];
-
-      // Add a random sensor line to the log
-      const randomLine = sensorLogs[Math.floor(Math.random() * sensorLogs.length)];
-      setLogs(prev => {
-        const next = [...prev, randomLine];
-        if (next.length > 50) next.shift(); // Cap console history
-        return next;
-      });
-
-      // Update mock gauges when armed
-      if (isArmed) {
-        // Motor temperature rises slowly with throttle
-        setMotorTemp(prev => prev.map((t, idx) => {
-          const targetTemp = 35 + (throttle * 0.3) + idx * (Math.random() * 2);
-          return t < targetTemp ? Math.round(t + 0.5) : Math.round(t - 0.2);
-        }));
-
-        // Motor RPM
-        const baseRpm = throttle * 85;
-        setMotorRpm(prev => prev.map(() => Math.round(baseRpm + (Math.random() - 0.5) * 150)));
-
-        // ESC Load
-        setEscLoad(Math.round(throttle * 0.95));
-
-        // Battery voltage drops with current draw (except when tethered)
-        const draw = isTethered ? 14.2 : (2.0 + (throttle * 0.32) + (windSpeed * 0.5));
-        setCurrentDraw(parseFloat(draw.toFixed(1)));
-        if (isTethered) {
-          setBatteryVoltage(16.80);
-        } else {
-          setBatteryVoltage(prev => Math.max(14.0, prev - (draw * 0.0005)));
+        // Auto-switch to frames tab to let user see extraction live
+        if (step === 3) {
+          setActiveTab('frames');
+        }
+      } else if (step <= 25) {
+        // Feature Matching phase
+        setPipelineState('matching');
+        const matchPct = (step - 15) * 10;
+        setPipelineProgress(35 + Math.floor((matchPct / 100) * 30));
+        
+        const f1 = (step - 16) % 15;
+        const f2 = (step - 15) % 15;
+        const matches = 400 + Math.floor(Math.sin(step) * 200);
+        
+        setLogs(prev => [
+          ...prev,
+          `[MATCHER] Correlating frame_${String(f1).padStart(2, '0')} ↔ frame_${String(f2).padStart(2, '0')} | Valid keypoint pairs: ${matches}`
+        ]);
+      } else if (step <= 35) {
+        // 3D Model generation phase
+        setPipelineState('generating');
+        const genPct = (step - 25) * 10;
+        setPipelineProgress(65 + Math.floor((genPct / 100) * 35));
+        
+        if (step === 26) {
+          setActiveTab('model');
+          setLogs(prev => [
+            ...prev,
+            '🔧 Initiating Structure-from-Motion (SfM) triangulation...',
+            '📍 Calculating sparse 3D point cloud coordinates...'
+          ]);
+        } else if (step === 29) {
+          setLogs(prev => [
+            ...prev,
+            '🔄 Running bundle adjustment (reprojection optimization)...',
+            `📊 Mean projection error: 0.285 pixels`
+          ]);
+        } else if (step === 32) {
+          setLogs(prev => [
+            ...prev,
+            '📐 Commencing Delaunay surface mesh triangulation...',
+            '🎨 Generating texture maps from video frames...'
+          ]);
         }
       } else {
-        // Cool down
-        setMotorTemp(prev => prev.map(t => Math.max(32, Math.round(t - 0.5))));
-        setMotorRpm([0, 0, 0, 0]);
-        setEscLoad(0);
-        setCurrentDraw(0.8);
-        setBatteryVoltage(prev => Math.min(16.76, prev + 0.02)); // charging
+        // Completed Sync
+        clearInterval(pipelineIntervalRef.current);
+        setPipelineState('synced');
+        setPipelineProgress(100);
+        setLogs(prev => [
+          ...prev,
+          '✨ DIGITAL TWIN RECONSTRUCTION COMPLETE!',
+          '🟢 Status: NOMINAL - Synchronized with virtual cloud storage.',
+          '📐 Physical volume: 1,482.5 cubic meters',
+          '📊 Point density: 1.5M points / watertight mesh generated.'
+        ]);
       }
-    }, 1000);
+    }, 500);
+  };
 
-    return () => clearInterval(logIntervalRef.current);
-  }, [isArmed, isTethered, throttle, pitch, roll, yaw, windSpeed, batteryVoltage, currentDraw, motorTemp]);
+  const resetPipeline = () => {
+    if (pipelineIntervalRef.current) clearInterval(pipelineIntervalRef.current);
+    setPipelineState('idle');
+    setPipelineProgress(0);
+    setRevealedFrameCount(0);
+    setActiveTab('video');
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.pause();
+    }
+    setLogs([
+      'Pipeline Status: RESET - STANDBY',
+      'Ready to load source video public/test1.mp4...',
+      'Click "START RECONSTRUCTION" to initialize the digital twin generation.'
+    ]);
+  };
 
-  // Auto-scroll terminal console
+  // ── Auto-scroll Terminal ─────────────────────────────────────
   useEffect(() => {
     if (terminalEndRef.current) {
       terminalEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [logs]);
 
-  // Autopilot Control Command Handlers
-  const handleArmToggle = () => {
-    const nextArmed = !isArmed;
-    setIsArmed(nextArmed);
-    if (nextArmed) {
-      setFlightState('Hovering');
-      setThrottle(45);
-      setPitch(2.0);
-      setRoll(-1.5);
-      setLogs(prev => [...prev, '>>> CMD RECEIVED: ARM MOTOR CIRCUITS', 'Motors spooled up. Altitude: 1.2m, Flight controller stabilized.']);
-    } else {
-      setFlightState('Grounded');
-      setThrottle(0);
-      setPitch(0);
-      setRoll(0);
-      setIsTethered(false);
-      setLogs(prev => [...prev, '>>> CMD RECEIVED: DISARM MOTORS', 'Motors halted. Virtual copy set to standby.']);
-    }
-  };
+  // ── WebGL 3D Scene Initialization ───────────────────────────
+  useEffect(() => {
+    if (activeTab !== 'model' || !containerRef.current) return;
 
-  const handleTakeoff = () => {
-    if (!isArmed) {
-      alert("Arm the motors first!");
-      return;
-    }
-    setFlightState('Hovering');
-    setThrottle(65);
-    setPitch(4.0);
-    setLogs(prev => [...prev, '>>> CMD RECEIVED: TAKEOFF AUTOPILOT', 'Ascending to waypoint height 15m. Cruise set.']);
-  };
+    const width = containerRef.current.clientWidth;
+    const height = containerRef.current.clientHeight || 450;
 
-  const handleLand = () => {
-    if (!isArmed) return;
-    setFlightState('Landing');
-    setThrottle(20);
-    setPitch(0.5);
-    setRoll(0.2);
-    setLogs(prev => [...prev, '>>> CMD RECEIVED: LAND AT LOCATION', 'Triggering descent. Autoland scan initialized...']);
+    // 1. Scene & Fog Setup
+    const scene = new THREE.Scene();
+    sceneRef.current = scene;
+    const isDark = document.documentElement.classList.contains('dark');
+    scene.background = new THREE.Color(isDark ? 0x0B0F19 : 0xF8FAFC);
+    scene.fog = new THREE.FogExp2(isDark ? 0x0B0F19 : 0xF8FAFC, 0.015);
+
+    // 2. Camera Setup
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
+    camera.position.set(20, 15, 25);
+    cameraRef.current = camera;
+
+    // 3. Renderer Setup
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     
-    // Auto disarm in 4s
-    setTimeout(() => {
-      setIsArmed(false);
-      setFlightState('Grounded');
-      setThrottle(0);
-      setPitch(0);
-      setRoll(0);
-      setLogs(prev => [...prev, 'Descent complete. Ground touch verified. Disarmed.']);
-    }, 4000);
-  };
+    containerRef.current.innerHTML = '';
+    containerRef.current.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
 
-  const handleRTH = () => {
-    if (!isArmed) return;
-    setFlightState('Returning');
-    setThrottle(75);
-    setPitch(-3.5);
-    setRoll(0);
-    setLogs(prev => [...prev, '>>> CMD RECEIVED: RETURN TO HOME (RTH)', 'Switching controls to home coordinates. Returning to pad.']);
-  };
+    // 4. Orbit Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 - 0.05; // Stay above ground
+    controls.minDistance = 5;
+    controls.maxDistance = 100;
+    controlsRef.current = controls;
 
-  // Fault injection simulation trigger
-  const handleInjectFault = (faultName) => {
-    if (activeFaults.includes(faultName)) return;
+    // 5. Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, isDark ? 0.3 : 0.6);
+    scene.add(ambientLight);
 
-    setActiveFaults(prev => [...prev, faultName]);
-    setTwinStatus('CRITICAL');
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(20, 30, 15);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 1024;
+    dirLight.shadow.mapSize.height = 1024;
+    scene.add(dirLight);
 
-    let logAlert = '';
-    if (faultName === 'motor') {
-      logAlert = '⚠️ CRITICAL FAULT: Motor 4 RPM drop detected! ESC current overload. switching to Tri-rotor emergency flight mode.';
-      setRoll(-12.5); // roll compensation
-    } else if (faultName === 'lidar') {
-      logAlert = '⚠️ WARNING FAULT: LiDAR optical pathway obstructed! Rangefinder disconnected. Fallback to Barometric altitude hold.';
-    } else if (faultName === 'gps') {
-      logAlert = '⚠️ CRITICAL FAULT: GPS Jamming / signal loss (HDOP > 8). Dropping coordinate locking. Enabling visual tracking position hold.';
-      setYaw(y => (y + 45) % 360);
+    // 6. Grid Helper / Reference Floor
+    const gridHelper = new THREE.GridHelper(50, 40, 0x0ea5e9, isDark ? 0x1e293b : 0xe2e8f0);
+    gridHelper.position.y = -5.0;
+    scene.add(gridHelper);
+
+    // ── BUILD DIGITAL TWIN SCENE MODEL ─────────────────────────
+    
+    // Structure: A reconstructed industrial concrete silos and grid
+    const structureGroup = new THREE.Group();
+    scene.add(structureGroup);
+
+    // Reconstructed Silo Mesh (Double Cylinders)
+    const siloMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      roughness: 0.9,
+      metalness: 0.1,
+      flatShading: true,
+      transparent: true,
+      opacity: 0.95
+    });
+
+    const silo1Geo = new THREE.CylinderGeometry(2.5, 2.5, 10, 16, 5);
+    const silo1 = new THREE.Mesh(silo1Geo, siloMat);
+    silo1.position.set(-3, 0, 0);
+    silo1.castShadow = true;
+    silo1.receiveShadow = true;
+    structureGroup.add(silo1);
+
+    const silo2Geo = new THREE.CylinderGeometry(2.0, 2.0, 8, 16, 5);
+    const silo2 = new THREE.Mesh(silo2Geo, siloMat);
+    silo2.position.set(3, -1, -2);
+    silo2.castShadow = true;
+    silo2.receiveShadow = true;
+    structureGroup.add(silo2);
+
+    // Base structures
+    const baseGeo = new THREE.BoxGeometry(10, 1, 8);
+    const baseMesh = new THREE.Mesh(baseGeo, siloMat);
+    baseMesh.position.set(0, -5.5, -1);
+    baseMesh.receiveShadow = true;
+    structureGroup.add(baseMesh);
+
+    scanMeshRef.current = structureGroup;
+
+    // 7. Dense Point Cloud representation (generated from SfM frames)
+    const numPoints = 12000;
+    const pointsGeo = new THREE.BufferGeometry();
+    const positionsArr = new Float32Array(numPoints * 3);
+    const colorsArr = new Float32Array(numPoints * 3);
+
+    for (let i = 0; i < numPoints; i++) {
+      // Shape points around the silos and bases
+      let px, py, pz;
+      const selector = Math.random();
+      
+      if (selector < 0.4) {
+        // Silo 1 shell points
+        const theta = Math.random() * Math.PI * 2;
+        const r = 2.5 + (Math.random() - 0.5) * 0.15;
+        py = (Math.random() - 0.5) * 10;
+        px = -3 + Math.cos(theta) * r;
+        pz = Math.sin(theta) * r;
+      } else if (selector < 0.7) {
+        // Silo 2 shell points
+        const theta = Math.random() * Math.PI * 2;
+        const r = 2.0 + (Math.random() - 0.5) * 0.15;
+        py = -1 + (Math.random() - 0.5) * 8;
+        px = 3 + Math.cos(theta) * r;
+        pz = -2 + Math.sin(theta) * r;
+      } else {
+        // Random structure ground base points
+        px = (Math.random() - 0.5) * 12;
+        py = -5.5 + (Math.random() - 0.5) * 1.5;
+        pz = (Math.random() - 0.5) * 10;
+      }
+
+      positionsArr[i * 3] = px;
+      positionsArr[i * 3 + 1] = py;
+      positionsArr[i * 3 + 2] = pz;
+
+      // Scan laser gradient HSL colors (cyan to deep violet heights)
+      const color = new THREE.Color();
+      const heightRatio = (py + 5) / 10; // 0 to 1
+      color.setHSL(0.55 + heightRatio * 0.3, 0.9, 0.55);
+      colorsArr[i * 3] = color.r;
+      colorsArr[i * 3 + 1] = color.g;
+      colorsArr[i * 3 + 2] = color.b;
     }
 
-    setLogs(prev => [...prev, logAlert]);
-  };
+    pointsGeo.setAttribute('position', new THREE.BufferAttribute(positionsArr, 3));
+    pointsGeo.setAttribute('color', new THREE.BufferAttribute(colorsArr, 3));
 
-  const handleClearFaults = () => {
-    setActiveFaults([]);
-    setTwinStatus('NOMINAL');
-    setRoll(-1.5);
-    setPitch(2.0);
-    setLogs(prev => [...prev, '✔ FAULTS CLEARED: Re-running sensor handshake checks...', 'All sensors checked. Autopilot status returned to NOMINAL.']);
-  };
+    const pointsMat = new THREE.PointsMaterial({
+      size: 0.12,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.9
+    });
+
+    const pointCloud = new THREE.Points(pointsGeo, pointsMat);
+    pointCloudRef.current = pointCloud;
+    scene.add(pointCloud);
+
+    // 8. Glowing scanner laser line plane
+    const laserGeo = new THREE.BoxGeometry(16, 0.08, 12);
+    const laserMat = new THREE.MeshBasicMaterial({
+      color: 0x0ea5e9,
+      transparent: true,
+      opacity: 0.4,
+      wireframe: true
+    });
+    const laserLine = new THREE.Mesh(laserGeo, laserMat);
+    laserLine.position.y = 0;
+    scene.add(laserLine);
+    laserLineRef.current = laserLine;
+
+    // 9. Scanned floating Drone Model
+    const droneGroup = new THREE.Group();
+    droneGroup.position.set(-6, 8, 4);
+    scene.add(droneGroup);
+    droneGroupRef.current = droneGroup;
+
+    // Central disk body
+    const bodyGeo = new THREE.CylinderGeometry(1.0, 1.0, 0.35, 6);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2 });
+    const droneBody = new THREE.Mesh(bodyGeo, bodyMat);
+    droneGroup.add(droneBody);
+
+    // Arms
+    const armMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
+    const armGeo = new THREE.BoxGeometry(4.0, 0.12, 0.12);
+    const arm1 = new THREE.Mesh(armGeo, armMat);
+    arm1.rotation.y = Math.PI / 4;
+    const arm2 = new THREE.Mesh(armGeo, armMat);
+    arm2.rotation.y = -Math.PI / 4;
+    droneGroup.add(arm1, arm2);
+
+    // Rotor spinning meshes
+    const rotors = [];
+    const rotorOffsets = [
+      [1.41, 0.2, 1.41],
+      [-1.41, 0.2, 1.41],
+      [1.41, 0.2, -1.41],
+      [-1.41, 0.2, -1.41]
+    ];
+    rotorOffsets.forEach(offset => {
+      const pGeo = new THREE.BoxGeometry(1.6, 0.02, 0.08);
+      const pMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+      const prop = new THREE.Mesh(pGeo, pMat);
+      prop.position.set(offset[0], offset[1], offset[2]);
+      droneGroup.add(prop);
+      rotors.push(prop);
+    });
+
+    // ── ANIMATE RENDER LOOP ────────────────────────────────────
+    const clock = new THREE.Clock();
+
+    const animate = () => {
+      const elapsed = clock.getElapsedTime();
+
+      // Spin propellers
+      rotors.forEach(r => {
+        r.rotation.y += 0.8;
+      });
+
+      // Hover drone
+      if (droneGroup) {
+        droneGroup.position.y = 7.0 + Math.sin(elapsed * 2.0) * 0.25;
+        droneGroup.position.x = -6.0 + Math.sin(elapsed * 0.5) * 0.5;
+        droneGroup.rotation.y = elapsed * 0.1;
+      }
+
+      // Scanner laser moving up and down
+      if (laserLine) {
+        laserLine.position.y = Math.sin(elapsed * 1.5) * 6;
+      }
+
+      // Orbit camera HUD position update
+      if (camera) {
+        setCurrentCameraPos({
+          x: Math.round(camera.position.x),
+          y: Math.round(camera.position.y),
+          z: Math.round(camera.position.z)
+        });
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+      requestRef.current = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    // ── Window Resize Handler ──────────────────────────────────
+    const handleResize = () => {
+      if (!containerRef.current || !rendererRef.current || !cameraRef.current) return;
+      const w = containerRef.current.clientWidth;
+      const h = containerRef.current.clientHeight || 450;
+      
+      cameraRef.current.aspect = w / h;
+      cameraRef.current.updateProjectionMatrix();
+      rendererRef.current.setSize(w, h);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Clean up WebGL
+    return () => {
+      cancelAnimationFrame(requestRef.current);
+      window.removeEventListener('resize', handleResize);
+      
+      // Dispose Geometries/Materials
+      silo1Geo.dispose();
+      silo2Geo.dispose();
+      baseGeo.dispose();
+      siloMat.dispose();
+      pointsGeo.dispose();
+      pointsMat.dispose();
+      laserGeo.dispose();
+      laserMat.dispose();
+      bodyGeo.dispose();
+      bodyMat.dispose();
+      armGeo.dispose();
+      armMat.dispose();
+      
+      if (containerRef.current) containerRef.current.innerHTML = '';
+    };
+  }, [activeTab]);
+
+  // ── Handle Display Mode Switches ─────────────────────────────
+  useEffect(() => {
+    const mesh = scanMeshRef.current;
+    const points = pointCloudRef.current;
+    if (!mesh || !points) return;
+
+    if (displayMode === 'shaded') {
+      mesh.visible = true;
+      mesh.children.forEach(c => {
+        c.material.wireframe = false;
+        c.material.needsUpdate = true;
+      });
+      points.visible = false;
+    } else if (displayMode === 'wireframe') {
+      mesh.visible = true;
+      mesh.children.forEach(c => {
+        c.material.wireframe = true;
+        c.material.needsUpdate = true;
+      });
+      points.visible = false;
+    } else if (displayMode === 'points') {
+      mesh.visible = false;
+      points.visible = true;
+    }
+  }, [displayMode, activeTab]);
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 text-left">
-      {/* LEFT COLUMN: 3D Attitude Horizon, ESC load dials */}
-      <div className="xl:col-span-8 space-y-6">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs">
-          <div className="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-slate-850 dark:text-slate-100 uppercase tracking-wider">Attitude Horizon & Diagnostics</h3>
+      {/* ── TOP PIPELINE CONTROL BAR ── */}
+      <div className="xl:col-span-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-base font-extrabold text-slate-850 dark:text-slate-100 flex items-center gap-2">
+            <span className="material-symbols-outlined text-sky-500">model_training</span>
+            <span>3D Photogrammetry & Digital Twin Engine</span>
+          </h2>
+          <p className="text-[11px] text-slate-400 mt-1">
+            Triangulate structural meshes and dense point clouds from high-resolution flight camera footage.
+          </p>
+        </div>
+        
+        <div className="flex gap-3 items-center">
+          <button
+            onClick={startPipeline}
+            disabled={pipelineState !== 'idle' && pipelineState !== 'synced'}
+            className="px-4 py-2 bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 disabled:opacity-40 text-slate-900 font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+          >
+            <span className="material-symbols-outlined text-sm font-bold">play_arrow</span>
+            <span>START RECONSTRUCTION</span>
+          </button>
+          
+          <button
+            onClick={resetPipeline}
+            className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700 transition-all active:scale-95 flex items-center gap-1"
+          >
+            <span className="material-symbols-outlined text-sm">restart_alt</span>
+            <span>RESET</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── LEFT PANEL: PIPELINE TABS & VISUALIZATION ── */}
+      <div className="xl:col-span-8 flex flex-col space-y-6">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs flex-1 flex flex-col min-h-[500px]">
+          {/* Tab Headers */}
+          <div className="flex border-b border-slate-100 dark:border-slate-800 pb-3 mb-4 justify-between items-center">
             <div className="flex gap-2">
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
-                isArmed 
-                  ? 'bg-red-500/10 border-red-500/30 text-red-500 animate-pulse' 
-                  : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
-              }`}>
-                {isArmed ? 'ARMED' : 'DISARMED'}
-              </span>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded border bg-sky-500/10 border-sky-500/30 text-sky-500 uppercase">
-                {flightState}
-              </span>
+              <button
+                onClick={() => setActiveTab('video')}
+                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all flex items-center gap-1 ${
+                  activeTab === 'video'
+                    ? 'bg-sky-500/10 text-sky-500 border border-sky-500/30'
+                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                }`}
+              >
+                <span className="material-symbols-outlined text-sm">movie</span>
+                <span>Video Input</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('frames')}
+                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all flex items-center gap-1 relative ${
+                  activeTab === 'frames'
+                    ? 'bg-sky-500/10 text-sky-500 border border-sky-500/30'
+                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                }`}
+              >
+                <span className="material-symbols-outlined text-sm">photo_library</span>
+                <span>Extracted Frames</span>
+                {revealedFrameCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-sky-500 text-slate-900 text-[8px] font-extrabold h-4 w-4 rounded-full flex items-center justify-center animate-pulse">
+                    {revealedFrameCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab('model')}
+                disabled={pipelineState === 'idle' || pipelineState === 'extracting' || pipelineState === 'matching'}
+                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all flex items-center gap-1 disabled:opacity-40 ${
+                  activeTab === 'model'
+                    ? 'bg-sky-500/10 text-sky-500 border border-sky-500/30'
+                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                }`}
+              >
+                <span className="material-symbols-outlined text-sm">3d_rotation</span>
+                <span>3D Digital Twin</span>
+              </button>
+            </div>
+            
+            <div className="text-[10px] font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1">
+              <span className={`h-1.5 w-1.5 rounded-full ${
+                pipelineState === 'synced' ? 'bg-emerald-500' : pipelineState !== 'idle' ? 'bg-sky-500 animate-ping' : 'bg-slate-500'
+              }`}></span>
+              <span>{pipelineState}</span>
             </div>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Horizon indicator */}
-            <div className="flex flex-col items-center border border-slate-100 dark:border-slate-800 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-900/50">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-3">3D Attitude Indicator (Virtual Copy)</span>
-              <canvas ref={horizonCanvasRef} width={200} height={200} className="bg-slate-950 rounded-full border-4 border-slate-850 shadow-inner" />
-              <div className="grid grid-cols-3 gap-4 text-center mt-4 w-full text-xs text-slate-500">
-                <div>
-                  <div className="text-[9px] uppercase">Pitch</div>
-                  <div className="font-bold text-slate-800 dark:text-slate-100">{pitch.toFixed(1)}°</div>
-                </div>
-                <div>
-                  <div className="text-[9px] uppercase">Roll</div>
-                  <div className="font-bold text-slate-800 dark:text-slate-100">{roll.toFixed(1)}°</div>
-                </div>
-                <div>
-                  <div className="text-[9px] uppercase">Yaw (Heading)</div>
-                  <div className="font-bold text-slate-800 dark:text-slate-100">{yaw.toFixed(1)}°</div>
-                </div>
+
+          {/* Progress Bar */}
+          {pipelineState !== 'idle' && (
+            <div className="mb-4 bg-slate-50 dark:bg-slate-850 p-3 rounded-lg border border-slate-100 dark:border-slate-800 text-xs">
+              <div className="flex justify-between items-center mb-1 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                <span className="uppercase font-mono flex items-center gap-1">
+                  <span className="material-symbols-outlined text-xs animate-spin">sync</span>
+                  {pipelineState === 'extracting' && 'Phase 1: Keyframe Decimation & Extraction'}
+                  {pipelineState === 'matching' && 'Phase 2: SIFT Feature Correlation & Correspondence'}
+                  {pipelineState === 'generating' && 'Phase 3: SfM Mesh Synthesis & Bundle Adjustment'}
+                  {pipelineState === 'synced' && 'Sync Completed: Twin Online'}
+                </span>
+                <span>{pipelineProgress}%</span>
+              </div>
+              <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden relative">
+                <div 
+                  className="h-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-300 rounded-full" 
+                  style={{ width: `${pipelineProgress}%` }}
+                />
               </div>
             </div>
+          )}
 
-            {/* Motor diagnostics and temperature dials */}
-            <div className="flex flex-col space-y-4">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ESC Engine & Motor Loads</span>
-              
-              <div className="grid grid-cols-2 gap-4">
-                {motorTemp.map((temp, idx) => (
-                  <div key={idx} className="border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 rounded-xl p-3 flex justify-between items-center text-xs">
-                    <div>
-                      <div className="font-bold text-slate-700 dark:text-slate-350">Motor {idx + 1}</div>
-                      <div className="text-[10px] text-sky-500 font-bold mt-0.5">{motorRpm[idx]} RPM</div>
+          {/* Tab Panels */}
+          <div className="flex-1 flex flex-col justify-between">
+            {/* ── PANEL: VIDEO INPUT ── */}
+            {activeTab === 'video' && (
+              <div className="flex-1 flex flex-col justify-center items-center border border-slate-100 dark:border-slate-800 rounded-xl bg-slate-950 p-4 relative overflow-hidden h-[400px]">
+                <video
+                  ref={videoRef}
+                  src="/test1.mp4"
+                  loop
+                  muted
+                  className="w-full h-full max-h-[350px] object-contain rounded-lg shadow-2xl"
+                />
+                {/* HUD Camera Target Indicator Overlay */}
+                <div className="absolute inset-0 pointer-events-none border border-sky-500/10 flex items-center justify-center">
+                  <div className="h-20 w-20 border border-dashed border-sky-500/30 rounded-full flex items-center justify-center animate-spin" style={{ animationDuration: '20s' }}></div>
+                  <div className="absolute h-10 w-10 border border-sky-500/40 rounded flex items-center justify-center">
+                    <span className="text-sky-500 text-[10px] font-bold font-mono">30s CUT</span>
+                  </div>
+                  {/* Outer corner marks */}
+                  <div className="absolute top-4 left-4 h-4 w-4 border-t-2 border-l-2 border-sky-500/30"></div>
+                  <div className="absolute top-4 right-4 h-4 w-4 border-t-2 border-r-2 border-sky-500/30"></div>
+                  <div className="absolute bottom-4 left-4 h-4 w-4 border-b-2 border-l-2 border-sky-500/30"></div>
+                  <div className="absolute bottom-4 right-4 h-4 w-4 border-b-2 border-r-2 border-sky-500/30"></div>
+                  {/* Top center scanner label */}
+                  <div className="absolute top-6 font-mono text-[9px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800 text-sky-400 tracking-wider">
+                    SOURCE DATA STREAM: test1.mp4
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── PANEL: EXTRACTED FRAMES ── */}
+            {activeTab === 'frames' && (
+              <div className="flex-1 flex flex-col">
+                {revealedFrameCount > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 max-h-[380px] overflow-y-auto pr-1">
+                    {EXTRACTED_FRAMES.slice(0, revealedFrameCount).map((frame) => (
+                      <div
+                        key={frame.index}
+                        onClick={() => setSelectedFrame(frame)}
+                        className={`group border rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-850 cursor-pointer transition-all ${
+                          selectedFrame.index === frame.index
+                            ? 'border-sky-500 shadow-md scale-[1.02]'
+                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-400'
+                        }`}
+                      >
+                        <div className="relative h-20 bg-slate-950 overflow-hidden">
+                          <img
+                            src={frame.src}
+                            alt={`frame_${frame.index}`}
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          />
+                          <span className="absolute bottom-1 right-1 bg-slate-950/80 text-[7px] text-slate-300 font-mono px-1 rounded">
+                            {frame.timeCode}
+                          </span>
+                        </div>
+                        <div className="p-1.5 text-[8px] font-mono text-slate-400 space-y-0.5">
+                          <div className="flex justify-between">
+                            <span>Index:</span>
+                            <span className="font-bold text-slate-700 dark:text-slate-200">#{(frame.index).toString().padStart(2, '0')}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Keypoints:</span>
+                            <span className="text-sky-500 font-bold">{frame.keypoints}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex-1 h-[300px] border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl flex flex-col justify-center items-center text-slate-400">
+                    <span className="material-symbols-outlined text-4xl mb-2">burst_mode</span>
+                    <span className="font-bold text-xs uppercase tracking-widest">No Frames Extracted</span>
+                    <span className="text-[10px] text-slate-500 mt-1">Start reconstruction to extract frames from test1.mp4.</span>
+                  </div>
+                )}
+
+                {/* Selected Frame Metrics Bar */}
+                {revealedFrameCount > 0 && selectedFrame && (
+                  <div className="mt-4 bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 p-3.5 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-16 bg-slate-950 rounded overflow-hidden border border-slate-200 dark:border-slate-800">
+                        <img src={selectedFrame.src} alt="Preview" className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <div className="font-extrabold text-slate-800 dark:text-slate-100">Selected Frame Details: frame_{String(selectedFrame.index).padStart(2, '0')}.jpg</div>
+                        <div className="text-[10px] text-slate-400 font-mono">Timestamp: {selectedFrame.timeCode} // Res: 480x270 px</div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className={`font-extrabold ${temp > 55 ? 'text-red-500' : 'text-slate-800 dark:text-slate-200'}`}>{temp}°C</div>
-                      <div className="text-[9px] text-slate-400 mt-0.5">Temp</div>
+                    <div className="grid grid-cols-2 gap-4 text-center sm:text-right font-mono text-[10px] text-slate-400">
+                      <div>
+                        <div>SIFT Keypoints</div>
+                        <div className="font-bold text-sky-500 text-xs">{selectedFrame.keypoints}</div>
+                      </div>
+                      <div>
+                        <div>Reprojection Err</div>
+                        <div className="font-bold text-slate-700 dark:text-slate-200 text-xs">{selectedFrame.reprojectionError}px</div>
+                      </div>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
+            )}
 
-              {/* ESC Loading slider bar */}
-              <div className="border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 rounded-xl p-4 space-y-2 text-xs">
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className="text-slate-400 font-bold uppercase">ESC Total Power Load</span>
-                  <span className={`font-extrabold ${escLoad > 80 ? 'text-red-500 animate-pulse' : 'text-sky-500'}`}>{escLoad}%</span>
+            {/* ── PANEL: 3D MODEL VIEW ── */}
+            {activeTab === 'model' && (
+              <div className="flex-1 flex flex-col relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-950 min-h-[380px]">
+                {/* 3D WebGL Canvas container */}
+                <div ref={containerRef} className="w-full h-[380px] z-10" />
+
+                {/* Camera HUD Details */}
+                <div className="absolute bottom-4 left-4 bg-slate-900/80 backdrop-blur-md px-3 py-2 rounded-lg border border-slate-800 text-[9px] font-mono space-y-0.5 text-slate-300 z-20 pointer-events-none">
+                  <div className="font-bold text-sky-400">GCS VIRTUAL FRAME HUD</div>
+                  <div>Cam Orbit: [X: {currentCameraPos.x}, Y: {currentCameraPos.y}, Z: {currentCameraPos.z}]</div>
+                  <div>Point Cloud Model: Silo Structure Matrix</div>
+                  <div>Reconstruction: Nominal 60FPS</div>
                 </div>
-                <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full transition-all duration-300 ${
-                      escLoad > 80 ? 'bg-red-500' : escLoad > 60 ? 'bg-yellow-500' : 'bg-sky-500'
-                    }`} 
-                    style={{ width: `${escLoad}%` }} 
-                  />
+
+                {/* Mesh Display Mode Switches */}
+                <div className="absolute bottom-4 right-4 flex bg-slate-950/80 backdrop-blur-md p-1 rounded-lg border border-slate-800 z-20 gap-1">
+                  {['shaded', 'wireframe', 'points'].map(mode => (
+                    <button
+                      key={mode}
+                      onClick={() => setDisplayMode(mode)}
+                      className={`text-[9px] font-extrabold px-2 py-1.5 rounded capitalize transition-all ${
+                        displayMode === mode 
+                          ? 'bg-sky-500 text-slate-850' 
+                          : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {mode}
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Real-time Vibration spectrum analyzer */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col h-[230px]">
-            <h4 className="font-bold text-xs text-slate-800 dark:text-slate-100 uppercase tracking-wider mb-2">IMU vibration Spectrum (G-Force)</h4>
-            <div className="flex-1 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 relative">
-              <canvas ref={vibrationCanvasRef} className="w-full h-full" />
-              <div className="absolute top-2 left-2 text-[9px] text-slate-400 bg-slate-950/80 px-2 py-0.5 rounded border border-slate-800">
-                Z-Axis frequency FFT bounds: 15-200 Hz
-              </div>
-            </div>
-          </div>
-
-          {/* Autopilot Command Deck */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs flex flex-col h-[230px]">
-            <h4 className="font-bold text-xs text-slate-800 dark:text-slate-100 uppercase tracking-wider mb-3">Autopilot Control Deck</h4>
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <button
-                onClick={handleArmToggle}
-                className={`py-2.5 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 ${
-                  isArmed 
-                    ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20' 
-                    : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border border-emerald-500/20'
-                }`}
-              >
-                <span className="material-symbols-outlined text-sm">{isArmed ? 'dangerous' : 'check_circle'}</span>
-                <span>{isArmed ? 'DISARM MOTORS' : 'ARM MOTORS'}</span>
-              </button>
-              
-              <button
-                onClick={handleTakeoff}
-                disabled={!isArmed}
-                className="py-2.5 bg-sky-500 disabled:opacity-50 text-slate-850 font-bold text-xs rounded-xl hover:bg-sky-600 transition-colors flex items-center justify-center gap-1"
-              >
-                <span className="material-symbols-outlined text-sm">flight_takeoff</span>
-                <span>Takeoff</span>
-              </button>
-
-              <button
-                onClick={handleLand}
-                disabled={!isArmed}
-                className="py-2.5 bg-slate-800 dark:bg-slate-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl hover:bg-slate-900 transition-colors flex items-center justify-center gap-1"
-              >
-                <span className="material-symbols-outlined text-sm">flight_land</span>
-                <span>Auto Land</span>
-              </button>
-
-              <button
-                onClick={handleRTH}
-                disabled={!isArmed}
-                className="py-2.5 bg-slate-800 dark:bg-slate-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl hover:bg-slate-900 transition-colors flex items-center justify-center gap-1"
-              >
-                <span className="material-symbols-outlined text-sm">cottage</span>
-                <span>Go Home Pad</span>
-              </button>
-            </div>
-
-            {/* Tethered Mode Toggle Button */}
-            <div className="mb-4">
-              <button
-                onClick={() => {
-                  if (!isArmed) {
-                    alert("Arm the motors first!");
-                    return;
-                  }
-                  const nextTether = !isTethered;
-                  setIsTethered(nextTether);
-                  if (nextTether) {
-                    setFlightState('Tethered Hover');
-                    setThrottle(55);
-                    setPitch(0);
-                    setRoll(0);
-                    setLogs(prev => [...prev, '>>> CMD RECEIVED: TETHERED SURVEILLANCE MODE ACTIVATED', 'Continuous high-voltage power line connected. Altitude locked at 15m.']);
-                  } else {
-                    setFlightState('Hovering');
-                    setLogs(prev => [...prev, '>>> CMD RECEIVED: TETHERED SURVEILLANCE MODE DEACTIVATED', 'Switched back to internal battery power supply.']);
-                  }
-                }}
-                disabled={!isArmed}
-                className={`w-full py-2 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 ${
-                  isTethered
-                    ? 'bg-amber-500 text-slate-900 hover:bg-amber-600'
-                    : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                <span className="material-symbols-outlined text-sm">power</span>
-                <span>{isTethered ? 'TETHERED MODE: ACTIVE' : 'ENGAGE TETHERED SURVEILLANCE'}</span>
-              </button>
-            </div>
-
-            {/* Interactive Throttle slider */}
-            <div className="space-y-1.5 text-xs">
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="text-slate-400 font-bold uppercase">Throttle Control</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">{throttle}%</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                disabled={!isArmed}
-                value={throttle}
-                onChange={(e) => setThrottle(parseInt(e.target.value))}
-                className="w-full h-1 bg-slate-200 dark:bg-slate-850 rounded-lg appearance-none cursor-pointer accent-sky-500 disabled:opacity-40"
-              />
-            </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* RIGHT COLUMN: Terminal Logs, fault injection, wind tunnel */}
-      <div className="xl:col-span-4 space-y-6">
-        {/* State Alerts display */}
+      {/* ── RIGHT PANEL: RECONSTRUCTION LOGS & QUALITY ── */}
+      <div className="xl:col-span-4 flex flex-col space-y-6">
+        {/* State Alerts */}
         <div className={`rounded-xl border p-4 text-xs ${
-          twinStatus === 'CRITICAL' 
-            ? 'bg-red-500/10 border-red-500/30 text-red-500 animate-pulse' 
-            : twinStatus === 'WARNING' 
-            ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500' 
-            : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500'
+          pipelineState === 'synced' 
+            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' 
+            : pipelineState !== 'idle' 
+            ? 'bg-sky-500/10 border-sky-500/30 text-sky-500 animate-pulse'
+            : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
         }`}>
           <div className="flex gap-2 items-center">
             <span className="material-symbols-outlined text-lg">
-              {twinStatus === 'CRITICAL' ? 'gpp_bad' : twinStatus === 'WARNING' ? 'warning' : 'security'}
+              {pipelineState === 'synced' ? 'check_circle' : pipelineState !== 'idle' ? 'autorenew' : 'hourglass_empty'}
             </span>
             <div>
-              <p className="font-bold uppercase tracking-wider">Virtual Twin State: {twinStatus}</p>
+              <p className="font-bold uppercase tracking-wider">
+                {pipelineState === 'idle' && 'Pipeline Standby'}
+                {pipelineState === 'extracting' && 'Extracting Frames...'}
+                {pipelineState === 'matching' && 'Matching Keypoints...'}
+                {pipelineState === 'generating' && 'Reconstructing Mesh...'}
+                {pipelineState === 'synced' && 'Digital Twin Synced'}
+              </p>
               <p className="text-[10px] text-slate-400 mt-0.5">
-                {twinStatus === 'CRITICAL' 
-                  ? 'Failsafe protocols engaged. Flight system responding.' 
-                  : 'All virtual circuits operating within limits.'}
+                {pipelineState === 'idle' && 'Awaiting video sequence import.'}
+                {pipelineState === 'extracting' && 'Slicing video into keyframes.'}
+                {pipelineState === 'matching' && 'Identifying matched feature points.'}
+                {pipelineState === 'generating' && 'Synthesizing 3D point vertices.'}
+                {pipelineState === 'synced' && 'Photogrammetry model is live and synced.'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Fault Injection Panel */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs">
-          <h4 className="font-bold text-xs text-slate-800 dark:text-slate-100 uppercase tracking-wider mb-2">Simulate Fault Injections</h4>
-          <p className="text-[10px] text-slate-400 mb-3">Manually trigger failures in the simulation matrix to test the flight computer fallback systems.</p>
-          
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            <button
-              onClick={() => handleInjectFault('motor')}
-              className="py-2 bg-slate-50 dark:bg-slate-800 hover:bg-red-500/10 hover:text-red-500 text-slate-600 dark:text-slate-350 rounded-lg text-center font-semibold text-[10px] border border-slate-100 dark:border-slate-800 transition-colors"
-            >
-              Fail Motor 4
-            </button>
-            <button
-              onClick={() => handleInjectFault('lidar')}
-              className="py-2 bg-slate-50 dark:bg-slate-800 hover:bg-red-500/10 hover:text-red-500 text-slate-600 dark:text-slate-350 rounded-lg text-center font-semibold text-[10px] border border-slate-100 dark:border-slate-800 transition-colors"
-            >
-              LiDAR Obstruction
-            </button>
-            <button
-              onClick={() => handleInjectFault('gps')}
-              className="py-2 bg-slate-50 dark:bg-slate-800 hover:bg-red-500/10 hover:text-red-500 text-slate-600 dark:text-slate-350 rounded-lg text-center font-semibold text-[10px] border border-slate-100 dark:border-slate-800 transition-colors"
-            >
-              GPS Jammer Active
-            </button>
-            <button
-              onClick={handleClearFaults}
-              className="py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg text-center font-bold text-[10px] transition-colors"
-            >
-              Clear Faults Matrix
-            </button>
+        {/* Real-time Reconstruction Console */}
+        <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-xs flex flex-col h-[280px]">
+          <div className="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+            <span className="text-[10px] text-sky-400 font-mono font-bold uppercase tracking-wider">RECONSTRUCTION LOGS</span>
+            <span className="text-[8px] bg-slate-850 text-slate-400 px-1.5 py-0.5 rounded font-mono">10Hz</span>
           </div>
-        </div>
-
-        {/* Environmental Wind Tunnel settings */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs text-xs space-y-3">
-          <h4 className="font-bold text-xs text-slate-800 dark:text-slate-100 uppercase tracking-wider">Wind-Tunnel Simulator</h4>
-          <div className="space-y-3">
-            <div>
-              <div className="flex justify-between items-center text-[10px] mb-1.5">
-                <span className="text-slate-400 font-bold uppercase font-mono">Crosswind Speed</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">{windSpeed} m/s</span>
-              </div>
-              <input 
-                type="range"
-                min="0"
-                max="25"
-                step="0.5"
-                value={windSpeed}
-                onChange={(e) => setWindSpeed(parseFloat(e.target.value))}
-                className="w-full h-1 bg-slate-200 dark:bg-slate-850 rounded-lg appearance-none cursor-pointer accent-sky-500"
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2 text-[9px] bg-slate-50 dark:bg-slate-800/30 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 text-slate-400">
-              <div>Est. Structural Drag: <span className="font-bold text-slate-700 dark:text-slate-200">{(windSpeed * 0.08).toFixed(2)} N</span></div>
-              <div>ESC Power Overhead: <span className="font-bold text-slate-700 dark:text-slate-200">+{Math.round(windSpeed * 1.8)}%</span></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Telemetry Stream Console Output */}
-        <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-xs flex flex-col h-[200px]">
-          <span className="text-[9px] text-sky-400 font-mono font-bold uppercase mb-2">RAW TELEMETRY STREAM (10Hz)</span>
           <div className="flex-1 overflow-y-auto font-mono text-[9px] text-slate-400 space-y-1 scrollbar-thin">
             {logs.map((log, idx) => (
-              <div key={idx} className="leading-relaxed break-all text-left">{log}</div>
+              <div key={idx} className="leading-relaxed break-all text-left">
+                <span className="text-sky-500/60 mr-1">&gt;</span>{log}
+              </div>
             ))}
             <div ref={terminalEndRef} />
+          </div>
+        </div>
+
+        {/* Photogrammetry Metrics Panel */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs text-xs space-y-3 flex-1">
+          <h4 className="font-bold text-xs text-slate-800 dark:text-slate-100 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-slate-800">Mesh & Bundle Metrics</h4>
+          
+          <div className="space-y-3 text-[10px] text-slate-400">
+            <div className="flex justify-between">
+              <span>Total Video Frames:</span>
+              <span className="font-bold text-slate-700 dark:text-slate-200">931 frames (30s)</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Decimated Keyframes:</span>
+              <span className="font-bold text-slate-700 dark:text-slate-200">15 frames</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Average Keypoints / Frame:</span>
+              <span className="font-bold text-slate-700 dark:text-slate-200">
+                {pipelineState === 'idle' ? '0' : '1,248 pts'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Triangulated Vertices:</span>
+              <span className="font-bold text-slate-700 dark:text-slate-200">
+                {pipelineState === 'synced' || pipelineState === 'generating' ? '12,000 pts' : '0'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Mean Reprojection Error:</span>
+              <span className={`font-bold ${pipelineState === 'synced' ? 'text-emerald-500' : 'text-slate-700 dark:text-slate-200'}`}>
+                {pipelineState === 'synced' ? '0.285 px' : '0.000 px'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Mesh Watertight Integrity:</span>
+              <span className={`font-bold ${pipelineState === 'synced' ? 'text-emerald-500' : 'text-slate-400'}`}>
+                {pipelineState === 'synced' ? 'VERIFIED' : 'PENDING'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
