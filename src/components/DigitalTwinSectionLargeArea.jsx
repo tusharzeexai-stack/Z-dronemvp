@@ -2,70 +2,53 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ZONES — Mapped from v3_x_1test.mp4 large-area aerial footage
-// ─────────────────────────────────────────────────────────────────────────────
 const ZONES = [
-  { id: 'Z1', label: 'Rebar Foundation Slab',   type: 'foundation' },
-  { id: 'Z2', label: 'Excavation & Dirt Mounds', type: 'excavation' },
-  { id: 'Z3', label: 'Vehicle Laydown / Road',   type: 'road'       },
-  { id: 'Z4', label: 'Outer Perimeter Zone',     type: 'perimeter'  },
+  { id: 'Z1', label: 'Rebar Foundation Slab'   },
+  { id: 'Z2', label: 'Excavation & Dirt Mounds' },
+  { id: 'Z3', label: 'Vehicle Laydown / Road'   },
+  { id: 'Z4', label: 'Outer Perimeter Zone'     },
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TRACKED OBJECTS — from YOLO labels in the video frames
-// ─────────────────────────────────────────────────────────────────────────────
 const TRACKED = [
-  { id: 'BLD-01', zone: 'Z1', cls: 'Bulldozer',      color: '#facc15', heat: 0.97 },
-  { id: 'BCK-01', zone: 'Z2', cls: 'Backhoe Loader', color: '#f97316', heat: 0.37 },
-  { id: 'VEH-01', zone: 'Z3', cls: 'Other Vehicle',  color: '#a855f7', heat: 0.40 },
-  { id: 'WRK-01', zone: 'Z1', cls: 'Person',         color: '#ff2d78', heat: 0.79 },
-  { id: 'WRK-02', zone: 'Z2', cls: 'Person',         color: '#ec4899', heat: 0.63 },
-  { id: 'WRK-03', zone: 'Z3', cls: 'Person',         color: '#fb7185', heat: 0.24 },
+  { id: 'BLD-01', zone: 'Z1', cls: 'Bulldozer',      color: '#facc15' },
+  { id: 'BCK-01', zone: 'Z2', cls: 'Backhoe Loader', color: '#f97316' },
+  { id: 'VEH-01', zone: 'Z3', cls: 'Other Vehicle',  color: '#a855f7' },
+  { id: 'WRK-01', zone: 'Z1', cls: 'Person',         color: '#ff2d78' },
+  { id: 'WRK-02', zone: 'Z2', cls: 'Person',         color: '#ec4899' },
+  { id: 'WRK-03', zone: 'Z3', cls: 'Person',         color: '#fb7185' },
 ];
 
 const MAX_FRAMES = 1204;
 const getFramePath = (idx) =>
   `/digital_twin/v3_x_1_frames/frame_${String(idx).padStart(4, '0')}.jpg`;
 
-function createHeatTex(center, outer) {
-  const C = document.createElement('canvas');
-  C.width = C.height = 128;
-  const ctx = C.getContext('2d');
-  const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-  g.addColorStop(0,   center);
-  g.addColorStop(0.4, outer || center);
-  g.addColorStop(1,   'transparent');
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(64, 64, 64, 0, Math.PI * 2); ctx.fill();
-  return new THREE.CanvasTexture(C);
-}
-
 export default function DigitalTwinSectionLargeArea() {
-  const mountRef    = useRef(null);
-  const rafRef      = useRef(null);
-  const clockRef    = useRef(new THREE.Clock());
-  const controlsRef = useRef(null);
-  const orthoRef    = useRef(null);
-  const droneRef    = useRef(null);
-  const rotorsRef   = useRef([]);
-  const objectsRef  = useRef([]);
-  const scanPlRef   = useRef(null);
-  const consoleEnd  = useRef(null);
+  const mountRef     = useRef(null);
+  const rafRef       = useRef(null);
+  const controlsRef  = useRef(null);
+  const orthoRef     = useRef(null);
+  const droneRef     = useRef(null);
+  const rotorsRef    = useRef([]);
+  const workersRef   = useRef([]);
+  const scanPlRef    = useRef(null);
+  const consoleEnd   = useRef(null);
+  const wireRef      = useRef(null);
+  const texLoader    = useRef(new THREE.TextureLoader());
+  const texCache     = useRef(new Map());
+  const playRef      = useRef(false);
+  const frameRef     = useRef(1);
+  const showWireRef  = useRef(false);
 
-  const texLoader   = useRef(new THREE.TextureLoader());
-  const texCache    = useRef(new Map());
-
-  const [currentFrame,   setCurrentFrame]   = useState(1);
-  const [scanActive,     setScanActive]     = useState(false);
-  const [scanPct,        setScanPct]        = useState(0);
-  const [detCount,       setDetCount]       = useState(0);
-  const [showThermal,    setShowThermal]    = useState(true);
-  const [showWireframe,  setShowWireframe]  = useState(false);
-  const [autoRotate,     setAutoRotate]     = useState(true);
-  const [activeZone,     setActiveZone]     = useState(null);
-  const [camPos,         setCamPos]         = useState({ x: 0, y: 0, z: 0 });
-  const [playing,        setPlaying]        = useState(false);
+  const [currentFrame, setCurrentFrame] = useState(1);
+  const [playing,      setPlaying]      = useState(false);
+  const [scanActive,   setScanActive]   = useState(false);
+  const [scanPct,      setScanPct]      = useState(0);
+  const [detCount,     setDetCount]     = useState(0);
+  const [showThermal,  setShowThermal]  = useState(true);
+  const [showWire,     setShowWire]     = useState(false);
+  const [autoRotate,   setAutoRotate]   = useState(true);
+  const [activeZone,   setActiveZone]   = useState(null);
+  const [camPos,       setCamPos]       = useState({ x: '0.0', y: '0.0', z: '0.0' });
   const [logs, setLogs] = useState([
     '> Z-DRONE Digital Twin Engine v3.0',
     '> Source: v3_x_1test.mp4 — Large Area Construction',
@@ -78,27 +61,31 @@ export default function DigitalTwinSectionLargeArea() {
     setLogs(p => { const n = [...p, `> ${msg}`]; return n.length > 50 ? n.slice(-50) : n; });
   }, []);
 
-  const playRef  = useRef(false);
-  const frameRef = useRef(1);
-
   useEffect(() => {
     if (consoleEnd.current) consoleEnd.current.scrollIntoView({ behavior: 'smooth' });
   }, [logs]);
 
-  // ── Texture streaming ─────────────────────────────────────────────────────
+  // Keep refs in sync with state for use inside animation loop
+  useEffect(() => { showWireRef.current = showWire; }, [showWire]);
+  useEffect(() => { if (controlsRef.current) controlsRef.current.autoRotate = autoRotate; }, [autoRotate]);
+
+  // ── Texture streaming ──────────────────────────────────────────────────────
   const applyFrame = useCallback((idx) => {
-    if (!orthoRef.current) return;
-    if (texCache.current.has(idx)) {
-      orthoRef.current.material.map = texCache.current.get(idx);
-      orthoRef.current.material.needsUpdate = true;
+    const mesh = orthoRef.current;
+    if (!mesh) return;
+    const cached = texCache.current.get(idx);
+    if (cached) {
+      mesh.material.map = cached;
+      mesh.material.needsUpdate = true;
     } else {
       texLoader.current.load(getFramePath(idx), (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         texCache.current.set(idx, tex);
-        if (texCache.current.size > 20) {
-          const first = texCache.current.keys().next().value;
-          texCache.current.get(first)?.dispose();
-          texCache.current.delete(first);
+        // LRU eviction — keep ≤ 18 textures
+        if (texCache.current.size > 18) {
+          const key = texCache.current.keys().next().value;
+          texCache.current.get(key)?.dispose();
+          texCache.current.delete(key);
         }
         if (orthoRef.current) {
           orthoRef.current.material.map = tex;
@@ -106,20 +93,21 @@ export default function DigitalTwinSectionLargeArea() {
         }
       });
     }
-    // Prefetch next 3
-    for (let j = 1; j <= 3; j++) {
+    // Pre-fetch ahead
+    for (let j = 1; j <= 4; j++) {
       const n = idx + j;
-      if (n <= MAX_FRAMES && !texCache.current.has(n))
+      if (n <= MAX_FRAMES && !texCache.current.has(n)) {
         texLoader.current.load(getFramePath(n), (t) => {
           t.colorSpace = THREE.SRGBColorSpace;
-          texCache.current.set(n, t);
+          if (!texCache.current.has(n)) texCache.current.set(n, t);
         });
+      }
     }
   }, []);
 
   useEffect(() => { applyFrame(currentFrame); }, [currentFrame, applyFrame]);
 
-  // ── Playback ─────────────────────────────────────────────────────────────
+  // ── Playback ────────────────────────────────────────────────────────────────
   useEffect(() => {
     playRef.current = playing;
     if (!playing) return;
@@ -131,7 +119,7 @@ export default function DigitalTwinSectionLargeArea() {
     return () => clearInterval(iv);
   }, [playing]);
 
-  // ── Three.js Scene ────────────────────────────────────────────────────────
+  // ── Three.js Scene ──────────────────────────────────────────────────────────
   useEffect(() => {
     const el = mountRef.current;
     if (!el) return;
@@ -154,7 +142,6 @@ export default function DigitalTwinSectionLargeArea() {
     // Camera
     const camera = new THREE.PerspectiveCamera(44, W / H, 0.1, 800);
     camera.position.set(30, 55, 70);
-    camera.lookAt(0, 0, 0);
 
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -173,41 +160,37 @@ export default function DigitalTwinSectionLargeArea() {
     dir.position.set(40, 80, 20);
     dir.castShadow = true;
     scene.add(dir);
-    const ptMain = new THREE.PointLight(0x00d4ff, 1.2, 120);
+    const ptMain = new THREE.PointLight(0x00d4ff, 1.2, 150);
     ptMain.position.set(0, 30, 0);
     scene.add(ptMain);
 
-    // ── Grid / Ground ──────────────────────────────────────────────────────
-    const gridLineMat = new THREE.LineBasicMaterial({ color: 0x001e2e, transparent: true, opacity: 0.9 });
+    // ── Grid / Ground ───────────────────────────────────────────────────────
+    const gridLineMat = new THREE.LineBasicMaterial({ color: 0x001e2e, transparent: true, opacity: 0.8 });
     const GS = 200, GD = 80;
-    const gridGrp = new THREE.Group();
     for (let i = 0; i <= GD; i++) {
       const p = -GS / 2 + i * (GS / GD);
-      gridGrp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(-GS/2, 0, p), new THREE.Vector3(GS/2, 0, p)]), gridLineMat));
-      gridGrp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(p, 0, -GS/2), new THREE.Vector3(p, 0, GS/2)]), gridLineMat));
+      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-GS/2, 0, p), new THREE.Vector3(GS/2, 0, p)]), gridLineMat));
+      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p, 0, -GS/2), new THREE.Vector3(p, 0, GS/2)]), gridLineMat));
     }
-    gridGrp.position.y = -0.01;
-    scene.add(gridGrp);
 
-    const gnd = new THREE.Mesh(new THREE.PlaneGeometry(300, 300),
-      new THREE.MeshStandardMaterial({ color: 0x000d18, roughness: 1 }));
+    const gnd = new THREE.Mesh(
+      new THREE.PlaneGeometry(300, 300),
+      new THREE.MeshStandardMaterial({ color: 0x000d18, roughness: 1 })
+    );
     gnd.rotation.x = -Math.PI / 2;
     gnd.receiveShadow = true;
     scene.add(gnd);
 
-    // ── MAIN ORTHOMOSAIC TERRAIN (real frame textured) ────────────────────
-    const TERRAIN_W = 160, TERRAIN_H = 90;
-    const terrainGeo = new THREE.PlaneGeometry(TERRAIN_W, TERRAIN_H, 80, 45);
+    // ── Orthomosaic terrain (real frame as texture) ─────────────────────────
+    const TW = 160, TH = 90;
+    const terrainGeo = new THREE.PlaneGeometry(TW, TH, 80, 45);
 
-    // Subtle topographic displacement
-    const pos = terrainGeo.attributes.position;
-    for (let i = 0; i < pos.count; i++) {
-      const x = pos.getX(i), y = pos.getY(i);
-      const z = Math.sin(x * 0.12) * Math.cos(y * 0.11) * 2.0
-              + Math.sin(x * 0.04) * 3.5;
-      pos.setZ(i, Math.max(0, z));
+    // Mild topographic noise
+    const posArr = terrainGeo.attributes.position;
+    for (let i = 0; i < posArr.count; i++) {
+      const x = posArr.getX(i), y = posArr.getY(i);
+      const z = Math.sin(x * 0.12) * Math.cos(y * 0.11) * 2.0 + Math.sin(x * 0.04) * 3.0;
+      posArr.setZ(i, Math.max(0, z));
     }
     terrainGeo.computeVertexNormals();
     terrainGeo.rotateX(-Math.PI / 2);
@@ -225,28 +208,37 @@ export default function DigitalTwinSectionLargeArea() {
     scene.add(orthoMesh);
     orthoRef.current = orthoMesh;
 
-    // Wireframe edges overlay
-    const wireGeo  = new THREE.EdgesGeometry(terrainGeo);
+    // Load first frame
+    texLoader.current.load(getFramePath(1), (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      texCache.current.set(1, tex);
+      if (orthoRef.current) {
+        orthoRef.current.material.map = tex;
+        orthoRef.current.material.needsUpdate = true;
+      }
+    });
+
+    // Wireframe overlay
+    const wireGeo = new THREE.WireframeGeometry(terrainGeo);
     const wireMesh = new THREE.LineSegments(wireGeo,
-      new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.3 }));
+      new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.25 }));
     wireMesh.visible = false;
     scene.add(wireMesh);
+    wireRef.current = wireMesh;
 
-    // Perimeter fence glow
+    // Perimeter fence
     const fenceMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.5 });
-    const hw = TERRAIN_W / 2 + 5, hh = TERRAIN_H / 2 + 5;
+    const hw = TW / 2 + 5, hh = TH / 2 + 5;
     scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(-hw, 0.3, -hh), new THREE.Vector3(hw, 0.3, -hh),
-      new THREE.Vector3(hw, 0.3,  hh), new THREE.Vector3(-hw, 0.3,  hh),
+      new THREE.Vector3(hw, 0.3, hh),  new THREE.Vector3(-hw, 0.3, hh),
       new THREE.Vector3(-hw, 0.3, -hh),
     ]), fenceMat));
 
-    // ── Zone labels ────────────────────────────────────────────────────────
-    const zonePositions = [
-      [0, 0], [-35, -22], [35, 18], [-55, 30]
-    ];
+    // Zone labels
+    const zonePosMap = [[0, 0], [-35, -22], [35, 18], [-55, 30]];
     ZONES.forEach((zone, idx) => {
-      const [cx, cz] = zonePositions[idx];
+      const [cx, cz] = zonePosMap[idx];
       const lc = document.createElement('canvas');
       lc.width = 380; lc.height = 52;
       const lctx = lc.getContext('2d');
@@ -254,147 +246,182 @@ export default function DigitalTwinSectionLargeArea() {
       lctx.font = 'bold 18px monospace';
       lctx.fillText(zone.label.toUpperCase(), 4, 34);
       const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: new THREE.CanvasTexture(lc), transparent: true, opacity: 0.7
+        map: new THREE.CanvasTexture(lc), transparent: true, opacity: 0.7,
       }));
       sprite.position.set(cx, 4.5, cz);
       sprite.scale.set(7, 1.0, 1);
       scene.add(sprite);
     });
 
-    // ── Worker Figures ─────────────────────────────────────────────────────
-    const mkWorker = (x, z, color, phase) => {
+    // ── Workers (simple glowing capsule figures) ────────────────────────────
+    const workerPositions = [
+      { x: 5,   z: -8,  color: '#ff2d78', phase: 0.0 },
+      { x: -15, z: -20, color: '#ff6b35', phase: 1.1 },
+      { x: 30,  z: 12,  color: '#fb923c', phase: 2.4 },
+    ];
+    workersRef.current = [];
+    workerPositions.forEach(({ x, z, color, phase }) => {
       const grp = new THREE.Group();
       grp.position.set(x, 0, z);
-      grp.scale.set(1.4, 1.4, 1.4);
       const c = new THREE.Color(color);
-      const wMat = () => new THREE.MeshStandardMaterial({
-        color: c, emissive: c, emissiveIntensity: 0.8,
-        transparent: true, opacity: 0.92, roughness: 0.18,
-      });
-      const P = (geo, px, py, pz) => {
-        const m = new THREE.Mesh(geo, wMat());
-        m.position.set(px, py, pz); m.castShadow = true; grp.add(m); return m;
-      };
-      const hg = new THREE.SphereGeometry(0.14, 18, 18); hg.scale(1, 1.12, 0.95); P(hg, 0, 1.68, 0);
-      P(new THREE.CylinderGeometry(0.052, 0.068, 0.12, 12), 0, 1.55, 0);
-      P(new THREE.LatheGeometry([
-        new THREE.Vector2(0.15,0), new THREE.Vector2(0.16,0.08),
-        new THREE.Vector2(0.10,0.25), new THREE.Vector2(0.15,0.38),
-        new THREE.Vector2(0.18,0.50), new THREE.Vector2(0.17,0.56)], 18), 0, 0.90, 0);
-      P(new THREE.SphereGeometry(0.078,12,12),-0.22,1.42,0); P(new THREE.SphereGeometry(0.078,12,12),0.22,1.42,0);
-      P(new THREE.CylinderGeometry(0.058,0.048,0.34,12),-0.245,1.20,0); P(new THREE.CylinderGeometry(0.058,0.048,0.34,12),0.245,1.20,0);
-      P(new THREE.CylinderGeometry(0.088,0.068,0.42,14),-0.115,0.62,0); P(new THREE.CylinderGeometry(0.088,0.068,0.42,14),0.115,0.62,0);
-      P(new THREE.CylinderGeometry(0.062,0.046,0.38,14),-0.115,0.15,0); P(new THREE.CylinderGeometry(0.062,0.046,0.38,14),0.115,0.15,0);
+      const mat = new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.7, roughness: 0.2 });
 
-      const blob = new THREE.Mesh(new THREE.CircleGeometry(1.0,28),
-        new THREE.MeshBasicMaterial({ map: createHeatTex(color), transparent:true, opacity:0.7, depthWrite:false, blending:THREE.AdditiveBlending }));
-      blob.rotation.x = -Math.PI/2; blob.position.set(x,0.1,z); scene.add(blob);
+      // Body
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 1.0, 12), mat);
+      body.position.y = 0.5; grp.add(body);
+      // Head
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 12), mat);
+      head.position.y = 1.25; grp.add(head);
+      scene.add(grp);
 
-      const ring = new THREE.Mesh(new THREE.RingGeometry(0.22,0.34,22),
-        new THREE.MeshBasicMaterial({ color: c, transparent:true, opacity:0.7, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending }));
-      ring.rotation.x = -Math.PI/2; ring.position.set(x,0.12,z); scene.add(ring);
+      // Heat blob
+      const blobCanvas = document.createElement('canvas');
+      blobCanvas.width = blobCanvas.height = 128;
+      const bctx = blobCanvas.getContext('2d');
+      const grad = bctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      grad.addColorStop(0, color);
+      grad.addColorStop(0.4, color);
+      grad.addColorStop(1, 'transparent');
+      bctx.fillStyle = grad;
+      bctx.beginPath(); bctx.arc(64, 64, 64, 0, Math.PI * 2); bctx.fill();
+
+      const blob = new THREE.Mesh(
+        new THREE.CircleGeometry(1.0, 28),
+        new THREE.MeshBasicMaterial({
+          map: new THREE.CanvasTexture(blobCanvas),
+          transparent: true, opacity: 0.7,
+          depthWrite: false, blending: THREE.AdditiveBlending
+        })
+      );
+      blob.rotation.x = -Math.PI / 2;
+      blob.position.set(x, 0.1, z);
+      scene.add(blob);
 
       const pLight = new THREE.PointLight(c, 0.7, 6);
-      pLight.position.set(x, 1.5, z); scene.add(pLight);
+      pLight.position.set(x, 1.5, z);
+      scene.add(pLight);
 
-      scene.add(grp);
-      return { grp, blob, ring, pLight, baseX: x, baseZ: z, phase, color: c };
-    };
+      workersRef.current.push({ grp, blob, pLight, baseX: x, baseZ: z, phase });
+    });
 
-    const workerObjects = [
-      mkWorker( 5,  -8, '#ff2d78', 0.0),
-      mkWorker(-15, -20, '#ff6b35', 1.1),
-      mkWorker( 30,  12, '#fb923c', 2.4),
-    ];
-    objectsRef.current = workerObjects;
-
-    // ── LiDAR Drone ───────────────────────────────────────────────────────
+    // ── Drone ───────────────────────────────────────────────────────────────
     const droneGrp = new THREE.Group();
     droneGrp.position.set(-20, 45, 0);
     scene.add(droneGrp);
     droneRef.current = droneGrp;
 
-    const dMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.25, metalness: 0.9 });
-    const gMat = new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x00d4ff, emissiveIntensity: 0.5, roughness: 0.1, metalness: 0.95 });
-    droneGrp.add(new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.3, 6), dMat));
-    const gimbal = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 12), gMat);
-    gimbal.position.y = -0.35; droneGrp.add(gimbal);
-    [[5, 0.12, 0], [0.12, 0, 5]].forEach(d => droneGrp.add(new THREE.Mesh(new THREE.BoxGeometry(...d),
-      new THREE.MeshStandardMaterial({ color: 0x334155 }))));
+    const dMatDrone = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.25, metalness: 0.9 });
+    const gMatDrone = new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x00d4ff, emissiveIntensity: 0.5, roughness: 0.1, metalness: 0.95 });
+    droneGrp.add(new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.3, 6), dMatDrone));
+    const gimbal = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 12), gMatDrone);
+    gimbal.position.y = -0.35;
+    droneGrp.add(gimbal);
+
+    const armMatDrone = new THREE.MeshStandardMaterial({ color: 0x334155 });
+    const arm1 = new THREE.Mesh(new THREE.BoxGeometry(5, 0.12, 0.2), armMatDrone);
+    droneGrp.add(arm1);
+    const arm2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 5), armMatDrone);
+    droneGrp.add(arm2);
 
     rotorsRef.current = [];
-    [[1.8, 0.2, 1.8], [-1.8, 0.2, 1.8], [1.8, 0.2, -1.8], [-1.8, 0.2, -1.8]].forEach(p => {
-      droneGrp.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.25, 8), gMat.clone()), { position: new THREE.Vector3(...p) }));
-      const blade = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.015, 0.09),
-        new THREE.MeshBasicMaterial({ color: 0x0f172a }));
+    [
+      [1.8, 0.2, 1.8], [-1.8, 0.2, 1.8],
+      [1.8, 0.2, -1.8], [-1.8, 0.2, -1.8]
+    ].forEach((p, i) => {
+      const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.25, 8), gMatDrone.clone());
+      motor.position.set(p[0], p[1], p[2]);
+      droneGrp.add(motor);
+
+      const blade = new THREE.Mesh(
+        new THREE.BoxGeometry(1.4, 0.015, 0.09),
+        new THREE.MeshBasicMaterial({ color: 0x0f172a })
+      );
       blade.position.set(p[0], p[1] + 0.16, p[2]);
       droneGrp.add(blade);
       rotorsRef.current.push(blade);
     });
 
-    const cone = new THREE.Mesh(new THREE.ConeGeometry(14, 45, 24, 1, true),
-      new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.04, side: THREE.DoubleSide }));
-    cone.position.y = -22; droneGrp.add(cone);
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(14, 45, 24, 1, true),
+      new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.04, side: THREE.DoubleSide })
+    );
+    cone.position.y = -22;
+    droneGrp.add(cone);
 
-    // ── LiDAR sweep plane ─────────────────────────────────────────────────
-    const scanPl = new THREE.Mesh(new THREE.PlaneGeometry(200, 200),
-      new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+    // ── LiDAR sweep plane ───────────────────────────────────────────────────
+    const scanPl = new THREE.Mesh(
+      new THREE.PlaneGeometry(200, 200),
+      new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending })
+    );
     scanPl.rotation.x = Math.PI / 2;
     scene.add(scanPl);
     scanPlRef.current = scanPl;
 
-    // ── Floating particles ────────────────────────────────────────────────
-    const ptGeo = new THREE.BufferGeometry();
-    const ptArr = new Float32Array(800 * 3);
+    // ── Floating particles ──────────────────────────────────────────────────
+    const ptPositions = new Float32Array(800 * 3);
     for (let i = 0; i < 800; i++) {
-      ptArr[i*3]=(Math.random()-0.5)*180; ptArr[i*3+1]=Math.random()*20; ptArr[i*3+2]=(Math.random()-0.5)*100;
+      ptPositions[i*3]   = (Math.random() - 0.5) * 180;
+      ptPositions[i*3+1] = Math.random() * 20;
+      ptPositions[i*3+2] = (Math.random() - 0.5) * 100;
     }
-    ptGeo.setAttribute('position', new THREE.BufferAttribute(ptArr, 3));
+    const ptGeo = new THREE.BufferGeometry();
+    ptGeo.setAttribute('position', new THREE.BufferAttribute(ptPositions, 3));
     scene.add(new THREE.Points(ptGeo, new THREE.PointsMaterial({
-      color: 0x00d4ff, size: 0.07, transparent: true, opacity: 0.4, depthWrite: false, blending: THREE.AdditiveBlending
+      color: 0x00d4ff, size: 0.07, transparent: true, opacity: 0.4,
+      depthWrite: false, blending: THREE.AdditiveBlending,
     })));
 
-    // ── Animation loop ─────────────────────────────────────────────────────
+    // ── Animation loop ──────────────────────────────────────────────────────
+    const clock = new THREE.Clock();
     const animate = () => {
       rafRef.current = requestAnimationFrame(animate);
-      const t = clockRef.current.getElapsedTime();
+      const t = clock.getElapsedTime();
       const frameIdx = frameRef.current;
 
-      // Worker animations
-      objectsRef.current.forEach(item => {
+      // Workers
+      workersRef.current.forEach((item) => {
         const pulse = 0.65 + Math.sin(t * 2.5 + item.phase) * 0.32;
         if (item.blob)   item.blob.material.opacity = pulse * 0.65;
-        if (item.ring)   item.ring.material.opacity = pulse * 0.7;
         if (item.pLight) item.pLight.intensity = 0.5 + Math.sin(t * 3 + item.phase) * 0.45;
-        const fo = (frameIdx / MAX_FRAMES) * 10;
+        const fo = (frameIdx / MAX_FRAMES) * 8;
         item.grp.position.x = item.baseX + Math.sin(item.phase) * fo + Math.sin(t * 0.7 + item.phase) * 0.05;
         item.grp.position.z = item.baseZ + Math.cos(item.phase) * fo + Math.cos(t * 0.7 + item.phase) * 0.03;
         item.grp.rotation.y = Math.atan2(Math.sin(item.phase), Math.cos(item.phase)) + Math.sin(t * 0.2 + item.phase) * 0.15;
       });
 
-      // Drone patrol (larger orbit for large area)
+      // Drone
       if (droneRef.current) {
-        const droneT = (frameIdx / MAX_FRAMES) * Math.PI * 2 + t * 0.15;
+        const angle = (frameIdx / MAX_FRAMES) * Math.PI * 2 + t * 0.15;
         droneRef.current.position.set(
-          Math.cos(droneT) * 65, 45 + Math.sin(t * 1.5) * 2, Math.sin(droneT) * 40
+          Math.cos(angle) * 65,
+          45 + Math.sin(t * 1.5) * 2,
+          Math.sin(angle) * 40
         );
-        droneRef.current.rotation.y = -droneT;
-        rotorsRef.current.forEach((r, i) => { r.rotation.y += (i % 2 === 0 ? 1 : -1) * 0.9; });
+        droneRef.current.rotation.y = -angle;
+        rotorsRef.current.forEach((r, i) => {
+          r.rotation.y += (i % 2 === 0 ? 1 : -1) * 0.9;
+        });
       }
 
-      // Scan sweep
+      // LiDAR sweep
       if (scanPlRef.current) {
         scanPlRef.current.position.y = Math.sin(t * 0.9) * 6;
         scanPlRef.current.material.opacity = 0.02 + Math.abs(Math.sin(t * 0.9)) * 0.07;
       }
 
       // Wireframe toggle
-      wireMesh.visible = showWireframeRef.current;
+      if (wireRef.current) {
+        wireRef.current.visible = showWireRef.current;
+      }
 
       ptMain.position.x = Math.cos(t * 0.22) * 40;
       ptMain.position.z = Math.sin(t * 0.22) * 25;
 
-      if (camera) setCamPos({ x: camera.position.x.toFixed(1), y: camera.position.y.toFixed(1), z: camera.position.z.toFixed(1) });
+      setCamPos({
+        x: camera.position.x.toFixed(1),
+        y: camera.position.y.toFixed(1),
+        z: camera.position.z.toFixed(1),
+      });
 
       controls.update();
       renderer.render(scene, camera);
@@ -416,32 +443,27 @@ export default function DigitalTwinSectionLargeArea() {
       el.innerHTML = '';
       texCache.current.forEach(t => t.dispose());
       texCache.current.clear();
+      orthoRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Refs for live toggle in animation loop (avoid scene rebuild)
-  const showWireframeRef = useRef(false);
-  useEffect(() => { showWireframeRef.current = showWireframe; }, [showWireframe]);
-  useEffect(() => { if (controlsRef.current) controlsRef.current.autoRotate = autoRotate; }, [autoRotate]);
-
   // Thermal toggle
   useEffect(() => {
-    objectsRef.current.forEach(item => {
+    workersRef.current.forEach(item => {
       if (item.blob)   item.blob.visible   = showThermal;
-      if (item.ring)   item.ring.visible   = showThermal;
       if (item.pLight) item.pLight.visible = showThermal;
     });
   }, [showThermal]);
 
-  // ── Scan pipeline ────────────────────────────────────────────────────────
+  // ── Scan pipeline ───────────────────────────────────────────────────────────
   const startScan = useCallback(() => {
     if (scanActive) return;
     setScanActive(true); setScanPct(0); setDetCount(0);
     addLog('LIDAR SCAN INITIATED — Large Area: v3_x_1test.mp4');
     addLog('Pass 1/12: Sweeping rebar foundation slab...');
     let pct = 0, det = 0;
-    const logSteps = [
+    const steps = [
       [8,  'LiDAR: Foundation Slab mapped — 31,220 pts'],
       [18, 'LiDAR: Excavation zone triangulated — 22,840 pts'],
       [28, 'LiDAR: Vehicle laydown profiled — 14,950 pts'],
@@ -452,17 +474,18 @@ export default function DigitalTwinSectionLargeArea() {
       [65, 'YOLO DETECT: BCK-01 Backhoe — conf 37% — Z2'],
       [72, 'THERMAL DETECT: WRK-01 39.2°C (0.79 conf) — Z1'],
       [79, 'THERMAL DETECT: WRK-02 38.9°C (0.63 conf) — Z2'],
-      [85, 'YOLO DETECT: VEH-01 Other Vehicle — conf 40% — Z3'],
+      [85, 'YOLO DETECT: VEH-01 Vehicle — conf 40% — Z3'],
       [90, 'THERMAL DETECT: WRK-03 38.1°C (0.24 conf) — Z3'],
       [94, '3D MESH: Generating 160m × 90m point cloud...'],
       [97, 'TWIN SYNC: Uploading state to Z-DRONE cloud...'],
     ];
+    const fired = new Set();
     const iv = setInterval(() => {
       pct += 1.4;
       setScanPct(Math.min(Math.round(pct), 100));
-      logSteps.forEach(([p, msg]) => {
-        if (p <= pct && !logSteps.find(x => x[0] === p && x[2])) {
-          logSteps.find(x => x[0] === p)[2] = true;
+      steps.forEach(([p, msg]) => {
+        if (p <= pct && !fired.has(p)) {
+          fired.add(p);
           addLog(msg);
           if (msg.startsWith('THERMAL DETECT') || msg.startsWith('YOLO DETECT')) {
             det++; setDetCount(det);
@@ -491,7 +514,7 @@ export default function DigitalTwinSectionLargeArea() {
   return (
     <div className="flex flex-col bg-[#010b14] rounded-b-2xl overflow-hidden border-x border-b border-[#003344] shadow-2xl relative" style={{ height: '560px', fontFamily: 'monospace' }}>
 
-      {/* Scan lines */}
+      {/* CRT scanlines */}
       <div className="absolute inset-0 pointer-events-none z-10"
         style={{ background: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,212,255,0.013) 3px,rgba(0,212,255,0.013) 4px)' }} />
       <div className="absolute inset-0 pointer-events-none z-10"
@@ -508,7 +531,7 @@ export default function DigitalTwinSectionLargeArea() {
         </div>
       )}
 
-      {/* ── Top-left: Facility overview ─────────────────────────────────── */}
+      {/* ── Facility Overview (top-left) ──────────────────────────────────── */}
       <div className="absolute top-14 left-4 z-20">
         <div className="bg-[#010d1a]/85 backdrop-blur border border-[#003344] rounded px-3 py-2 text-[9px] space-y-1">
           <div className="text-[#00e5ff] font-bold tracking-wider mb-1">FACILITY OVERVIEW</div>
@@ -516,11 +539,11 @@ export default function DigitalTwinSectionLargeArea() {
           <div style={{ color: '#ff2d78' }}>{detCount} / {TRACKED.length} Objects Detected</div>
           <div className="text-[#00e5ff] opacity-55">Coverage: {scanPct}%</div>
           <div className="text-[#00e5ff] opacity-40 mt-1 text-[8px]">Source: v3_x_1test.mp4</div>
-          <div className="text-[#00e5ff] opacity-40 text-[8px]">Area: 160m × 90m (14,400m²)</div>
+          <div className="text-[#00e5ff] opacity-40 text-[8px]">Area: 160m × 90m</div>
         </div>
       </div>
 
-      {/* ── Right: Zone list ─────────────────────────────────────────────── */}
+      {/* ── Zone list (top-right) ─────────────────────────────────────────── */}
       <div className="absolute top-14 right-4 z-20 space-y-1">
         {ZONES.map((z) => {
           const cnt = TRACKED.filter(t => t.zone === z.id).length;
@@ -528,7 +551,7 @@ export default function DigitalTwinSectionLargeArea() {
             <div key={z.id}
               className="bg-[#010d1a]/85 backdrop-blur border rounded px-2.5 py-1 text-[8px] cursor-pointer hover:border-[#00e5ff] transition-all"
               style={{ borderColor: cnt > 0 ? '#003d55' : '#002233' }}
-              onClick={() => setActiveZone(activeZone === z.id ? null : z.id)}
+              onClick={() => setActiveZone(prev => prev === z.id ? null : z.id)}
             >
               <div className="flex items-center gap-2.5">
                 <span className="text-[#00e5ff] opacity-70 font-bold">{z.id}</span>
@@ -542,22 +565,17 @@ export default function DigitalTwinSectionLargeArea() {
         })}
       </div>
 
-      {/* ── LIVE DRONE FEED (real frame images) ──────────────────────────── */}
+      {/* ── Live Drone Feed ───────────────────────────────────────────────── */}
       <div className="absolute top-14 left-44 z-20 w-[200px] rounded overflow-hidden border border-[#00e5ff] shadow-[0_0_15px_rgba(0,229,255,0.2)] bg-[#010d1a]/80 backdrop-blur">
         <div className="px-2 py-1 text-[7px] text-[#00e5ff] font-bold tracking-widest border-b border-[#00e5ff]/30 flex justify-between">
           <span>DRONE FEED</span>
-          <span className="opacity-60">FRM {String(currentFrame).padStart(4,'0')}</span>
+          <span className="opacity-60">FRM {String(currentFrame).padStart(4, '0')}</span>
         </div>
         <div className="relative aspect-video">
-          <img
-            src={getFramePath(currentFrame)}
-            alt="Live Drone Feed"
-            className="w-full h-full object-cover"
-          />
+          <img src={getFramePath(currentFrame)} alt="Drone Feed" className="w-full h-full object-cover" />
           <div className="absolute inset-0 border-[0.5px] border-[#ff2d78] pointer-events-none opacity-40 m-[2px]" />
           <div className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-[#ff2d78] animate-pulse" />
         </div>
-        {/* Mini playback controls under feed */}
         <div className="flex items-center gap-1 px-2 py-1 border-t border-[#00e5ff]/20">
           <button onClick={() => setPlaying(p => !p)}
             className="text-[7px] text-[#00e5ff] font-bold px-1.5 py-0.5 border border-[#003344] rounded hover:border-[#00e5ff] transition-colors">
@@ -566,8 +584,7 @@ export default function DigitalTwinSectionLargeArea() {
           <input type="range" min="1" max={MAX_FRAMES} value={currentFrame}
             onChange={(e) => { const v = parseInt(e.target.value); frameRef.current = v; setCurrentFrame(v); }}
             className="flex-1 h-0.5 appearance-none rounded cursor-pointer"
-            style={{ accentColor: '#00e5ff' }}
-          />
+            style={{ accentColor: '#00e5ff' }} />
         </div>
       </div>
 
@@ -590,14 +607,14 @@ export default function DigitalTwinSectionLargeArea() {
             <div className="h-1.5 w-1.5 rounded-full bg-[#00e5ff]" />
           </div>
         </div>
-        <div className="p-2 overflow-y-auto text-[7.5px] space-y-0.5 scrollbar-none" style={{ height: 'calc(100% - 30px)' }}>
+        <div className="p-2 overflow-y-auto text-[7.5px] space-y-0.5" style={{ height: 'calc(100% - 30px)' }}>
           {logs.map((l, i) => (
             <div key={i} className={`leading-relaxed break-all ${
               l.includes('THERMAL DETECT') ? 'text-[#ff2d78]' :
               l.includes('SCAN COMPLETE')  ? 'text-[#00ff88]' :
               l.includes('YOLO DETECT')    ? 'text-[#a78bfa]' :
               l.includes('LIDAR')          ? 'text-[#00e5ff]' :
-              l.includes('──')             ? 'text-[#003344]' :
+              l.includes('──')             ? 'text-[#003344]'  :
               'text-[#00e5ff] opacity-55'
             }`}>{l}</div>
           ))}
@@ -612,7 +629,6 @@ export default function DigitalTwinSectionLargeArea() {
             {((currentFrame / 3).toFixed(1))}s
           </span>
           <input
-            id="large-twin-timeline"
             type="range" min="1" max={MAX_FRAMES} value={currentFrame}
             onChange={e => { const v = parseInt(e.target.value); frameRef.current = v; setCurrentFrame(v); }}
             className="flex-1 h-1 bg-[#002233] rounded-lg appearance-none cursor-pointer outline-none"
@@ -640,9 +656,9 @@ export default function DigitalTwinSectionLargeArea() {
 
         <div className="flex gap-4 items-center flex-wrap">
           {[
-            { label: 'THERMAL IR',  state: showThermal,   toggle: () => setShowThermal(v => !v),   activeColor: '#ff2d78' },
-            { label: 'WIREFRAME',   state: showWireframe, toggle: () => setShowWireframe(v => !v), activeColor: '#00e5ff' },
-            { label: 'AUTO-ROTATE', state: autoRotate,    toggle: () => setAutoRotate(v => !v),    activeColor: '#00e5ff' },
+            { label: 'THERMAL IR',  state: showThermal, toggle: () => setShowThermal(v => !v),  activeColor: '#ff2d78' },
+            { label: 'WIREFRAME',   state: showWire,    toggle: () => setShowWire(v => !v),      activeColor: '#00e5ff' },
+            { label: 'AUTO-ROTATE', state: autoRotate,  toggle: () => setAutoRotate(v => !v),    activeColor: '#00e5ff' },
           ].map(({ label, state, toggle, activeColor }) => (
             <label key={label} className="flex items-center gap-2 cursor-pointer" onClick={toggle}>
               <div className="w-8 h-4 rounded-full relative transition-all"
@@ -657,7 +673,7 @@ export default function DigitalTwinSectionLargeArea() {
         <div className="flex items-center gap-3 text-[9px] text-[#00e5ff] opacity-55">
           <span className="tracking-widest">SCAN</span>
           <div className="w-32 h-1 rounded-full bg-[#002233] overflow-hidden">
-            <div className="h-full rounded-full transition-all"
+            <div className="h-full rounded-full"
               style={{ width: `${scanPct}%`, background: 'linear-gradient(90deg,#003344,#00e5ff)', boxShadow: '0 0 6px #00e5ff', transition: 'width 0.08s' }} />
           </div>
           <span className="font-mono">{scanPct}%</span>
